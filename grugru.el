@@ -133,7 +133,7 @@ grugru-buffer-local-major-mode-grugru-alist."))
   (setq grugru-buffer-local-major-mode-grugru-alist
         (cdr (assq major-mode grugru-major-modes-grugru-alist))))
 
-(add-hook 'change-major-mode-hook 'grugru-major-mode-hook)
+(add-hook 'change-major-mode-after-body-hook 'grugru-major-mode-hook)
 
 (provide 'grugru)
 ;;; grugru.el ends here
