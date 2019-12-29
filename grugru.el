@@ -59,7 +59,7 @@ is begining/end point of current thing."
                         (symbol . ("let" "let*"))
                         (symbol . ("defun" "cl-defun"))
                         (symbol . ("defvar" "defcustom"))
-                        (symbol . ("add" "remove"))
+                        (word   . ("add" "remove"))
                         (symbol . ("setq" "setq-default"))))
     ((tex-mode latex-mode yatex-mode) . ((symbol . ("figure" "table")))))
   "An alist of toggled text on each `major-mode'.
