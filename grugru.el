@@ -6,7 +6,9 @@
 ;; Keywords: convenience, abbrev, tools
 
 ;; Version: 0.0.0
-;; Package-Requires:
+;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
+;; URL: https://github.com/ROCKTAKEY/grugru
+
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
