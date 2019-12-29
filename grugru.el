@@ -95,9 +95,9 @@ and STRING is string which is toggled in order."
 
          do
          (setq cons
-               (or (setq tmp (cdr (assoc sexp cache)))
+               (or (setq tmp (cdr (assoc getter cache)))
                    (prog1 (if (functionp sexp) (apply sexp) (eval sexp)))))
-         (unless tmp (push (cons sexp cons) cache))
+         (unless tmp (push (cons getter cons) cache))
 
          (setq begin (car cons) end (cdr cons))
          (setq now (- (point) begin))
