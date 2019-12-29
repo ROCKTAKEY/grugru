@@ -26,5 +26,12 @@
 
 ;;; Code:
 
+(defgroup grugru ()
+  "Group for grugru."
+  :group 'convenience
+  :group 'abbrev
+  :group 'tools
+  :prefix "grugru")
+
 (provide 'grugru)
 ;;; grugru.el ends here
