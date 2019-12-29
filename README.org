@@ -1,0 +1,8 @@
+[[https://github.com/ROCKTAKEY/grugru][https://img.shields.io/github/tag/ROCKTAKEY/grugru.svg?style=flat-square]]
+[[file:LICENSE][https://img.shields.io/github/license/ROCKTAKEY/grugru.svg?style=flat-square]]
+[[https://github.com/ROCKTAKEY/grugru/actions][https://img.shields.io/github/workflow/status/ROCKTAKEY/grugru/CI/master.svg?style=flat-square]]
+* Rotate text at point.
+
+* How to Use?
+* License
+  This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
