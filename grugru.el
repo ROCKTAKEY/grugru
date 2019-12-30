@@ -30,6 +30,7 @@
 
 (require 'cl-lib)
 (require 'thingatpt)
+(require 'subword)
 
 (defgroup grugru ()
   "Group for grugru."
@@ -40,7 +41,11 @@
 
 (defcustom grugru-getter-alist
   '((symbol . (bounds-of-thing-at-point 'symbol))
-    (word   . (bounds-of-thing-at-point 'word))
+    (word   . (progn
+                (let ((x (save-excursion (cons (subword-right) (subword-left))))
+                      (y (save-excursion (cons (subword-left) (subword-right)))))
+                  (if (< (- (- (car x) (cdr x)) (- (cdr y) (car y))))
+                      (cons (cdr x) (car x)) y))))
     (char   . (cons (point) (1+ (point)))))
   "An alist of getter of current thing.
 Each element should be (SYMBOL . SEXP). SYMBOL is used to access to SEXP by
