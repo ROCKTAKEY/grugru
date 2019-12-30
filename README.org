@@ -2,7 +2,17 @@
 [[file:LICENSE][https://img.shields.io/github/license/ROCKTAKEY/grugru.svg?style=flat-square]]
 [[https://github.com/ROCKTAKEY/grugru/actions][https://img.shields.io/github/workflow/status/ROCKTAKEY/grugru/CI/master.svg?style=flat-square]]
 * Rotate text at point.
+  With this package, you can rotate things at point.
 
+  #+begin_center
+  [[https://raw.githubusercontent.com/ROCKTAKEY/images/7baf9507a8fb9c20eda7395be1c9d91d0ae61c51/emacs-lisp-mode.gif]]
+  Fig. 1 demo on =emacs-lisp-mode=
+
+  [[https://raw.githubusercontent.com/ROCKTAKEY/images/7baf9507a8fb9c20eda7395be1c9d91d0ae61c51/c%2B%2B-mode.gif]]
+  Fig. 2 demo on =c++-mode=
+  #+end_center
 * How to Use?
+
+
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
