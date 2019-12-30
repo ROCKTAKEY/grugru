@@ -145,5 +145,21 @@ grugru-buffer-local-major-mode-grugru-alist."))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru-major-mode-hook)
 
+(defun grugru-define-on-major-mode (major getter list)
+  ""
+  (let ((x (assq major grugru-major-modes-grugru-alist)))
+    (if x
+        (setf (cdr (last x)) (cons getter list))
+      (push (cons major (list (cons getter list)))
+            grugru-major-modes-grugru-alist))))
+
+(defmacro grugru-define-on-local-major-mode (getter list)
+  ""
+  `(grugru-define-on-major-mode ,major-mode ,getter ,list))
+
+(defun grugru-define-local (getter list)
+  ""
+  (push (cons getter list) grugru-buffer-local-grugru-alist))
+
 (provide 'grugru)
 ;;; grugru.el ends here
