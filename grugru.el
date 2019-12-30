@@ -79,6 +79,15 @@ and STRING is string which is toggled in order."
 
 (defvar grugru--point-cache nil)
 
+(defun grugru--assq (key alist)
+  "Same as assq, but if car of element of ALIST is list, compare KEY to element of that, too."
+  (cl-loop
+   for (x . y) in alist
+   if (or (eq key x) (and (listp x) (memq key x)))
+   collect y
+   end
+   finally return nil))
+
 (defun grugru ()
   ""
   (interactive)
@@ -131,7 +140,8 @@ grugru-buffer-local-major-mode-grugru-alist."))
 (defun grugru-major-mode-hook ()
   ""
   (setq grugru-buffer-local-major-mode-grugru-alist
-        (cdr (assq major-mode grugru-major-modes-grugru-alist))))
+        (apply #'append
+               (grugru--assq major-mode grugru-major-modes-grugru-alist))))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru-major-mode-hook)
 
