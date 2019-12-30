@@ -127,7 +127,7 @@ and STRING is string which is toggled in order."
           str
           (pcase strs-or-func
             ((pred functionp)
-             (apply strs-or-func (buffer-substring begin end)))
+             (funcall strs-or-func (buffer-substring begin end)))
             ((pred listp)
              (let ((list (member (buffer-substring begin end) strs-or-func)))
                (when list
