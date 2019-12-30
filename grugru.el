@@ -114,19 +114,19 @@ and STRING is string which is toggled in order."
          do
          (setq
           str
-          (cond
-           ((functionp strs-or-func)
-            (apply strs-or-func (buffer-substring begin end)))
-           ((listp strs-or-func)
-            (let ((list (member (buffer-substring begin end) strs-or-func)))
-              (when list
-                (if (eq (length list) 1)
-                    (car strs-or-func)
-                  (nth 1 list)))))
-           (t
-            (error "Wrong grugru is set in grugru-buffer-local-grugru-alist or \
+          (pcase strs-or-func
+            ((pred functionp)
+             (apply strs-or-func (buffer-substring begin end)))
+            ((pred listp)
+             (let ((list (member (buffer-substring begin end) strs-or-func)))
+               (when list
+                 (if (eq (length list) 1)
+                     (car strs-or-func)
+                   (nth 1 list)))))
+            (_
+             (error "Wrong grugru is set in grugru-buffer-local-grugru-alist or \
 grugru-buffer-local-major-mode-grugru-alist."))
-           ))
+            ))
          if str return str
          finally return nil)
       (delete-region begin end)
