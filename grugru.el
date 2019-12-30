@@ -156,7 +156,7 @@ grugru-buffer-local-major-mode-grugru-alist."))
   ""
   (let ((x (assq major grugru-major-modes-grugru-alist)))
     (if x
-        (setf (cdr (last x)) (cons getter list))
+        (setf (cdr (last (cdr x))) (list (cons getter list)))
       (push (cons major (list (cons getter list)))
             grugru-major-modes-grugru-alist))))
 
