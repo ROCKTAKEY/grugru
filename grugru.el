@@ -60,7 +60,8 @@ is begining/end point of current thing."
                         (symbol . ("defun" "cl-defun"))
                         (symbol . ("defvar" "defcustom"))
                         (word   . ("add" "remove"))
-                        (symbol . ("setq" "setq-default"))))
+                        (symbol . ("setq" "setq-default"))
+                        (word . ("global" "local"))))
     ((tex-mode latex-mode yatex-mode) . ((symbol . ("figure" "table")))))
   "An alist of toggled text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
