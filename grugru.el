@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 0.0.0
+;; Version: 1.0.0
 ;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
