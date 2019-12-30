@@ -87,9 +87,7 @@ and STRING is string which is toggled in order."
   (cl-loop
    for (x . y) in alist
    if (or (eq key x) (and (listp x) (memq key x)))
-   collect y
-   end
-   finally return nil))
+   collect y))
 
 
 
