@@ -81,7 +81,7 @@ and STRING is string which is toggled in order."
 (defvar grugru--point-cache nil)
 
 
-
+;; inner
 (defun grugru--assq (key alist)
   "Same as assq, but if car of element of ALIST is list, compare KEY to element of that, too."
   (cl-loop
@@ -89,8 +89,16 @@ and STRING is string which is toggled in order."
    if (or (eq key x) (and (listp x) (memq key x)))
    collect y))
 
-
+(defun grugru--major-mode-hook ()
+  ""
+  (setq grugru-buffer-local-major-mode-grugru-alist
+        (apply #'append
+               (grugru--assq major-mode grugru-major-modes-grugru-alist))))
 
+(add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-hook)
+
+
+;; For user interaction
 (defun grugru ()
   ""
   (interactive)
@@ -141,17 +149,7 @@ grugru-buffer-local-major-mode-grugru-alist."))
          (+ begin (min now (length str))))))))
 
 
-
-(defun grugru-major-mode-hook ()
-  ""
-  (setq grugru-buffer-local-major-mode-grugru-alist
-        (apply #'append
-               (grugru--assq major-mode grugru-major-modes-grugru-alist))))
-
-(add-hook 'change-major-mode-after-body-hook 'grugru-major-mode-hook)
-
-
-
+;; For lisp user
 (defun grugru-define-on-major-mode (major getter list)
   ""
   (let ((x (assq major grugru-major-modes-grugru-alist)))
