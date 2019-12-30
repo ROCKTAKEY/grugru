@@ -12,7 +12,36 @@
   Fig. 2 demo on =c++-mode=
   #+end_center
 * How to Use?
+  You can intaractively use the function =grugru=. This function rotate the thing at point
+  if it is asigned to =grugru-*-grugru-alist=. You can asign things rotated with
+  =grugru-define-on-major-mode=, =grugru-define-on-local-major-mode=, and =grugru-define-local=.
+  #+BEGIN_SRC emacs-lisp -n
+    ;; Define grugru on major-mode.
+    (grugru-define-on-major-mode 'c-mode 'symbol '("unsigned" "signed"))
+    (grugru-define-on-major-mode 'c-mode 'word '("get" "set"))
 
+    ;; Define grugru on current major-mode.
+    ;; Same as (grugru-define-on-major-mode major-mode 'symbol '("red" "green" "yellow"))
+    (grugru-define-on-local-major-mode 'symbol '("red" "green" "yellow"))
+
+    ;; Define grugru on local. Should be defined in some hook,
+    ;; because it is saved buffer local.
+    (add-hook 'text-mode-hook
+              (lambda ()
+               (grugru-define-local 'word '("is" "was"))
+               (grugru-define-local 'word '("I" "my" "me" "mine"))))
+
+    ;; You can use function instead of list of strings.
+    (grugru-define-on-major-mode
+     'c-mode 'symbol
+     (lambda (arg)
+      (cond
+       ((string-match "a\\(.*\\)b" arg)
+        (concat "b" (match-string 1 arg) "c"))
+       ((string-match "b\\(.*\\)c" arg)
+        (concat "a" (match-string 1 arg) "b")))))
+
+  #+END_SRC
 
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
