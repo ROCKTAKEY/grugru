@@ -1,12 +1,12 @@
-;;; grugru.el --- Rotate text at point.             -*- lexical-binding: t; -*-
+;;; grugru.el --- Rotate text at point             -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.6
-;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
+;; Version: 1.0.8
+;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -190,8 +190,7 @@ is recommended.
                    (nth 1 list)))))
             (_
              (error "Wrong grugru is set in grugru-buffer-local-grugru-alist or \
-grugru--buffer-local-major-mode-grugru-alist."))
-            ))
+grugru--buffer-local-major-mode-grugru-alist."))))
          if str return str
          finally return nil)
       (delete-region begin end)
