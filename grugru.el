@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.0
+;; Version: 1.0.1
 ;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -84,6 +84,8 @@ and STRING is string which is toggled in order."
 
 (defvar-local grugru-buffer-local-major-mode-grugru-alist '() "")
 
+(defvar-local grugru--loaded nil)
+
 (defvar grugru--point-cache nil)
 
 
@@ -99,7 +101,8 @@ and STRING is string which is toggled in order."
   ""
   (setq grugru-buffer-local-major-mode-grugru-alist
         (apply #'append
-               (grugru--assq major-mode grugru-major-modes-grugru-alist))))
+               (grugru--assq major-mode grugru-major-modes-grugru-alist)))
+  (setq grugru--loaded t))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-hook)
 
@@ -108,6 +111,7 @@ and STRING is string which is toggled in order."
 (defun grugru ()
   ""
   (interactive)
+  (unless grugru--loaded (grugru--major-mode-hook))
   (let (begin end sexp str now cons cache tmp)
     (when
         (cl-loop
