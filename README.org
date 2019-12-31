@@ -13,7 +13,7 @@
   #+end_center
 * How to Use?
   You can intaractively use the function =grugru=. This function rotate the thing at point
-  if it is asigned to =grugru-*-grugru-alist=. You can asign things rotated with
+  if it is asigned to =grugru-*-grugru-alist=. You can asign rotated things with
   =grugru-define-on-major-mode=, =grugru-define-on-local-major-mode=, and =grugru-define-local=.
   #+BEGIN_SRC emacs-lisp -n
     ;; Define grugru on major-mode.
