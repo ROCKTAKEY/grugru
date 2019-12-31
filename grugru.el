@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.9
+;; Version: 1.0.10
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -44,9 +44,9 @@
     (word   . grugru--get-word)
     (char   . (cons (point) (1+ (point)))))
   "An alist of getter of current thing.
-Each element should be (SYMBOL . FUNC-OR-SEXP). SYMBOL is used to access to SEXP by
-`grugru'. FUNC-OR-SEXP should be sexp or function which return cons cell whose car/cdr
-is begining/end point of current thing."
+Each element should be (SYMBOL . FUNC-OR-SEXP).  SYMBOL is used to access to
+SEXP by `grugru'.  FUNC-OR-SEXP should be sexp or function
+which return cons cell whose car/cdr is begining/end point of current thing."
   :group 'grugru
   :risky t
   :type '(&rest (symbolp . [functionp sexp])))
@@ -69,7 +69,7 @@ is begining/end point of current thing."
 Each element should be (MAJOR-MODE . ALIST).
 
 ALIST is compounded from (GETTER . STRINGS-OR-FUNCTION).
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
@@ -80,7 +80,7 @@ current thing as an argument and returns next text."
 
 (defvar grugru-buffer-global-grugru-alist '()
   "This variable keeps global list of (GETTER . STRINGS-OR-FUNCTION).
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text.
@@ -126,7 +126,7 @@ You can add element to this with `grugru-define-on-major-mode',
         (cons y x)))))
 
 (defun grugru--assq (key alist)
-  "Like `assq', but if car of element of ALIST is list, compare KEY to element of that, too.
+  "Like `assq', but key of ALIST is list, compare KEY to element of that, too.
 In addition, This function return list of all cdr matched to the KEY."
   (cl-loop
    for (x . y) in alist
@@ -150,9 +150,8 @@ In addition, This function return list of all cdr matched to the KEY."
 You can directly add element to `grugru-buffer-global-grugru-alist',
 `grugru-buffer-local-grugru-alist', and `grugru-major-modes-grugru-alist'.
 However, directly asignment is risky, so Using `grugru-define-on-major-mode',
-`grugru-define-on-local-major-mode', `grugru-define-local', or `grugru-define-global'
-is recommended.
-"
+`grugru-define-on-local-major-mode', `grugru-define-local', or
+`grugru-define-global' is recommended."
   (interactive)
   (unless grugru--loaded (grugru--major-mode-load))
   (let (begin end sexp str now cons cache tmp)
@@ -165,7 +164,7 @@ is recommended.
 
          do (setq sexp (cdr (assq getter grugru-getter-alist)))
 
-         unless sexp do (error "Getter %s is not set in grugru-getter-alist." getter)
+         unless sexp do (error "Getter %s is not set in grugru-getter-alist" getter)
 
          do
          (setq cons
@@ -190,7 +189,7 @@ is recommended.
                    (nth 1 list)))))
             (_
              (error "Wrong grugru is set in grugru-buffer-local-grugru-alist or \
-grugru--buffer-local-major-mode-grugru-alist."))))
+grugru--buffer-local-major-mode-grugru-alist"))))
          if str return str
          finally return nil)
       (delete-region begin end)
@@ -204,13 +203,12 @@ grugru--buffer-local-major-mode-grugru-alist."))))
 
 ;; For lisp user
 (defun grugru-define-on-major-mode (major getter strings-or-function)
-  "Add new grugru STRINGS-OR-FUNCTION in MAJOR major-mode, with GETTER.
+  "Add new grugru STRINGS-OR-FUNCTION in MAJOR major mode, with GETTER.
 
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
-"
+current thing as an argument and returns next text."
   (let ((x (assq major grugru-major-modes-grugru-alist)))
     (if x
         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
@@ -224,21 +222,19 @@ current thing as an argument and returns next text.
 (defun grugru-define-local (getter strings-or-function)
   "Add new grugru STRINGS-OR-FUNCTION with GETTER on buffer-local.
 
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
-"
+current thing as an argument and returns next text."
   (push (cons getter strings-or-function) grugru-buffer-local-grugru-alist))
 
 (defun grugru-define-global (getter strings-or-function)
   "Add new grugru STRINGS-OR-FUNCTION with GETTER globally.
 
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
-"
+current thing as an argument and returns next text."
   (push (cons getter strings-or-function) grugru-buffer-global-grugru-alist))
 
 (provide 'grugru)
