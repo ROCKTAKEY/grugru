@@ -25,7 +25,7 @@
 ;;
 
 ;;; Code:
-
+(require 'grugru)
 
 
 (provide 'grugru-test)
