@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.3
+;; Version: 1.0.4
 ;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -41,11 +41,7 @@
 
 (defcustom grugru-getter-alist
   '((symbol . (bounds-of-thing-at-point 'symbol))
-    (word   . (progn
-                (let ((x (save-excursion (cons (subword-right) (subword-left))))
-                      (y (save-excursion (cons (subword-left) (subword-right)))))
-                  (if (< (- (- (car x) (cdr x)) (- (cdr y) (car y))))
-                      (cons (cdr x) (car x)) y))))
+    (word   . grugru--get-word)
     (char   . (cons (point) (1+ (point)))))
   "An alist of getter of current thing.
 Each element should be (SYMBOL . SEXP). SYMBOL is used to access to SEXP by
@@ -90,6 +86,17 @@ and STRING is string which is toggled in order."
 
 
 ;; inner
+(defun grugru--get-word ()
+  ""
+  (if (or (eq (point) (point-max))
+          (string-match "[\\]-_:;&+^~|#$!?%'()<>=*{}.,/\\\\ \n\t]"
+                        (buffer-substring (point) (1+ (point)))))
+      (save-excursion (cons (subword-left) (subword-right)))
+    (save-excursion
+      (let ((x (subword-right))
+            (y (subword-left)))
+        (cons y x)))))
+
 (defun grugru--assq (key alist)
   "Same as assq, but if car of element of ALIST is list, compare KEY to element of that, too."
   (cl-loop
