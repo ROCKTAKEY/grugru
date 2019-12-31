@@ -19,6 +19,8 @@
     ;; Define grugru on major-mode.
     (grugru-define-on-major-mode 'c-mode 'symbol '("unsigned" "signed"))
     (grugru-define-on-major-mode 'c-mode 'word '("get" "set"))
+    ;; Now, you can toggle unsigned <=> signed and get <=> set
+    ;; by running the command grugru in c-mode.
 
     ;; Define grugru on current major-mode.
     ;; Same as (grugru-define-on-major-mode major-mode 'symbol '("red" "green" "yellow"))
