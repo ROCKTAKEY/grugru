@@ -46,6 +46,15 @@
        ((string-match "b\\(.*\\)c" arg)
         (concat "a" (match-string 1 arg) "b")))))
 
+    ;; You can define function which rotate pre-specified texts.
+    ;; For example, three-state can rotate only 2 tuples,
+    ;; ("water" "ice" "vapor") and ("solid" "liquid" "gas"),
+    ;; not any other tuples defined by grugru-define-global and so on.
+    (grugru-define-function three-state ()
+     "Docstring. This is optional."
+     (symbol . ("water" "ice" "vapor"))
+     (symbol . ("solid" "liquid" "gas")))
+
   #+END_SRC
 
 * License
