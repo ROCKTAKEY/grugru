@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -82,7 +82,7 @@ and STRING is string which is toggled in order."
 
 (defvar-local grugru-buffer-local-grugru-alist '() "")
 
-(defvar-local grugru-buffer-local-major-mode-grugru-alist '() "")
+(defvar-local grugru--buffer-local-major-mode-grugru-alist '() "")
 
 (defvar-local grugru--loaded nil)
 
@@ -99,7 +99,7 @@ and STRING is string which is toggled in order."
 
 (defun grugru--major-mode-hook ()
   ""
-  (setq grugru-buffer-local-major-mode-grugru-alist
+  (setq grugru--buffer-local-major-mode-grugru-alist
         (apply #'append
                (grugru--assq major-mode grugru-major-modes-grugru-alist)))
   (setq grugru--loaded t))
@@ -117,7 +117,7 @@ and STRING is string which is toggled in order."
         (cl-loop
          for (getter . strs-or-func)
          in (append grugru-buffer-local-grugru-alist
-                    grugru-buffer-local-major-mode-grugru-alist)
+                    grugru--buffer-local-major-mode-grugru-alist)
 
          do (setq sexp (cdr (assq getter grugru-getter-alist)))
 
@@ -146,7 +146,7 @@ and STRING is string which is toggled in order."
                    (nth 1 list)))))
             (_
              (error "Wrong grugru is set in grugru-buffer-local-grugru-alist or \
-grugru-buffer-local-major-mode-grugru-alist."))
+grugru--buffer-local-major-mode-grugru-alist."))
             ))
          if str return str
          finally return nil)
