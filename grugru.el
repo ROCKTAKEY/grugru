@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.4
+;; Version: 1.0.5
 ;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -76,6 +76,8 @@ and STRING is string which is toggled in order."
   :type '(&rest ([symbolp (&rest symbolp)] .
                  (&rest (symbolp . [(&rest stringp) functionp])))))
 
+(defvar grugru-buffer-global-grugru-alist '() "")
+
 (defvar-local grugru-buffer-local-grugru-alist '() "")
 
 (defvar-local grugru--buffer-local-major-mode-grugru-alist '() "")
@@ -124,7 +126,8 @@ and STRING is string which is toggled in order."
         (cl-loop
          for (getter . strs-or-func)
          in (append grugru-buffer-local-grugru-alist
-                    grugru--buffer-local-major-mode-grugru-alist)
+                    grugru--buffer-local-major-mode-grugru-alist
+                    grugru-buffer-global-grugru-alist)
 
          do (setq sexp (cdr (assq getter grugru-getter-alist)))
 
@@ -182,6 +185,10 @@ grugru--buffer-local-major-mode-grugru-alist."))
 (defun grugru-define-local (getter list)
   ""
   (push (cons getter list) grugru-buffer-local-grugru-alist))
+
+(defun grugru-define-global (getter list)
+  ""
+  (push (cons getter list) grugru-buffer-global-grugru-alist))
 
 (provide 'grugru)
 ;;; grugru.el ends here
