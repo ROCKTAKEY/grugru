@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.1
+;; Version: 1.1.2
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -30,7 +30,7 @@
 ;;; How to Use?
 ;;   You can intaractively use the function `grugru'.
 ;;   This function rotate the thing at point
-;;   if it is asigned to `grugru-*-grugru-alist'. You can asign rotated things with
+;;   if it is asigned to `grugru-*-grugru-alist'.  You can asign rotated things with
 ;;   `grugru-define-on-major-mode', `grugru-define-on-local-major-mode', and `grugru-define-local'.
 ;;
 ;;     ;; Define grugru on major-mode.
@@ -45,14 +45,14 @@
 ;;     ;; because major-mode is not confirmed if in init.el.
 ;;     (grugru-define-on-local-major-mode 'symbol '("red" "green" "yellow"))
 ;;
-;;     ;; Define grugru on local. Should be defined in some hook or function,
+;;     ;; Define grugru on local.  Should be defined in some hook or function,
 ;;     ;; because it is saved buffer local.
 ;;     (add-hook 'text-mode-hook
 ;;               (lambda ()
 ;;                (grugru-define-local 'word '("is" "was"))
 ;;                (grugru-define-local 'word '("I" "my" "me" "mine"))))
 ;;
-;;     ;; Define grugru globally. This is applied in all buffers.
+;;     ;; Define grugru globally.  This is applied in all buffers.
 ;;     (grugru-define-global 'symbol '("yes" "no"))
 ;;
 ;;     ;; You can use function instead of list of strings.
@@ -70,7 +70,7 @@
 ;;     ;; ("water" "ice" "vapor") and ("solid" "liquid" "gas"),
 ;;     ;; not any other tuples defined by grugru-define-global and so on.
 ;;     (grugru-define-function three-state ()
-;;      "Docstring. This is optional."
+;;      "Docstring.  This is optional."
 ;;      (symbol . ("water" "ice" "vapor"))
 ;;      (symbol . ("solid" "liquid" "gas")))
 ;;
