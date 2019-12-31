@@ -22,14 +22,19 @@
 
     ;; Define grugru on current major-mode.
     ;; Same as (grugru-define-on-major-mode major-mode 'symbol '("red" "green" "yellow"))
+    ;; This should be run in some hook or function,
+    ;; because major-mode is not confirmed if in init.el.
     (grugru-define-on-local-major-mode 'symbol '("red" "green" "yellow"))
 
-    ;; Define grugru on local. Should be defined in some hook,
+    ;; Define grugru on local. Should be defined in some hook or function,
     ;; because it is saved buffer local.
     (add-hook 'text-mode-hook
               (lambda ()
                (grugru-define-local 'word '("is" "was"))
                (grugru-define-local 'word '("I" "my" "me" "mine"))))
+
+    ;; Define grugru globally. This is applied in all buffers.
+    (grugru-define-global 'symbol '("yes" "no"))
 
     ;; You can use function instead of list of strings.
     (grugru-define-on-major-mode
