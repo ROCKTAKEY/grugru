@@ -24,6 +24,55 @@
 
 ;;; Commentary:
 
+;;; Grugru: Rotate text at point.
+;;   With this package, you can rotate things at point.
+
+;;; How to Use?
+;;   You can intaractively use the function `grugru'.
+;;   This function rotate the thing at point
+;;   if it is asigned to `grugru-*-grugru-alist'. You can asign rotated things with
+;;   `grugru-define-on-major-mode', `grugru-define-on-local-major-mode', and `grugru-define-local'.
+;;
+;;     ;; Define grugru on major-mode.
+;;     (grugru-define-on-major-mode 'c-mode 'symbol '("unsigned" "signed"))
+;;     (grugru-define-on-major-mode 'c-mode 'word '("get" "set"))
+;;     ;; Now, you can toggle unsigned <=> signed and get <=> set
+;;     ;; by running the command grugru in c-mode.
+;;
+;;     ;; Define grugru on current major-mode.
+;;     ;; Same as (grugru-define-on-major-mode major-mode 'symbol '("red" "green" "yellow"))
+;;     ;; This should be run in some hook or function,
+;;     ;; because major-mode is not confirmed if in init.el.
+;;     (grugru-define-on-local-major-mode 'symbol '("red" "green" "yellow"))
+;;
+;;     ;; Define grugru on local. Should be defined in some hook or function,
+;;     ;; because it is saved buffer local.
+;;     (add-hook 'text-mode-hook
+;;               (lambda ()
+;;                (grugru-define-local 'word '("is" "was"))
+;;                (grugru-define-local 'word '("I" "my" "me" "mine"))))
+;;
+;;     ;; Define grugru globally. This is applied in all buffers.
+;;     (grugru-define-global 'symbol '("yes" "no"))
+;;
+;;     ;; You can use function instead of list of strings.
+;;     (grugru-define-on-major-mode
+;;      'c-mode 'symbol
+;;      (lambda (arg)
+;;       (cond
+;;        ((string-match "a\\(.*\\)b" arg)
+;;         (concat "b" (match-string 1 arg) "c"))
+;;        ((string-match "b\\(.*\\)c" arg)
+;;         (concat "a" (match-string 1 arg) "b")))))
+;;
+;;     ;; You can define function which rotate pre-specified texts.
+;;     ;; For example, three-state can rotate only 2 tuples,
+;;     ;; ("water" "ice" "vapor") and ("solid" "liquid" "gas"),
+;;     ;; not any other tuples defined by grugru-define-global and so on.
+;;     (grugru-define-function three-state ()
+;;      "Docstring. This is optional."
+;;      (symbol . ("water" "ice" "vapor"))
+;;      (symbol . ("solid" "liquid" "gas")))
 ;;
 
 ;;; Code:
