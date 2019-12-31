@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.10
+;; Version: 1.1.0
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -236,6 +236,48 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (push (cons getter strings-or-function) grugru-buffer-global-grugru-alist))
+
+(defmacro grugru-define-function (name _ &optional docstring &rest body)
+  "You can define grugru function NAME with DOCSTRING and BODY.
+The function defined with this rotates text at point only if it is matched to
+one element of BODY.
+
+DOCSTRING is optional argument, which is passed to defun as DOCSTRING,
+and BODY is sequence of (GETTER . STRING-OR-FUNCTION).
+
+GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
+
+\(fn NAME () &optional DOCSTRING &rest BODY)"
+  (declare (indent defun) (doc-string 3))
+  (let* ((args (cons docstring body))
+         (docs (when (stringp (car args))
+                 (car args)))
+         (args (if docs (cdr args) args)))
+   `(defun ,name ()
+      ,docs
+      (interactive)
+      (let ((grugru-buffer-global-grugru-alist ',args)
+            (grugru-buffer-local-grugru-alist nil)
+            (grugru--buffer-local-major-mode-grugru-alist nil)
+            (grugru--loaded t))
+       (call-interactively #'grugru)))))
+
+(with-eval-after-load 'find-func
+  (defun grugru--function-advice (original symbol type library)
+    "Advice for `find-function-search-for-symbol' from grugru."
+    (let ((name (symbol-name symbol)))
+      (or (funcall original symbol type library)
+          (and (null type)
+               (with-current-buffer (find-file-noselect library)
+                 (when (re-search-forward
+                        (format "\\|\\(^\\s-*(grugru-define-function\\s-*%s\\)"
+                                (regexp-quote name))
+                        nil t)
+                   (cons (current-buffer) (match-beginning 0))))))))
+  (advice-add 'find-function-search-for-symbol :around 'grugru--function-advice))
 
 (provide 'grugru)
 ;;; grugru.el ends here
