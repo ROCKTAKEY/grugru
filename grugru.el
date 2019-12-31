@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.0
+;; Version: 1.1.1
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -193,6 +193,7 @@ In addition, This function return list of all cdr matched to the KEY."
 
 
 ;; For user interaction
+;;;###autoload
 (defun grugru ()
   "Rotate thing on point, if it is in `grugru-*-grugru-alist'.
 
@@ -251,6 +252,7 @@ grugru--buffer-local-major-mode-grugru-alist"))))
 
 
 ;; For lisp user
+;;;###autoload
 (defun grugru-define-on-major-mode (major getter strings-or-function)
   "Add new grugru STRINGS-OR-FUNCTION in MAJOR major mode, with GETTER.
 
@@ -264,10 +266,12 @@ current thing as an argument and returns next text."
       (push (cons major (list (cons getter strings-or-function)))
             grugru-major-modes-grugru-alist))))
 
+;;;###autoload
 (defmacro grugru-define-on-local-major-mode (getter strings-or-function)
   "Same as (grugru-define-on-major-mode major-mode GETTER STRINGS-OR-FUNCTION)."
   `(grugru-define-on-major-mode ,major-mode ,getter ,strings-or-function))
 
+;;;###autoload
 (defun grugru-define-local (getter strings-or-function)
   "Add new grugru STRINGS-OR-FUNCTION with GETTER on buffer-local.
 
@@ -277,6 +281,7 @@ STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (push (cons getter strings-or-function) grugru-buffer-local-grugru-alist))
 
+;;;###autoload
 (defun grugru-define-global (getter strings-or-function)
   "Add new grugru STRINGS-OR-FUNCTION with GETTER globally.
 
@@ -286,6 +291,7 @@ STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (push (cons getter strings-or-function) grugru-buffer-global-grugru-alist))
 
+;;;###autoload
 (defmacro grugru-define-function (name _ &optional docstring &rest body)
   "You can define grugru function NAME with DOCSTRING and BODY.
 The function defined with this rotates text at point only if it is matched to
