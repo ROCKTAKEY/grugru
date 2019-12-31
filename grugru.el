@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.5
+;; Version: 1.0.6
 ;; Package-Requires: ((cl-lib "1.0") (emacs "24"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -44,8 +44,8 @@
     (word   . grugru--get-word)
     (char   . (cons (point) (1+ (point)))))
   "An alist of getter of current thing.
-Each element should be (SYMBOL . SEXP). SYMBOL is used to access to SEXP by
-`grugru'. SEXP should be sexp or function which return cons cell whose car/cdr
+Each element should be (SYMBOL . FUNC-OR-SEXP). SYMBOL is used to access to SEXP by
+`grugru'. FUNC-OR-SEXP should be sexp or function which return cons cell whose car/cdr
 is begining/end point of current thing."
   :group 'grugru
   :risky t
@@ -65,33 +65,59 @@ is begining/end point of current thing."
                         (symbol . ("setq" "setq-default"))
                         (word . ("global" "local"))))
     ((tex-mode latex-mode yatex-mode) . ((symbol . ("figure" "table")))))
-  "An alist of toggled text on each `major-mode'.
+  "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
 
-ALIST is compounded from (GETTER . (STRING...)).
-GETTER is symbol in `grugru-getter-alist', \
-and STRING is string which is toggled in order."
+ALIST is compounded from (GETTER . STRINGS-OR-FUNCTION).
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text."
   :group 'grugru
   :risky t
   :type '(&rest ([symbolp (&rest symbolp)] .
                  (&rest (symbolp . [(&rest stringp) functionp])))))
 
-(defvar grugru-buffer-global-grugru-alist '() "")
+(defvar grugru-buffer-global-grugru-alist '()
+  "This variable keeps global list of (GETTER . STRINGS-OR-FUNCTION).
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
 
-(defvar-local grugru-buffer-local-grugru-alist '() "")
+You can add element to this with `grugru-define-global'.")
 
-(defvar-local grugru--buffer-local-major-mode-grugru-alist '() "")
+(defvar-local grugru-buffer-local-grugru-alist '()
+    "This variable keeps buffer-local list of (GETTER . STRINGS-OR-FUNCTION).
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
 
-(defvar-local grugru--loaded nil)
+You can add element to this with `grugru-define-local'.")
 
-(defvar grugru--point-cache nil)
+(defvar-local grugru--buffer-local-major-mode-grugru-alist '()
+    "This variable keeps major-mode-specific list of (GETTER . STRINGS-OR-FUNCTION).
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+ STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
+
+You can add element to this with `grugru-define-on-major-mode',
+ or `grugru-define-on-major-mode'.")
+
+(defvar-local grugru--loaded nil
+  "Wheather the buffer load grugru list or not.")
+
+(defvar grugru--point-cache nil
+  "Cache for keep position on sequentally executed `grugru'.")
 
 
 ;; inner
 (defun grugru--get-word ()
-  ""
+  "Get beginning/end of current point."
   (if (or (eq (point) (point-max))
-          (string-match "[\\]-_:;&+^~|#$!?%'()<>=*{}.,/\\\\ \n\t]"
+          (string-match "[\\[\\]-_:;&+^~|#$!?%'()<>=*{}.,/\\\\ \n\t]"
                         (buffer-substring (point) (1+ (point)))))
       (save-excursion (cons (subword-left) (subword-right)))
     (save-excursion
@@ -100,14 +126,15 @@ and STRING is string which is toggled in order."
         (cons y x)))))
 
 (defun grugru--assq (key alist)
-  "Same as assq, but if car of element of ALIST is list, compare KEY to element of that, too."
+  "Like `assq', but if car of element of ALIST is list, compare KEY to element of that, too.
+In addition, This function return list of all cdr matched to the KEY."
   (cl-loop
    for (x . y) in alist
    if (or (eq key x) (and (listp x) (memq key x)))
    collect y))
 
 (defun grugru--major-mode-hook ()
-  ""
+  "Load grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
         (apply #'append
                (grugru--assq major-mode grugru-major-modes-grugru-alist)))
@@ -118,7 +145,14 @@ and STRING is string which is toggled in order."
 
 ;; For user interaction
 (defun grugru ()
-  ""
+  "Rotate thing on point, if it is in `grugru-*-grugru-alist'.
+
+You can directly add element to `grugru-buffer-global-grugru-alist',
+`grugru-buffer-local-grugru-alist', and `grugru-major-modes-grugru-alist'.
+However, directly asignment is risky, so Using `grugru-define-on-major-mode',
+`grugru-define-on-local-major-mode', `grugru-define-local', or `grugru-define-global'
+is recommended.
+"
   (interactive)
   (unless grugru--loaded (grugru--major-mode-hook))
   (let (begin end sexp str now cons cache tmp)
@@ -170,25 +204,43 @@ grugru--buffer-local-major-mode-grugru-alist."))
 
 
 ;; For lisp user
-(defun grugru-define-on-major-mode (major getter list)
-  ""
+(defun grugru-define-on-major-mode (major getter strings-or-function)
+  "Add new grugru STRINGS-OR-FUNCTION in MAJOR major-mode, with GETTER.
+
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
+"
   (let ((x (assq major grugru-major-modes-grugru-alist)))
     (if x
-        (setf (cdr (last (cdr x))) (list (cons getter list)))
-      (push (cons major (list (cons getter list)))
+        (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
+      (push (cons major (list (cons getter strings-or-function)))
             grugru-major-modes-grugru-alist))))
 
-(defmacro grugru-define-on-local-major-mode (getter list)
-  ""
-  `(grugru-define-on-major-mode ,major-mode ,getter ,list))
+(defmacro grugru-define-on-local-major-mode (getter strings-or-function)
+  "Same as (grugru-define-on-major-mode major-mode GETTER STRINGS-OR-FUNCTION)."
+  `(grugru-define-on-major-mode ,major-mode ,getter ,strings-or-function))
 
-(defun grugru-define-local (getter list)
-  ""
-  (push (cons getter list) grugru-buffer-local-grugru-alist))
+(defun grugru-define-local (getter strings-or-function)
+  "Add new grugru STRINGS-OR-FUNCTION with GETTER on buffer-local.
 
-(defun grugru-define-global (getter list)
-  ""
-  (push (cons getter list) grugru-buffer-global-grugru-alist))
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
+"
+  (push (cons getter strings-or-function) grugru-buffer-local-grugru-alist))
+
+(defun grugru-define-global (getter strings-or-function)
+  "Add new grugru STRINGS-OR-FUNCTION with GETTER globally.
+
+GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
+`char' is available as GETTER.
+STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+current thing as an argument and returns next text.
+"
+  (push (cons getter strings-or-function) grugru-buffer-global-grugru-alist))
 
 (provide 'grugru)
 ;;; grugru.el ends here
