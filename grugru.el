@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.0.8
+;; Version: 1.0.9
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -133,14 +133,14 @@ In addition, This function return list of all cdr matched to the KEY."
    if (or (eq key x) (and (listp x) (memq key x)))
    collect y))
 
-(defun grugru--major-mode-hook ()
+(defun grugru--major-mode-load ()
   "Load grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
         (apply #'append
                (grugru--assq major-mode grugru-major-modes-grugru-alist)))
   (setq grugru--loaded t))
 
-(add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-hook)
+(add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
 
 
 ;; For user interaction
@@ -154,7 +154,7 @@ However, directly asignment is risky, so Using `grugru-define-on-major-mode',
 is recommended.
 "
   (interactive)
-  (unless grugru--loaded (grugru--major-mode-hook))
+  (unless grugru--loaded (grugru--major-mode-load))
   (let (begin end sexp str now cons cache tmp)
     (when
         (cl-loop
