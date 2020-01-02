@@ -29,7 +29,9 @@
     ;; Same as (grugru-define-on-major-mode major-mode 'symbol '("red" "green" "yellow"))
     ;; This should be run in some hook or function,
     ;; because major-mode is not confirmed if in init.el.
-    (grugru-define-on-local-major-mode 'symbol '("red" "green" "yellow"))
+    (add-hook 'c-mode-common-hook
+     (lambda ()
+      (grugru-define-on-local-major-mode 'symbol '("red" "green" "yellow"))))
 
     ;; Define grugru on local. Should be defined in some hook or function,
     ;; because it is saved buffer local.
