@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.2
+;; Version: 1.1.3
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -256,15 +256,22 @@ grugru--buffer-local-major-mode-grugru-alist"))))
 (defun grugru-define-on-major-mode (major getter strings-or-function)
   "Add new grugru STRINGS-OR-FUNCTION in MAJOR major mode, with GETTER.
 
+MAJOR is `major-mode' or list of that where the grugru is set.
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
-  (let ((x (assq major grugru-major-modes-grugru-alist)))
+  (let ((x (assoc major grugru-major-modes-grugru-alist)))
     (if x
         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
       (push (cons major (list (cons getter strings-or-function)))
-            grugru-major-modes-grugru-alist))))
+            grugru-major-modes-grugru-alist))
+    (mapcar (lambda (arg)
+              (with-current-buffer arg
+                (when (or (eq major major-mode)
+                          (and (listp major) (memq major-mode major)))
+                  (setq grugru--loaded t))))
+            (buffer-list))))
 
 ;;;###autoload
 (defmacro grugru-define-on-local-major-mode (getter strings-or-function)

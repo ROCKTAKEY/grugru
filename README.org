@@ -22,6 +22,9 @@
     ;; Now, you can toggle unsigned <=> signed and get <=> set
     ;; by running the command grugru in c-mode.
 
+    ;; You can pass a list of symbol major-mode instead of one.
+    (grugru-define-on-major-mode '(java-mode c++-mode) 'word '("get" "set"))
+
     ;; Define grugru on current major-mode.
     ;; Same as (grugru-define-on-major-mode major-mode 'symbol '("red" "green" "yellow"))
     ;; This should be run in some hook or function,
