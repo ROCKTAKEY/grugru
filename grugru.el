@@ -1,11 +1,11 @@
 ;;; grugru.el --- Rotate text at point             -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019  ROCKTAKEY
+;; Copyright (C) 2019-2020  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.3
+;; Version: 1.1.4
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -166,7 +166,7 @@ You can add element to this with `grugru-define-on-major-mode',
 (defun grugru--get-word ()
   "Get beginning/end of current point."
   (if (or (eq (point) (point-max))
-          (string-match "[\\[\\]-_:;&+^~|#$!?%'()<>=*{}.,/\\\\ \n\t]"
+          (string-match "[-\\[\\]_:;&+^~|#$!?%'()<>=*{}.,/\\\\\n\t]\\| "
                         (buffer-substring (point) (1+ (point)))))
       (save-excursion (cons (subword-left) (subword-right)))
     (save-excursion
