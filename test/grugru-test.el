@@ -25,6 +25,9 @@
 ;;
 
 ;;; Code:
+(require 'undercover)
+(undercover "*.el")
+
 (require 'grugru)
 
 
