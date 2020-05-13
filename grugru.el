@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.6
+;; Version: 1.1.7
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -245,7 +245,7 @@ grugru--buffer-local-major-mode-grugru-alist"))))
       (delete-region begin end)
       (insert str)
       (goto-char
-       (if (eq this-command last-command)
+       (if (and grugru--point-cache (eq this-command last-command))
            (+ begin (min grugru--point-cache (length str)))
          (setq grugru--point-cache now)
          (+ begin (min now (length str))))))))
