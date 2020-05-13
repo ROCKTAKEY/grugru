@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.5
+;; Version: 1.1.6
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -276,7 +276,7 @@ current thing as an argument and returns next text."
 ;;;###autoload
 (defmacro grugru-define-on-local-major-mode (getter strings-or-function)
   "Same as (grugru-define-on-major-mode major-mode GETTER STRINGS-OR-FUNCTION)."
-  `(grugru-define-on-major-mode ,major-mode ,getter ,strings-or-function))
+  `(grugru-define-on-major-mode (eval 'major-mode) ,getter ,strings-or-function))
 
 ;;;###autoload
 (defun grugru-define-local (getter strings-or-function)
