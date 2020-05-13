@@ -1,6 +1,6 @@
 ;;; grugru-test.el --- test for grugru
 
-;; Copyright (C) 2019  ROCKTAKEY
+;; Copyright (C) 2019-2020  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords:
@@ -29,7 +29,1310 @@
 (undercover "*.el")
 
 (require 'grugru)
+(require 'ert)
+(require 'cursor-test)
 
+;; Global
+
+(ert-deftest grugru-define-global-2-symbol-end-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-global-3-symbol-end-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "baz| hoge")
+
+    (cursor-test/equal*
+     :init "baz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-global-2-symbol-end-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-global-3-symbol-end-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "baaa|z hoge")
+    (cursor-test/equal*
+     :init "baaaz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "foo| hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-global-2-symbol-beginning-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-define-global-3-symbol-beginning-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baz")
+
+    (cursor-test/equal*
+     :init "hoge |baz"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-define-global-2-symbol-beginning-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |baar")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")
+
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-define-global-3-symbol-beginning-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+   (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baar")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   (lambda ()
+     (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baaaz")
+  (cursor-test/equal*
+   :init "hoge |baaaz"
+   :exercise
+   (lambda ()
+     (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   (lambda ()
+     (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo")))
+
+
+
+(ert-deftest grugru-define-global-2-word-end-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "aaa-bar| hoge")
+    (cursor-test/equal*
+     :init "aaa-bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-global-3-word-end-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "aaa-bar| hoge")
+    (cursor-test/equal*
+     :init "aaa-bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "aaa-baz| hoge")
+
+    (cursor-test/equal*
+     :init "aaa-baz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-global-2-word-end-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "aaa-baa|r hoge")
+    (cursor-test/equal*
+     :init "aaa-baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")
+
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-global-3-word-end-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "aaa-baa|r hoge")
+    (cursor-test/equal*
+     :init "aaa-baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "aaa-baaa|z hoge")
+    (cursor-test/equal*
+     :init "aaa-baaaz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")
+
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")
+    (cursor-test/equal*
+     :init "aaa-baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-global-2-word-beginning-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |aaa-bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+(ert-deftest grugru-define-global-3-word-beginning-same-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar-aaa")
+    (cursor-test/equal*
+     :init "hoge |bar-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baz-aaa")
+
+    (cursor-test/equal*
+     :init "hoge |baz-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+(ert-deftest grugru-define-global-2-word-beginning-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |baar-aaa")
+    (cursor-test/equal*
+     :init "hoge |baar -aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+(ert-deftest grugru-define-global-3-word-beginning-different-length ()
+  (let (grugru-buffer-global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baar-aaa")
+    (cursor-test/equal*
+     :init "hoge |baar-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baaaz-aaa")
+    (cursor-test/equal*
+     :init "hoge |baaaz-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge |baar-aaa"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+
+;; Local
+
+(ert-deftest grugru-define-local-3-symbol-end-same-length ()
+  (cursor-test/equal*
+   :init "foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "bar| hoge")
+  (cursor-test/equal*
+   :init "bar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "baz| hoge")
+
+  (cursor-test/equal*
+   :init "baz| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "foo| hoge"))
+
+(ert-deftest grugru-define-local-2-symbol-end-different-length ()
+  (cursor-test/equal*
+   :init "foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "baa|r hoge")
+  (cursor-test/equal*
+   :init "baar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "foo| hoge")
+
+  (cursor-test/equal*
+   :init "foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "foo| hoge"))
+
+(ert-deftest grugru-define-local-3-symbol-end-different-length ()
+  (cursor-test/equal*
+   :init "foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "baa|r hoge")
+  (cursor-test/equal*
+   :init "baar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "baaa|z hoge")
+  (cursor-test/equal*
+   :init "baaaz| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "foo| hoge")
+
+  (cursor-test/equal*
+   :init "foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "foo| hoge")
+  (cursor-test/equal*
+   :init "baar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "foo| hoge"))
+
+(ert-deftest grugru-define-local-2-symbol-beginning-same-length ()
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar"))
+     (call-interactively #'grugru))
+   :expect "hoge |bar")
+  (cursor-test/equal*
+   :init "hoge |bar"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo"))
+
+(ert-deftest grugru-define-local-3-symbol-beginning-same-length ()
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "hoge |bar")
+  (cursor-test/equal*
+   :init "hoge |bar"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baz")
+
+  (cursor-test/equal*
+   :init "hoge |baz"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo"))
+
+(ert-deftest grugru-define-local-2-symbol-beginning-different-length ()
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "hoge |baar")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo"))
+
+(ert-deftest grugru-define-local-3-symbol-beginning-different-length ()
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baar")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baaaz")
+  (cursor-test/equal*
+   :init "hoge |baaaz"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo"))
+
+
+
+(ert-deftest grugru-define-local-2-word-end-same-length ()
+  (cursor-test/equal*
+   :init "aaa-foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar"))
+     (call-interactively #'grugru))
+   :expect "aaa-bar| hoge")
+  (cursor-test/equal*
+   :init "aaa-bar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar"))
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge"))
+
+(ert-deftest grugru-define-local-3-word-end-same-length ()
+  (cursor-test/equal*
+   :init "aaa-foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "aaa-bar| hoge")
+  (cursor-test/equal*
+   :init "aaa-bar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "aaa-baz| hoge")
+
+  (cursor-test/equal*
+   :init "aaa-baz| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge"))
+
+(ert-deftest grugru-define-local-2-word-end-different-length ()
+  (cursor-test/equal*
+   :init "aaa-foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "aaa-baa|r hoge")
+  (cursor-test/equal*
+   :init "aaa-baar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge")
+
+  (cursor-test/equal*
+   :init "aaa-foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge"))
+
+(ert-deftest grugru-define-local-3-word-end-different-length ()
+  (cursor-test/equal*
+   :init "aaa-foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "aaa-baa|r hoge")
+  (cursor-test/equal*
+   :init "aaa-baar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "aaa-baaa|z hoge")
+  (cursor-test/equal*
+   :init "aaa-baaaz| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge")
+
+  (cursor-test/equal*
+   :init "aaa-foo| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge")
+  (cursor-test/equal*
+   :init "aaa-baar| hoge"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "aaa-foo| hoge"))
+
+(ert-deftest grugru-define-local-2-word-beginning-same-length ()
+  (cursor-test/equal*
+   :init "hoge |foo-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar"))
+     (call-interactively #'grugru))
+   :expect "hoge |bar")
+  (cursor-test/equal*
+   :init "hoge |aaa-bar"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa"))
+
+(ert-deftest grugru-define-local-3-word-beginning-same-length ()
+  (cursor-test/equal*
+   :init "hoge |foo-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "hoge |bar-aaa")
+  (cursor-test/equal*
+   :init "hoge |bar-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baz-aaa")
+
+  (cursor-test/equal*
+   :init "hoge |baz-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "bar" "baz"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa"))
+
+(ert-deftest grugru-define-local-2-word-beginning-different-length ()
+  (cursor-test/equal*
+   :init "hoge |foo-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "hoge |baar-aaa")
+  (cursor-test/equal*
+   :init "hoge |baar -aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa")
+
+  (cursor-test/equal*
+   :init "hoge |foo-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa"))
+
+(ert-deftest grugru-define-local-3-word-beginning-different-length ()
+  (cursor-test/equal*
+   :init "hoge |foo-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baar-aaa")
+  (cursor-test/equal*
+   :init "hoge |baar-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baaaz-aaa")
+  (cursor-test/equal*
+   :init "hoge |baaaz-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa")
+
+  (cursor-test/equal*
+   :init "hoge |foo-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa")
+  (cursor-test/equal*
+   :init "hoge |baar-aaa"
+   :exercise
+   (lambda ()
+     (grugru-define-local 'word '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo-aaa"))
+
+
+;; Major-mode-local
+
+(ert-deftest grugru-define-major-mode-local-2-symbol-end-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-3-symbol-end-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "baz| hoge")
+
+    (cursor-test/equal*
+     :init "baz| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-2-symbol-end-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-3-symbol-end-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "baaa|z hoge")
+    (cursor-test/equal*
+     :init "baaaz| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "foo| hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-2-symbol-beginning-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-define-major-mode-local-3-symbol-beginning-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baz")
+
+    (cursor-test/equal*
+     :init "hoge |baz"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-define-major-mode-local-2-symbol-beginning-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |baar")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")
+
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'symbol '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-define-major-mode-local-3-symbol-beginning-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+   (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   #'(lambda ()
+     (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baar")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   #'(lambda ()
+     (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |baaaz")
+  (cursor-test/equal*
+   :init "hoge |baaaz"
+   :exercise
+   #'(lambda ()
+     (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+
+  (cursor-test/equal*
+   :init "hoge |foo"
+   :exercise
+   #'(lambda ()
+     (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo")
+  (cursor-test/equal*
+   :init "hoge |baar"
+   :exercise
+   #'(lambda ()
+     (grugru-define-on-local-major-mode 'symbol '("foo" "baar" "baaaz"))
+     (call-interactively #'grugru)
+     (call-interactively #'grugru))
+   :expect "hoge |foo")))
+
+
+
+(ert-deftest grugru-define-major-mode-local-2-word-end-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "aaa-bar| hoge")
+    (cursor-test/equal*
+     :init "aaa-bar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-3-word-end-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "aaa-bar| hoge")
+    (cursor-test/equal*
+     :init "aaa-bar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "aaa-baz| hoge")
+
+    (cursor-test/equal*
+     :init "aaa-baz| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-2-word-end-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "aaa-baa|r hoge")
+    (cursor-test/equal*
+     :init "aaa-baar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")
+
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-3-word-end-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "aaa-baa|r hoge")
+    (cursor-test/equal*
+     :init "aaa-baar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "aaa-baaa|z hoge")
+    (cursor-test/equal*
+     :init "aaa-baaaz| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")
+
+    (cursor-test/equal*
+     :init "aaa-foo| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")
+    (cursor-test/equal*
+     :init "aaa-baar| hoge"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "aaa-foo| hoge")))
+
+(ert-deftest grugru-define-major-mode-local-2-word-beginning-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |aaa-bar"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+(ert-deftest grugru-define-major-mode-local-3-word-beginning-same-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar-aaa")
+    (cursor-test/equal*
+     :init "hoge |bar-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baz-aaa")
+
+    (cursor-test/equal*
+     :init "hoge |baz-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "bar" "baz"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+(ert-deftest grugru-define-major-mode-local-2-word-beginning-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |baar-aaa")
+    (cursor-test/equal*
+     :init "hoge |baar -aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
+
+(ert-deftest grugru-define-major-mode-local-3-word-beginning-different-length ()
+  (let (grugru-major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baar-aaa")
+    (cursor-test/equal*
+     :init "hoge |baar-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "hoge |baaaz-aaa")
+    (cursor-test/equal*
+     :init "hoge |baaaz-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge |baar-aaa"
+     :exercise
+     #'(lambda ()
+       (grugru-define-on-local-major-mode 'word '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru)
+       (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")))
 
 (provide 'grugru-test)
 ;;; grugru-test.el ends here
