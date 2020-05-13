@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.4
+;; Version: 1.1.5
 ;; Package-Requires: ((cl-lib "0.6.1") (emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -270,7 +270,7 @@ current thing as an argument and returns next text."
               (with-current-buffer arg
                 (when (or (eq major major-mode)
                           (and (listp major) (memq major-mode major)))
-                  (setq grugru--loaded t))))
+                  (setq grugru--loaded nil))))
             (buffer-list))))
 
 ;;;###autoload
