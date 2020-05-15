@@ -32,6 +32,31 @@
 (require 'ert)
 (require 'cursor-test)
 
+(ert-deftest grugru-assq ()
+  (should
+   (equal
+    (grugru--assq 'foo '((bar . foo)
+                         (foo . hoge)))
+    '(hoge)))
+  (should
+   (equal
+    (grugru--assq 'foo '(((bar baz) . foo)
+                         ((quwe foo) . hoge)))
+    '(hoge)))
+  (should-not
+   (grugru--assq 'foo '(((bar baz) . foo)
+                        ((quwe faa) . hoge))))
+  (should
+   (equal
+    (grugru--assq 'foo '(((poo aa) . abc)
+                         ((quwe foo) . hoge)
+                         (bar . baz)
+                         (foo . wes)
+                         ((foo qqq) . qq)))
+    '(hoge wes qq))))
+
+
+
 ;; Global
 
 (ert-deftest grugru-define-global-2-symbol-end-same-length ()
@@ -1333,6 +1358,98 @@
          (call-interactively #'grugru)
          (call-interactively #'grugru))
      :expect "hoge |foo-aaa")))
+
+
+(ert-deftest grugru-define-function ()
+  (grugru-define-function grugru-test-1 ()
+    "Document"
+    (symbol "foo" "bar" "baz")
+    (word "qwe" "rty" "uio"))
+  (grugru-define-function grugru-test-2 ()
+    (symbol "foo" "bar" "baz")
+    (word "qwe" "rty" "uiop"))
+  (cursor-test/equal*
+   :init
+   "foo|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-1))
+   :expect
+   "bar|")
+  (cursor-test/equal*
+   :init
+   "bar|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-1))
+   :expect
+   "baz|")
+  (cursor-test/equal*
+   :init
+   "baz|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-1))
+   :expect
+   "foo|")
+  (cursor-test/equal*
+   :init
+   "aaa-qwe|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-1))
+   :expect
+   "aaa-rty|")
+  (cursor-test/equal*
+   :init
+   "aaa-rty|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-1))
+   :expect
+   "aaa-uio|")
+  (cursor-test/equal*
+   :init
+   "aaa-uio|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-1))
+   :expect
+   "aaa-qwe|")
+  (cursor-test/equal*
+   :init
+   "aaa-qwe|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-2))
+   :expect
+   "aaa-rty|")
+  (cursor-test/equal*
+   :init
+   "aaa-rty|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-2))
+   :expect
+   "aaa-uio|p")
+  (cursor-test/equal*
+   :init
+   "aaa-uiop|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-2))
+   :expect
+   "aaa-qwe|")
+  (cursor-test/equal*
+   :init
+   "aaa-rty|"
+   :exercise
+   (lambda ()
+     (call-interactively #'grugru-test-2)
+     (call-interactively #'grugru-test-2)
+     (call-interactively #'grugru-test-2))
+   :expect
+   "aaa-rty|"))
 
 (provide 'grugru-test)
 ;;; grugru-test.el ends here
