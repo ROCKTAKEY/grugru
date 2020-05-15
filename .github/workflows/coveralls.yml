@@ -1,4 +1,4 @@
-name: CI
+name: coveralls
 
 on: [push, pull_request]
 
@@ -9,8 +9,6 @@ jobs:
     strategy:
       matrix:
         emacs_version:
-          - '24.5'
-          - '25.3'
           - '26.1'
     steps:
       - uses: actions/checkout@v1
@@ -20,4 +18,7 @@ jobs:
           version: ${{ matrix.emacs_version }}
       - uses: conao3/setup-cask@master
       - run: cask install
-      - run: make test-all
+      - run: make clean
+      - run: make ert
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
