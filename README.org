@@ -13,8 +13,8 @@
   Fig. 2 demo on =c++-mode=
   #+end_center
 * How to Use?
-  You can intaractively use the function =grugru=. This function rotate the thing at point
-  if it is asigned to =grugru-*-grugru-alist=. You can asign rotated things with
+  You can interactively use the function =grugru=. This function rotate the thing at point
+  if it is assigned to =grugru-*-grugru-alist=. You can assign rotated things with
   =grugru-define-on-major-mode=, =grugru-define-on-local-major-mode=, and =grugru-define-local=.
   #+BEGIN_SRC emacs-lisp -n
     ;; Define grugru on major-mode.
