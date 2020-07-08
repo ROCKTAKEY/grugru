@@ -28,9 +28,9 @@
 ;;   With this package, you can rotate things at point.
 
 ;;; How to Use?
-;;   You can intaractively use the function `grugru'.
+;;   You can interactively use the function `grugru'.
 ;;   This function rotate the thing at point
-;;   if it is asigned to `grugru-*-grugru-alist'.  You can asign rotated things with
+;;   if it is assigned to `grugru-*-grugru-alist'.  You can assign rotated things with
 ;;   `grugru-define-on-major-mode', `grugru-define-on-local-major-mode', and `grugru-define-local'.
 ;;
 ;;     ;; Define grugru on major-mode.
@@ -95,7 +95,7 @@
   "An alist of getter of current thing.
 Each element should be (SYMBOL . FUNC-OR-SEXP).  SYMBOL is used to access to
 SEXP by `grugru'.  FUNC-OR-SEXP should be sexp or function
-which return cons cell whose car/cdr is begining/end point of current thing."
+which return cons cell whose car/cdr is beginning/end point of current thing."
   :group 'grugru
   :risky t
   :type '(&rest (symbolp . [functionp sexp])))
@@ -156,10 +156,10 @@ You can add element to this with `grugru-define-on-major-mode',
  or `grugru-define-on-major-mode'.")
 
 (defvar-local grugru--loaded nil
-  "Wheather the buffer load grugru list or not.")
+  "Whether the buffer load grugru list or not.")
 
 (defvar grugru--point-cache nil
-  "Cache for keep position on sequentally executed `grugru'.")
+  "Cache for keep position on sequentially executed `grugru'.")
 
 
 ;; inner
@@ -199,7 +199,7 @@ In addition, This function return list of all cdr matched to the KEY."
 
 You can directly add element to `grugru-buffer-global-grugru-alist',
 `grugru-buffer-local-grugru-alist', and `grugru-major-modes-grugru-alist'.
-However, directly asignment is risky, so Using `grugru-define-on-major-mode',
+However, directly assignment is risky, so Using `grugru-define-on-major-mode',
 `grugru-define-on-local-major-mode', `grugru-define-local', or
 `grugru-define-global' is recommended."
   (interactive)
