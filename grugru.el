@@ -182,8 +182,7 @@ You can add element to this with `grugru-define-on-major-mode',
 (defun grugru--major-mode-load ()
   "Load grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
-        (apply #'append
-               (assq major-mode grugru-major-modes-grugru-alist)))
+        (cdr (assq major-mode grugru-major-modes-grugru-alist)))
   (setq grugru--loaded-local t))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
