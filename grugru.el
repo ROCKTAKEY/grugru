@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.11
+;; Version: 1.1.12
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -155,8 +155,11 @@ current thing as an argument and returns next text.
 You can add element to this with `grugru-define-on-major-mode',
  or `grugru-define-on-major-mode'.")
 
-(defvar-local grugru--loaded nil
+(defvar grugru--loaded nil
   "Whether the buffer load grugru list or not.")
+
+(defvar-local grugru--loaded-local nil
+  "Whether the buffer load grugru list or not, on the buffer.")
 
 (defvar grugru--point-cache nil
   "Cache for keep position on sequentially executed `grugru'.")
@@ -187,9 +190,18 @@ In addition, This function return list of all cdr matched to the KEY."
   (setq grugru--buffer-local-major-mode-grugru-alist
         (apply #'append
                (grugru--assq major-mode grugru-major-modes-grugru-alist)))
-  (setq grugru--loaded t))
+  (setq grugru--loaded-local t))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
+
+(defun grugru--major-mode-set-as-unloaded (major)
+  "Mark buffers on MAJOR `major-mode' as unloaded."
+  (mapcar (lambda (arg)
+            (with-current-buffer arg
+              (when (or (eq major major-mode)
+                        (and (listp major) (memq major-mode major)))
+                (setq grugru--loaded-local nil))))
+          (buffer-list)))
 
 
 ;; For user interaction
@@ -203,7 +215,10 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
 `grugru-define-on-local-major-mode', `grugru-define-local', or
 `grugru-define-global' is recommended."
   (interactive)
-  (unless grugru--loaded (grugru--major-mode-load))
+  (unless (and grugru--loaded grugru--loaded-local)
+    (grugru--major-mode-load)
+    (setq grugru--loaded t)
+    (setq grugru--loaded-local t))
   (let (begin end sexp str now cons cache tmp)
     (when
         (cl-loop
@@ -266,12 +281,7 @@ current thing as an argument and returns next text."
         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
       (push (cons major (list (cons getter strings-or-function)))
             grugru-major-modes-grugru-alist))
-    (mapcar (lambda (arg)
-              (with-current-buffer arg
-                (when (or (eq major major-mode)
-                          (and (listp major) (memq major-mode major)))
-                  (setq grugru--loaded nil))))
-            (buffer-list))))
+    (grugru--major-mode-set-as-unloaded major)))
 
 ;;;###autoload
 (defmacro grugru-define-on-local-major-mode (getter strings-or-function)
@@ -286,6 +296,7 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
+  (setq grugru--loaded-local nil)
   (push (cons getter strings-or-function) grugru-buffer-local-grugru-alist))
 
 ;;;###autoload
@@ -296,6 +307,7 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
+  (setq grugru--loaded-local nil)
   (push (cons getter strings-or-function) grugru-buffer-global-grugru-alist))
 
 ;;;###autoload
@@ -324,6 +336,7 @@ current thing as an argument and returns next text.
       (let ((grugru-buffer-global-grugru-alist ',args)
             (grugru-buffer-local-grugru-alist nil)
             (grugru--buffer-local-major-mode-grugru-alist nil)
+            (grugru--loaded-local t)
             (grugru--loaded t))
        (call-interactively #'grugru)))))
 
