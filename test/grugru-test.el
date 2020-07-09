@@ -35,7 +35,7 @@
 ;; Global
 
 (ert-deftest grugru-define-global-2-symbol-end-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -52,7 +52,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-global-3-symbol-end-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -77,7 +77,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-global-2-symbol-end-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -103,7 +103,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-global-3-symbol-end-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -145,7 +145,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-global-2-symbol-beginning-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -162,7 +162,7 @@
      :expect "hoge |foo")))
 
 (ert-deftest grugru-define-global-3-symbol-beginning-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -187,7 +187,7 @@
      :expect "hoge |foo")))
 
 (ert-deftest grugru-define-global-2-symbol-beginning-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -213,7 +213,7 @@
      :expect "hoge |foo")))
 
 (ert-deftest grugru-define-global-3-symbol-beginning-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -257,7 +257,7 @@
 
 
 (ert-deftest grugru-define-global-2-word-end-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -274,7 +274,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-global-3-word-end-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -299,7 +299,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-global-2-word-end-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -325,7 +325,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-global-3-word-end-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -367,7 +367,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-global-2-word-beginning-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -384,7 +384,7 @@
      :expect "hoge |foo-aaa")))
 
 (ert-deftest grugru-define-global-3-word-beginning-same-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -409,7 +409,7 @@
      :expect "hoge |foo-aaa")))
 
 (ert-deftest grugru-define-global-2-word-beginning-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -435,7 +435,7 @@
      :expect "hoge |foo-aaa")))
 
 (ert-deftest grugru-define-global-3-word-beginning-different-length ()
-  (let (grugru-buffer-global-grugru-alist)
+  (let (grugru--global-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -893,7 +893,7 @@
 ;; Major-mode-local
 
 (ert-deftest grugru-define-major-mode-local-2-symbol-end-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -910,7 +910,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-3-symbol-end-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -935,7 +935,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-2-symbol-end-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -961,7 +961,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-3-symbol-end-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "foo| hoge"
      :exercise
@@ -1003,7 +1003,7 @@
      :expect "foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-2-symbol-beginning-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -1020,7 +1020,7 @@
      :expect "hoge |foo")))
 
 (ert-deftest grugru-define-major-mode-local-3-symbol-beginning-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -1045,7 +1045,7 @@
      :expect "hoge |foo")))
 
 (ert-deftest grugru-define-major-mode-local-2-symbol-beginning-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -1071,7 +1071,7 @@
      :expect "hoge |foo")))
 
 (ert-deftest grugru-define-major-mode-local-3-symbol-beginning-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo"
      :exercise
@@ -1115,7 +1115,7 @@
 
 
 (ert-deftest grugru-define-major-mode-local-2-word-end-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -1132,7 +1132,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-3-word-end-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -1157,7 +1157,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-2-word-end-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -1183,7 +1183,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-3-word-end-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "aaa-foo| hoge"
      :exercise
@@ -1225,7 +1225,7 @@
      :expect "aaa-foo| hoge")))
 
 (ert-deftest grugru-define-major-mode-local-2-word-beginning-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -1242,7 +1242,7 @@
      :expect "hoge |foo-aaa")))
 
 (ert-deftest grugru-define-major-mode-local-3-word-beginning-same-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -1267,7 +1267,7 @@
      :expect "hoge |foo-aaa")))
 
 (ert-deftest grugru-define-major-mode-local-2-word-beginning-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -1293,7 +1293,7 @@
      :expect "hoge |foo-aaa")))
 
 (ert-deftest grugru-define-major-mode-local-3-word-beginning-different-length ()
-  (let (grugru-major-modes-grugru-alist)
+  (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise

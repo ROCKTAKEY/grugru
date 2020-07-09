@@ -100,7 +100,7 @@ which return cons cell whose car/cdr is beginning/end point of current thing."
   :risky t
   :type '(&rest (symbolp . [functionp sexp])))
 
-(defcustom grugru-major-modes-grugru-alist
+(defvar grugru--major-modes-grugru-alist
   '((c++-mode . ((symbol . ("true" "false"))
                  (symbol . ("vector" "array" "deque"))
                  (symbol . ("class" "struct"))
@@ -123,13 +123,9 @@ ALIST is compounded from (GETTER . STRINGS-OR-FUNCTION).
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text."
-  :group 'grugru
-  :risky t
-  :type '(&rest ([symbolp (&rest symbolp)] .
-                 (&rest (symbolp . [(&rest stringp) functionp])))))
+current thing as an argument and returns next text.")
 
-(defvar grugru-buffer-global-grugru-alist '()
+(defvar grugru--global-grugru-alist '()
   "This variable keeps global list of (GETTER . STRINGS-OR-FUNCTION).
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
@@ -138,7 +134,7 @@ current thing as an argument and returns next text.
 
 You can add element to this with `grugru-define-global'.")
 
-(defvar-local grugru-buffer-local-grugru-alist '()
+(defvar-local grugru--buffer-local-grugru-alist '()
     "This variable keeps buffer-local list of (GETTER . STRINGS-OR-FUNCTION).
 GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
 `char' is available as GETTER.
@@ -182,7 +178,7 @@ You can add element to this with `grugru-define-on-major-mode',
 (defun grugru--major-mode-load ()
   "Load grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
-        (cdr (assq major-mode grugru-major-modes-grugru-alist)))
+        (cdr (assq major-mode grugru--major-modes-grugru-alist)))
   (setq grugru--loaded-local t))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
@@ -202,8 +198,8 @@ You can add element to this with `grugru-define-on-major-mode',
 (defun grugru ()
   "Rotate thing on point, if it is in `grugru-*-grugru-alist'.
 
-You can directly add element to `grugru-buffer-global-grugru-alist',
-`grugru-buffer-local-grugru-alist', and `grugru-major-modes-grugru-alist'.
+You can directly add element to `grugru--global-grugru-alist',
+`grugru--buffer-local-grugru-alist', and `grugru--major-modes-grugru-alist'.
 However, directly assignment is risky, so Using `grugru-define-on-major-mode',
 `grugru-define-on-local-major-mode', `grugru-define-local', or
 `grugru-define-global' is recommended."
@@ -216,9 +212,9 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
     (when
         (cl-loop
          for (getter . strs-or-func)
-         in (append grugru-buffer-local-grugru-alist
+         in (append grugru--buffer-local-grugru-alist
                     grugru--buffer-local-major-mode-grugru-alist
-                    grugru-buffer-global-grugru-alist)
+                    grugru--global-grugru-alist)
 
          do (setq sexp (cdr (assq getter grugru-getter-alist)))
 
@@ -246,7 +242,7 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
                      (car strs-or-func)
                    (nth 1 list)))))
             (_
-             (error "Wrong grugru is set in grugru-buffer-local-grugru-alist or \
+             (error "Wrong grugru is set in grugru--buffer-local-grugru-alist or \
 grugru--buffer-local-major-mode-grugru-alist"))))
          if str return str
          finally return nil)
@@ -273,11 +269,11 @@ current thing as an argument and returns next text."
       (mapc (lambda (arg)
               (grugru-define-on-major-mode arg getter strings-or-function))
             major)
-   (let ((x (assoc major grugru-major-modes-grugru-alist)))
+   (let ((x (assoc major grugru--major-modes-grugru-alist)))
     (if x
         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
       (push (cons major (list (cons getter strings-or-function)))
-            grugru-major-modes-grugru-alist))
+            grugru--major-modes-grugru-alist))
     (grugru--major-mode-set-as-unloaded major))))
 
 ;;;###autoload
@@ -294,7 +290,7 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (setq grugru--loaded-local nil)
-  (push (cons getter strings-or-function) grugru-buffer-local-grugru-alist))
+  (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist))
 
 ;;;###autoload
 (defun grugru-define-global (getter strings-or-function)
@@ -305,7 +301,7 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (setq grugru--loaded-local nil)
-  (push (cons getter strings-or-function) grugru-buffer-global-grugru-alist))
+  (push (cons getter strings-or-function) grugru--global-grugru-alist))
 
 ;;;###autoload
 (defmacro grugru-define-function (name _ &optional docstring &rest body)
@@ -330,8 +326,8 @@ current thing as an argument and returns next text.
    `(defun ,name ()
       ,docs
       (interactive)
-      (let ((grugru-buffer-global-grugru-alist ',args)
-            (grugru-buffer-local-grugru-alist nil)
+      (let ((grugru--global-grugru-alist ',args)
+            (grugru--buffer-local-grugru-alist nil)
             (grugru--buffer-local-major-mode-grugru-alist nil)
             (grugru--loaded-local t)
             (grugru--loaded t))
