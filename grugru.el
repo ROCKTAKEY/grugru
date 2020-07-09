@@ -153,11 +153,9 @@ current thing as an argument and returns next text.
 You can add element to this with `grugru-define-on-major-mode',
  or `grugru-define-on-major-mode'.")
 
-(defvar grugru--loaded nil
-  "Whether the buffer load grugru list or not.")
-
 (defvar-local grugru--loaded-local nil
-  "Whether the buffer load grugru list or not, on the buffer.")
+  "Whether the buffer load grugru list or not, on the buffer.
+Global grugru is not observed, because `grugru' is remake rotated sets of list.")
 
 (defvar grugru--point-cache nil
   "Cache for keep position on sequentially executed `grugru'.")
@@ -204,9 +202,8 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
 `grugru-define-on-local-major-mode', `grugru-define-local', or
 `grugru-define-global' is recommended."
   (interactive)
-  (unless (and grugru--loaded grugru--loaded-local)
+  (unless grugru--loaded-local
     (grugru--major-mode-load)
-    (setq grugru--loaded t)
     (setq grugru--loaded-local t))
   (let (begin end sexp str now cons cache tmp)
     (when
@@ -289,7 +286,6 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
-  (setq grugru--loaded-local nil)
   (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist))
 
 ;;;###autoload
@@ -300,7 +296,6 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
-  (setq grugru--loaded-local nil)
   (push (cons getter strings-or-function) grugru--global-grugru-alist))
 
 ;;;###autoload
@@ -329,8 +324,7 @@ current thing as an argument and returns next text.
       (let ((grugru--global-grugru-alist ',args)
             (grugru--buffer-local-grugru-alist nil)
             (grugru--buffer-local-major-mode-grugru-alist nil)
-            (grugru--loaded-local t)
-            (grugru--loaded t))
+            (grugru--loaded-local t))
        (call-interactively #'grugru)))))
 
 (with-eval-after-load 'find-func
