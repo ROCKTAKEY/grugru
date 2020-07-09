@@ -177,19 +177,11 @@ You can add element to this with `grugru-define-on-major-mode',
             (y (subword-left)))
         (cons y x)))))
 
-(defun grugru--assq (key alist)
-  "Like `assq', but key of ALIST is list, compare KEY to element of that, too.
-In addition, This function return list of all cdr matched to the KEY."
-  (cl-loop
-   for (x . y) in alist
-   if (or (eq key x) (and (listp x) (memq key x)))
-   collect y))
-
 (defun grugru--major-mode-load ()
   "Load grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
         (apply #'append
-               (grugru--assq major-mode grugru-major-modes-grugru-alist)))
+               (assq major-mode grugru-major-modes-grugru-alist)))
   (setq grugru--loaded-local t))
 
 (add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
@@ -276,12 +268,16 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
-  (let ((x (assoc major grugru-major-modes-grugru-alist)))
+  (if (listp major)
+      (mapc (lambda (arg)
+              (grugru-define-on-major-mode arg getter strings-or-function))
+            major)
+   (let ((x (assoc major grugru-major-modes-grugru-alist)))
     (if x
         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
       (push (cons major (list (cons getter strings-or-function)))
             grugru-major-modes-grugru-alist))
-    (grugru--major-mode-set-as-unloaded major)))
+    (grugru--major-mode-set-as-unloaded major))))
 
 ;;;###autoload
 (defmacro grugru-define-on-local-major-mode (getter strings-or-function)
