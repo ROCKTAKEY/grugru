@@ -32,31 +32,6 @@
 (require 'ert)
 (require 'cursor-test)
 
-(ert-deftest grugru-assq ()
-  (should
-   (equal
-    (grugru--assq 'foo '((bar . foo)
-                         (foo . hoge)))
-    '(hoge)))
-  (should
-   (equal
-    (grugru--assq 'foo '(((bar baz) . foo)
-                         ((quwe foo) . hoge)))
-    '(hoge)))
-  (should-not
-   (grugru--assq 'foo '(((bar baz) . foo)
-                        ((quwe faa) . hoge))))
-  (should
-   (equal
-    (grugru--assq 'foo '(((poo aa) . abc)
-                         ((quwe foo) . hoge)
-                         (bar . baz)
-                         (foo . wes)
-                         ((foo qqq) . qq)))
-    '(hoge wes qq))))
-
-
-
 ;; Global
 
 (ert-deftest grugru-define-global-2-symbol-end-same-length ()
