@@ -113,7 +113,9 @@ which return cons cell whose car/cdr is beginning/end point of current thing."
                         (word   . ("add" "remove"))
                         (symbol . ("setq" "setq-default"))
                         (word . ("global" "local"))))
-    ((tex-mode latex-mode yatex-mode) . ((symbol . ("figure" "table")))))
+    (tex-mode . ((symbol . ("figure" "table"))))
+    (yatex-mode . ((symbol . ("figure" "table"))))
+    (latex-mode . ((symbol . ("figure" "table")))))
   "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
 
