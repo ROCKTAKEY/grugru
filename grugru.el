@@ -195,7 +195,7 @@ In addition, This function return list of all cdr matched to the KEY."
 (add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
 
 (defun grugru--major-mode-set-as-unloaded (major)
-  "Mark buffers on MAJOR major-mode as unloaded."
+  "Mark buffers on MAJOR `major-mode' as unloaded."
   (mapcar (lambda (arg)
             (with-current-buffer arg
               (when (or (eq major major-mode)
