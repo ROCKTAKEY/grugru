@@ -332,10 +332,10 @@ current thing as an argument and returns next text.
   "Remove `major-mode' local grugru defined with MAJOR, GETTER and STRINGS-OR-FUNCTION."
   (if (listp major)
       (mapcar (lambda (arg)
-                (grugru-remove-on-major-mode args getter string-or-function)))
+                (grugru-remove-on-major-mode args getter strings-or-function)))
     (grugru--major-mode-set-as-unloaded major)
     (let ((major-grugru (assq major grugru--major-modes-grugru-alist)))
-      (setf (cdr major-grugru) (delete (cons getter string-or-function)
+      (setf (cdr major-grugru) (delete (cons getter strings-or-function)
                                        (cdr major-grugru))))))
 
 ;;;###autoload
@@ -347,13 +347,13 @@ current thing as an argument and returns next text.
 (defun grugru-remove-local (getter strings-or-function)
   "Remove local grugru defined with GETTER and  STRINGS-OR-FUNCTION."
   (setq grugru--buffer-local-grugru-alist
-        (delete (cons getter string-or-function) grugru--buffer-local-grugru-alist)))
+        (delete (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
 
 ;;;###autoload
 (defun grugru-remove-global (getter strings-or-function)
   "Remove global grugru defined with GETTER and  STRINGS-OR-FUNCTION."
   (setq grugru--global-grugru-alist
-        (delete (cons getter string-or-function) grugru--global-grugru-alist)))
+        (delete (cons getter strings-or-function) grugru--global-grugru-alist)))
 
 (with-eval-after-load 'find-func
   (defun grugru--function-advice (original symbol type library)
