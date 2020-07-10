@@ -1432,7 +1432,6 @@
          (call-interactively #'grugru))
      :expect "hoge foo-|bbb")))
 
-
 
 (ert-deftest grugru-define-function ()
   (grugru-define-function grugru-test-1 ()
