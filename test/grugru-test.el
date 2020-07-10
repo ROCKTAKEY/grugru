@@ -1375,11 +1375,11 @@
      :init "hoge foo-|aaa"
      :exercise
      #'(lambda ()
-         (grugru-define-on-local-major-mode 'fundamental-mode 'word
+         (grugru-define-on-local-major-mode 'word
                                             '("foo" "bar" "baz"))
-         (grugru-define-on-local-major-mode 'fundamental-mode 'word
+         (grugru-define-on-local-major-mode 'word
                                             '("aaa" "bbb" "ccc"))
-         (grugru-remove-on-local-major-mode 'fundamental-mode 'word
+         (grugru-remove-on-local-major-mode 'word
                                             '("foo" "bar" "baz"))
          (call-interactively #'grugru))
      :expect "hoge foo-|bbb")))
