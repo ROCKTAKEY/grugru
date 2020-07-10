@@ -1390,11 +1390,11 @@
      :init "hoge |foo-aaa"
      :exercise
      #'(lambda ()
-         (grugru-define-local 'fundamental-mode 'word
+         (grugru-define-local 'word
                                  '("foo" "bar" "baz"))
-         (grugru-define-local 'fundamental-mode 'word
+         (grugru-define-local 'word
                                  '("aaa" "bbb" "ccc"))
-         (grugru-remove-local 'fundamental-mode 'word
+         (grugru-remove-local 'word
                                  '("foo" "bar" "baz"))
          (call-interactively #'grugru))
      :expect "hoge |foo-aaa")
@@ -1402,22 +1402,22 @@
      :init "hoge foo-|aaa"
      :exercise
      #'(lambda ()
-         (grugru-define-local 'fundamental-mode 'word
+         (grugru-define-local 'word
                                  '("foo" "bar" "baz"))
-         (grugru-define-local 'fundamental-mode 'word
+         (grugru-define-local 'word
                                  '("aaa" "bbb" "ccc"))
-         (grugru-remove-local 'fundamental-mode 'word
+         (grugru-remove-local 'word
                                  '("foo" "bar" "baz"))
          (call-interactively #'grugru))
      :expect "hoge foo-|bbb")))
 
 (ert-deftest grugru-remove-global ()
   (let (grugru--major-modes-grugru-alist)
-    (grugru-define-global 'fundamental-mode 'word
+    (grugru-define-global 'word
                           '("foo" "bar" "baz"))
-    (grugru-define-global 'fundamental-mode 'word
+    (grugru-define-global 'word
                           '("aaa" "bbb" "ccc"))
-    (grugru-remove-global 'fundamental-mode 'word
+    (grugru-remove-global 'word
                           '("foo" "bar" "baz"))
     (cursor-test/equal*
      :init "hoge |foo-aaa"
