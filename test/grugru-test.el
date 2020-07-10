@@ -1335,6 +1335,104 @@
      :expect "hoge |foo-aaa")))
 
 
+;; Remove
+(ert-deftest grugru-remove-on-major-mode ()
+  (let (grugru--major-modes-grugru-alist)
+    (grugru-define-on-major-mode 'fundamental-mode 'word
+                                 '("foo" "bar" "baz"))
+    (grugru-define-on-major-mode 'fundamental-mode 'word
+                                 '("aaa" "bbb" "ccc"))
+    (grugru-remove-on-major-mode 'fundamental-mode 'word
+                                 '("foo" "bar" "baz"))
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+(ert-deftest grugru-remove-on-local-major-mode ()
+  (let (grugru--major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (grugru-define-on-local-major-mode 'word
+                                            '("foo" "bar" "baz"))
+         (grugru-define-on-local-major-mode 'word
+                                            '("aaa" "bbb" "ccc"))
+         (grugru-remove-on-local-major-mode 'word
+                                            '("foo" "bar" "baz"))
+         (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (grugru-define-on-local-major-mode 'word
+                                            '("foo" "bar" "baz"))
+         (grugru-define-on-local-major-mode 'word
+                                            '("aaa" "bbb" "ccc"))
+         (grugru-remove-on-local-major-mode 'word
+                                            '("foo" "bar" "baz"))
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+(ert-deftest grugru-remove-local ()
+  (let (grugru--major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (grugru-define-local 'word
+                                 '("foo" "bar" "baz"))
+         (grugru-define-local 'word
+                                 '("aaa" "bbb" "ccc"))
+         (grugru-remove-local 'word
+                                 '("foo" "bar" "baz"))
+         (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (grugru-define-local 'word
+                                 '("foo" "bar" "baz"))
+         (grugru-define-local 'word
+                                 '("aaa" "bbb" "ccc"))
+         (grugru-remove-local 'word
+                                 '("foo" "bar" "baz"))
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+(ert-deftest grugru-remove-global ()
+  (let (grugru--major-modes-grugru-alist)
+    (grugru-define-global 'word
+                          '("foo" "bar" "baz"))
+    (grugru-define-global 'word
+                          '("aaa" "bbb" "ccc"))
+    (grugru-remove-global 'word
+                          '("foo" "bar" "baz"))
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+
 (ert-deftest grugru-define-function ()
   (grugru-define-function grugru-test-1 ()
     "Document"

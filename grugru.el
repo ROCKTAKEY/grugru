@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.1.14
+;; Version: 1.2.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -326,6 +326,34 @@ current thing as an argument and returns next text.
             (grugru--buffer-local-major-mode-grugru-alist nil)
             (grugru--loaded-local t))
        (call-interactively #'grugru)))))
+
+;;;###autoload
+(defun grugru-remove-on-major-mode (major getter strings-or-function)
+  "Remove `major-mode' local grugru defined with MAJOR, GETTER and STRINGS-OR-FUNCTION."
+  (if (listp major)
+      (mapcar (lambda (arg)
+                (grugru-remove-on-major-mode args getter strings-or-function)))
+    (grugru--major-mode-set-as-unloaded major)
+    (let ((major-grugru (assq major grugru--major-modes-grugru-alist)))
+      (setf (cdr major-grugru) (delete (cons getter strings-or-function)
+                                       (cdr major-grugru))))))
+
+;;;###autoload
+(defmacro grugru-remove-on-local-major-mode (getter strings-or-function)
+  "Same as (grugru-remove-on-major-mode major-mode GETTER STRINGS-OR-FUNCTION)."
+  `(grugru-remove-on-major-mode (eval 'major-mode) ,getter ,strings-or-function))
+
+;;;###autoload
+(defun grugru-remove-local (getter strings-or-function)
+  "Remove local grugru defined with GETTER and  STRINGS-OR-FUNCTION."
+  (setq grugru--buffer-local-grugru-alist
+        (delete (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
+
+;;;###autoload
+(defun grugru-remove-global (getter strings-or-function)
+  "Remove global grugru defined with GETTER and  STRINGS-OR-FUNCTION."
+  (setq grugru--global-grugru-alist
+        (delete (cons getter strings-or-function) grugru--global-grugru-alist)))
 
 (with-eval-after-load 'find-func
   (defun grugru--function-advice (original symbol type library)
