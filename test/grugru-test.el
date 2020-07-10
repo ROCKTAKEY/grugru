@@ -1357,17 +1357,17 @@
          (call-interactively #'grugru))
      :expect "hoge foo-|bbb")))
 
-(ert-deftest grugru-remove-local ()
+(ert-deftest grugru-remove-on-local-major-mode ()
   (let (grugru--major-modes-grugru-alist)
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
      #'(lambda ()
-         (grugru-define-on-local-major-mode 'fundamental-mode 'word
+         (grugru-define-on-local-major-mode 'word
                                             '("foo" "bar" "baz"))
-         (grugru-define-on-local-major-mode 'fundamental-mode 'word
+         (grugru-define-on-local-major-mode 'word
                                             '("aaa" "bbb" "ccc"))
-         (grugru-remove-on-local-major-mode 'fundamental-mode 'word
+         (grugru-remove-on-local-major-mode 'word
                                             '("foo" "bar" "baz"))
          (call-interactively #'grugru))
      :expect "hoge |foo-aaa")
