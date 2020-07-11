@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.3.0
+;; Version: 1.3.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -319,7 +319,8 @@ current thing as an argument and returns next text.
   "Remove `major-mode' local grugru defined with MAJOR, GETTER and STRINGS-OR-FUNCTION."
   (if (listp major)
       (mapcar (lambda (arg)
-                (grugru-remove-on-major-mode args getter strings-or-function)))
+                (grugru-remove-on-major-mode arg getter strings-or-function))
+              major)
     (grugru--major-mode-set-as-unloaded major)
     (let ((major-grugru (assq major grugru--major-modes-grugru-alist)))
       (setf (cdr major-grugru) (delete (cons getter strings-or-function)

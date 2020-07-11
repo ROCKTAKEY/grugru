@@ -1382,6 +1382,25 @@
      :exercise
      #'(lambda ()
          (call-interactively #'grugru))
+     :expect "hoge foo-|bbb"))
+  (let (grugru--major-modes-grugru-alist)
+    (grugru-define-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                 '("foo" "bar" "baz"))
+    (grugru-define-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                 '("aaa" "bbb" "ccc"))
+    (grugru-remove-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                 '("foo" "bar" "baz"))
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge |foo-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
      :expect "hoge foo-|bbb")))
 
 (ert-deftest grugru-remove-on-local-major-mode ()
