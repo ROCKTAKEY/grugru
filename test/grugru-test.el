@@ -29,6 +29,8 @@
 (undercover "*.el")
 
 (require 'grugru)
+(require 'grugru-default)
+
 (require 'ert)
 (require 'cursor-test)
 
@@ -1722,6 +1724,12 @@
      (call-interactively #'grugru-test-2))
    :expect
    "aaa-rty|"))
+
+
+(ert-deftest grugru-default-setup ()
+  (let (grugru--global-grugru-alist
+        grugru-major-modes-grugru-alist)
+   (grugru-default-setup)))
 
 (provide 'grugru-test)
 ;;; grugru-test.el ends here

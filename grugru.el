@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.3.1
+;; Version: 1.4.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -100,22 +100,7 @@ which return cons cell whose car/cdr is beginning/end point of current thing."
   :risky t
   :type '(&rest (symbolp . [functionp sexp])))
 
-(defvar grugru--major-modes-grugru-alist
-  '((c++-mode . ((symbol . ("true" "false"))
-                 (symbol . ("vector" "array" "deque"))
-                 (symbol . ("class" "struct"))
-                 (symbol . ("float" "double"))
-                 (symbol . ("private" "public" "protected"))))
-    (emacs-lisp-mode . ((symbol . ("nil" "t"))
-                        (symbol . ("let" "let*"))
-                        (symbol . ("defun" "cl-defun"))
-                        (symbol . ("defvar" "defcustom"))
-                        (word   . ("add" "remove"))
-                        (symbol . ("setq" "setq-default"))
-                        (word . ("global" "local"))))
-    (tex-mode . ((symbol . ("figure" "table"))))
-    (yatex-mode . ((symbol . ("figure" "table"))))
-    (latex-mode . ((symbol . ("figure" "table")))))
+(defvar grugru--major-modes-grugru-alist '()
   "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
 
