@@ -16,6 +16,14 @@
   You can interactively use the function =grugru=. This function rotate the thing at point
   if it is assigned to =grugru-*-grugru-alist=. You can assign rotated things with
   =grugru-define-on-major-mode=, =grugru-define-on-local-major-mode=, and =grugru-define-local=.
+
+  If you want use default grugru, eval ~grugru-default-setup~. In the other words,
+  add to your init.el:
+  #+BEGIN_SRC emacs-lisp :tangle yes
+  (grugru-default-setup)
+  #+END_SRC
+
+** Examples
   #+BEGIN_SRC emacs-lisp -n
     ;; Define grugru on major-mode.
     (grugru-define-on-major-mode 'c-mode 'symbol '("unsigned" "signed"))
