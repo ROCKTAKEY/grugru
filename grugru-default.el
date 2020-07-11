@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(load "grugru.el")
+
 (defun grugru-default-setup ()
   "Setup default value.
 If some are not confortable, you can remove some of them,
