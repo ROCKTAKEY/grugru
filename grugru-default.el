@@ -25,7 +25,6 @@
 ;; Define default setupper.
 
 ;;; Code:
-(require 'grugru)
 
 (defun grugru-default-setup ()
   "Setup default value.
