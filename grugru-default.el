@@ -26,7 +26,8 @@
 
 ;;; Code:
 
-(load "grugru.el")
+(eval-when-compile
+  (require 'grugru))
 
 (defun grugru-default-setup ()
   "Setup default value.
