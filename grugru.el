@@ -355,6 +355,42 @@ current thing as an argument and returns next text.
   (setq grugru--global-grugru-alist
         (delete (cons getter strings-or-function) grugru--global-grugru-alist)))
 
+;;;###autoload
+(defmacro grugru-define-multiple (&rest clauses)
+  "Define multiple grugru with CLAUSES.
+Each element of CLAUSES can be:
+ - (GETTER . STRINGS-OR-FUNCTION)
+   This is regarded as (`grugru-define-global' GETTER STRINGS-OR-FUNCTION).
+ - (MAJOR-MODE . ((GETTER . STRINGS-OR-FUNCTION)...))
+   This is regarded as multiple sexps, each one is like
+   (`grugru-define-on-major-mode' MAJOR-MODE GETTER STRINGS-OR-FUNCTION).
+ - (CLAUSE...)
+   List of cons cells like above is also acceptable."
+  `(progn
+     ,@(mapcar
+        (lambda (arg)
+          (cond
+           ;; (MAJOR-MODE . ((GETTER . STRINGS-OR-FUNCTION)...))
+           ((or (and (listp (car arg))
+                     (string-match "-mode$" (symbol-name (caar arg))))
+                (and (symbolp (car arg))
+                     (string-match "-mode$" (symbol-name (car arg)))))
+            `(progn
+               ,@(cl-loop
+                  for (getter . strings-or-function) in (cdr arg)
+                  collect
+                  `(grugru-define-on-major-mode
+                    ',(car arg) ',getter ',strings-or-function))))
+           ;;(CLAUSE...)
+           ((and (listp (car arg)) (not (functionp (car arg)))
+                 `(grugru-define-multiple ,@arg)))
+           ;; (GETTER . STRINGS-OR-FUNCTION)
+           ((or (functionp (car arg)) (assq (car arg) grugru-getter-alist))
+            `(grugru-define-global ',(car arg) ',(cdr arg)))
+           ;; Not acceptable
+           (t (error "Wrong clauses on `grugru-define-multiple'"))))
+        clauses)))
+
 (with-eval-after-load 'find-func
   (defun grugru--function-advice (original symbol type library)
     "Advice for `find-function-search-for-symbol' from grugru."
