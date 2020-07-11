@@ -63,6 +63,36 @@
      (symbol . ("water" "ice" "vapor"))
      (symbol . ("solid" "liquid" "gas")))
 
+    ;; You can also write like:
+    (grugru-define-multiple
+     (fundamental-mode
+      . ((word . ("aaa" "bbb" "ccc"))
+         ;; (symbol "xxx" "yyy" "zzz") is same as below.
+         ;; You can use both.
+         (symbol . ("xxx" "yyy" "zzz"))
+         (word . ("abc" "def" "ghi"))))
+      (word . ("aaaa" "bbbb" "cccc"))
+      (symbol . ("xxxx" "yyyyy" "zzzzz"))
+      (word . ("abcd" "defd" "ghid")))
+    ;; or
+    (grugru-define-multiple
+     (fundamental-mode
+       (word "aaa" "bbb" "ccc")
+       (symbol "xxx" "yyy" "zzz")
+       (word "abc" "def" "ghi"))
+      (word "aaaa" "bbbb" "cccc")
+      (symbol "xxxx" "yyyyy" "zzzzz")
+      (word "abcd" "defd" "ghid"))
+
+    ;; Above two examples are both expanded to:
+    (progn
+      (progn
+         (grugru-define-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc"))
+         (grugru-define-on-major-mode 'fundamental-mode 'symbol '("xxx" "yyy" "zzz"))
+         (grugru-define-on-major-mode 'fundamental-mode 'word '("abc" "def" "ghi")))
+       (grugru-define-global 'word '("aaaa" "bbbb" "cccc"))
+       (grugru-define-global 'symbol '("xxxx" "yyyyy" "zzzzz"))
+       (grugru-define-global 'word '("abcd" "defd" "ghid")))
   #+END_SRC
 
 * License
