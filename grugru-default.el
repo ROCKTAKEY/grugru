@@ -26,9 +26,9 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'grugru))
+(require 'grugru)
 
+;;;###autoload
 (defun grugru-default-setup ()
   "Setup default value.
 If some are not confortable, you can remove some of them,

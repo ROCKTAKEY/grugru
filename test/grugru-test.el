@@ -29,6 +29,8 @@
 (undercover "*.el")
 
 (require 'grugru)
+(require 'grugru-default)
+
 (require 'ert)
 (require 'cursor-test)
 

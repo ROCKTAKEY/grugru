@@ -81,8 +81,6 @@
 (require 'thingatpt)
 (require 'subword)
 
-(require 'grugru-default)
-
 (defgroup grugru ()
   "Group for grugru."
   :group 'convenience
