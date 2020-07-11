@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.4.0
+;; Version: 1.5.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -340,6 +340,36 @@ current thing as an argument and returns next text.
   "Remove global grugru defined with GETTER and  STRINGS-OR-FUNCTION."
   (setq grugru--global-grugru-alist
         (delete (cons getter strings-or-function) grugru--global-grugru-alist)))
+
+;;;###autoload
+(defun grugru-redefine-on-major-mode (major getter old-str-or-func new-str-or-func)
+  "Redefine grugru defined with GETTER and OLD-STR-OR-FUNC on MAJOR to NEW-STR-OR-FUNC."
+  (if (listp major)
+      (mapcar
+       (lambda (arg)
+         (grugru-redefine-on-major-mode arg getter old-str-or-func new-str-or-func))
+       major)
+    (let* ((major-lst (cdr (assq major grugru--major-modes-grugru-alist)))
+           (lst (car (member (cons getter old-str-or-func) major-lst))))
+      (if lst
+          (setf (cdr lst) new-str-or-func)
+        (error "No grugru defined on %s with %s, %s" major getter old-str-or-func)))))
+
+;;;###autoload
+(defun grugru-redefine-global (getter old-str-or-func new-str-or-func)
+  "Redefine grugru defined with GETTER and OLD-STR-OR-FUNC on to NEW-STR-OR-FUNC."
+  (let* ((lst (car (member (cons getter old-str-or-func) grugru--global-grugru-alist))))
+    (if lst
+        (setf (cdr lst) new-str-or-func)
+      (error "No grugru defined with %s, %s" getter old-str-or-func))))
+
+;;;###autoload
+(defun grugru-redefine-local (getter old-str-or-func new-str-or-func)
+  "Redefine grugru defined with GETTER and OLD-STR-OR-FUNC on to NEW-STR-OR-FUNC."
+  (let* ((lst (car (member (cons getter old-str-or-func) grugru--buffer-local-grugru-alist))))
+    (if lst
+        (setf (cdr lst) new-str-or-func)
+      (error "No grugru defined with %s, %s" getter old-str-or-func))))
 
 ;;;###autoload
 (defmacro grugru-define-multiple (&rest clauses)

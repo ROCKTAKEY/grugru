@@ -1481,6 +1481,116 @@
      :expect "hoge foo-|bbb")))
 
 
+(ert-deftest grugru-redefine-on-major-mode ()
+  (let (grugru--major-modes-grugru-alist)
+    (grugru-define-on-major-mode 'fundamental-mode 'word
+                                 '("foo" "bar" "baz"))
+    (grugru-define-on-major-mode 'fundamental-mode 'word
+                                 '("aaa" "bbb" "ccc"))
+    (grugru-redefine-on-major-mode 'fundamental-mode 'word
+                                   '("foo" "bar" "baz")
+                                   '("foo" "baq" "baqq"))
+    (should-error
+     (grugru-redefine-on-major-mode 'fundamental-mode 'symbol
+                                    '("aaa" "bbb" "ccc")
+                                    '("foo" "baq" "baqq")))
+    (should-error
+     (grugru-redefine-on-major-mode 'fundamental-mode 'word
+                                    '("aaa" "bbb" "cccc")
+                                    '("foo" "baq" "baqq")))
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge |baq-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb"))
+  (let (grugru--major-modes-grugru-alist)
+    (grugru-define-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                 '("foo" "bar" "baz"))
+    (grugru-define-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                 '("aaa" "bbb" "ccc"))
+    (grugru-redefine-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                   '("foo" "bar" "baz")
+                                 '("foo" "baq" "baqq"))
+    (should-error
+     (grugru-redefine-on-major-mode '(lisp-interaction-mode fundamental-mode) 'symbol
+                                    '("aaa" "bbb" "ccc")
+                                    '("foo" "baq" "baqq")))
+    (should-error
+     (grugru-redefine-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                    '("aaa" "bbb" "cccc")
+                                    '("foo" "baq" "baqq")))
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge |baq-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+(ert-deftest grugru-redefine-local ()
+  (let (grugru--major-modes-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (grugru-define-local 'word
+                                 '("foo" "bar" "baz"))
+         (grugru-define-local 'word
+                                 '("aaa" "bbb" "ccc"))
+         (grugru-redefine-local 'word
+                                '("foo" "bar" "baz")
+                                 '("foo" "baq" "baqq"))
+         (call-interactively #'grugru))
+     :expect "hoge |baq-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (grugru-define-local 'word
+                                 '("foo" "bar" "baz"))
+         (grugru-define-local 'word
+                                 '("aaa" "bbb" "ccc"))
+         (grugru-redefine-local 'word
+                                '("foo" "bar" "baz")
+                                 '("foo" "baq" "baqq"))
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+(ert-deftest grugru-redefine-global ()
+  (let (grugru--major-modes-grugru-alist)
+    (grugru-define-global 'word
+                          '("foo" "bar" "baz"))
+    (grugru-define-global 'word
+                          '("aaa" "bbb" "ccc"))
+    (grugru-redefine-global 'word
+                            '("foo" "bar" "baz")
+                          '("foo" "baq" "baqq"))
+    (cursor-test/equal*
+     :init "hoge |foo-aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge |baq-aaa")
+    (cursor-test/equal*
+     :init "hoge foo-|aaa"
+     :exercise
+     #'(lambda ()
+         (call-interactively #'grugru))
+     :expect "hoge foo-|bbb")))
+
+
 (ert-deftest grugru-define-multiple-global ()
   (should
    (equal
