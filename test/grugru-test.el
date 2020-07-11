@@ -57,6 +57,8 @@
                 form))))))))
    (t form))))
 
+
+
 ;; Global
 
 (ert-deftest grugru-define-global-2-symbol-end-same-length ()
