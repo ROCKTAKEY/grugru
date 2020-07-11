@@ -1490,6 +1490,14 @@
     (grugru-redefine-on-major-mode 'fundamental-mode 'word
                                    '("foo" "bar" "baz")
                                    '("foo" "baq" "baqq"))
+    (should-error
+     (grugru-redefine-on-major-mode 'fundamental-mode 'symbol
+                                    '("aaa" "bbb" "ccc")
+                                    '("foo" "baq" "baqq")))
+    (should-error
+     (grugru-redefine-on-major-mode 'fundamental-mode 'word
+                                    '("aaa" "bbb" "cccc")
+                                    '("foo" "baq" "baqq")))
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
@@ -1510,6 +1518,14 @@
     (grugru-redefine-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
                                    '("foo" "bar" "baz")
                                  '("foo" "baq" "baqq"))
+    (should-error
+     (grugru-redefine-on-major-mode '(lisp-interaction-mode fundamental-mode) 'symbol
+                                    '("aaa" "bbb" "ccc")
+                                    '("foo" "baq" "baqq")))
+    (should-error
+     (grugru-redefine-on-major-mode '(lisp-interaction-mode fundamental-mode) 'word
+                                    '("aaa" "bbb" "cccc")
+                                    '("foo" "baq" "baqq")))
     (cursor-test/equal*
      :init "hoge |foo-aaa"
      :exercise
