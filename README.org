@@ -22,7 +22,10 @@
   #+BEGIN_SRC emacs-lisp :tangle yes
   (grugru-default-setup)
   #+END_SRC
-
+  If you want to change default action at point, you can use ~grugru-edit~,
+  with which you can edit grugrus at point interactively.
+  Or, you can use ~grugru-redefine-\*~ or ~grugru-remove-\*~
+  for non-interactive editing of default setup.
 ** Examples
   #+BEGIN_SRC emacs-lisp -n
     ;; Define grugru on major-mode.

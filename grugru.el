@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.5.0
+;; Version: 1.6.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -99,6 +99,19 @@ which return cons cell whose car/cdr is beginning/end point of current thing."
   :group 'grugru
   :risky t
   :type '(&rest (symbolp . [functionp sexp])))
+
+(defcustom grugru-edit-save-file
+  (expand-file-name ".grugru" user-emacs-directory)
+  "File which has saved data, provided by `grugru-edit'."
+  :group 'grugru
+  :type 'string)
+
+(defcustom grugru-edit-completing-function #'completing-read
+  "Completing read function used `grugru-edit'.
+You can also use `ivy-completing-read' or `ido-completing-read'."
+  :group 'grugru
+  :risky t
+  :type 'function)
 
 (defvar grugru--major-modes-grugru-alist '()
   "An alist of rotated text on each `major-mode'.
@@ -235,6 +248,83 @@ grugru--buffer-local-major-mode-grugru-alist"))))
            (+ begin (min grugru--point-cache (length str)))
          (setq grugru--point-cache now)
          (+ begin (min now (length str))))))))
+
+;;;###autoload
+(defun grugru-edit ()
+  "Edit grugru which can be rotated at point.
+The change made by this function is saved in file `grugru-edit-save-file'."
+  (interactive)
+  (unless grugru--loaded-local
+    (grugru--major-mode-load)
+    (setq grugru--loaded-local t))
+  (let* ((lst
+          (mapcar
+           (lambda (arg)
+             (cons (format "%S(%S): %S" (nth 0 arg) (nth 1 arg)(nth 2 arg)) arg))
+           (let ((separator (gensym))
+                 (flag nil)
+                 cache sexp tmp begin end cons now)
+             (cl-loop
+              for (getter . strs-or-func)
+              in (append grugru--buffer-local-major-mode-grugru-alist
+                         (list (cons separator separator))
+                         grugru--global-grugru-alist)
+              do (setq sexp (cdr (assq getter grugru-getter-alist)))
+              do (when (eq getter separator) (setq flag t))
+              if sexp
+              do
+              (setq cons
+                    (or (setq tmp (cdr (assoc getter cache)))
+                        (prog1 (if (functionp sexp) (funcall sexp) (eval sexp)))))
+              (unless tmp (push (cons getter cons) cache))
+
+              (setq begin (car cons) end (cdr cons))
+              (setq now (- (point) begin))
+              and
+              if (pcase strs-or-func
+                   ((pred functionp)
+                    (funcall strs-or-func (buffer-substring begin end)))
+                   ((pred listp)
+                    (let ((list (member (buffer-substring begin end) strs-or-func)))
+                      (when list
+                        (if (eq (length list) 1)
+                            (car strs-or-func)
+                          (nth 1 list))))))
+              collect (list (if flag 'global major-mode) getter strs-or-func)))))
+         ;; (reduced-lst
+         ;;  (cl-loop for (s . (a b c)) collect c))
+         (cons (assoc
+                (funcall grugru-edit-completing-function "Edit grugru: "
+                         lst nil t nil nil (car lst))
+                lst))
+         (new (read
+               (read-from-minibuffer
+                (format "Edit '%s' to: " (nth 0 cons)) (format "%S" (nth 2 (cdr cons))))))
+         (expression
+          (if (eq (nth 0 (cdr cons)) 'global)
+              (if new
+                  `(grugru-redefine-global ',(nth 1 (cdr cons)) ',(nth 2 (cdr cons)) ',new)
+                `(grugru-remove-global ',(nth 1 (cdr cons)) ',(nth 2 (cdr cons))))
+            (if new
+                `(grugru-redefine-on-major-mode ',(nth 0 (cdr cons)) ',(nth 1 (cdr cons))
+                                                ',(nth 2 (cdr cons)) ',new)
+              `(grugru-remove-on-major-mode (nth 0 (cdr cons)) ',(nth 1 (cdr cons))
+                                            ',(nth 2 (cdr cons))))
+            )))
+    (eval expression)
+    (with-temp-buffer
+      (let (print-level print-length)
+        (encode-coding-string
+         (format "%S
+" expression)
+         'utf-8 nil (current-buffer))
+        (write-region nil nil grugru-edit-save-file t)))))
+
+;;;###autoload
+(defun grugru-edit-load ()
+  "Load edited grugru saved on `grugru-edit-save-file'."
+  (interactive)
+  (load grugru-edit-save-file t nil t))
 
 
 ;; For lisp user
