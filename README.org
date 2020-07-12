@@ -23,7 +23,8 @@
   (grugru-default-setup)
   #+END_SRC
   If you want to change default action at point, you can use ~grugru-edit~,
-  with which you can edit grugrus at point interactively.
+  with which you can edit grugrus at point interactively. If you want to use
+  ivy or ido as completing-read, set ~grugru-edit-completing-function~.
   Or, you can use ~grugru-redefine-\*~ or ~grugru-remove-\*~
   for non-interactive editing of default setup.
 ** Examples
