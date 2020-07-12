@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.6.0
+;; Version: 1.6.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -343,7 +343,8 @@ current thing as an argument and returns next text."
             major)
    (let ((x (assoc major grugru--major-modes-grugru-alist)))
     (if x
-        (setf (cdr (last (cdr x))) (list (cons getter strings-or-function)))
+        (unless (member (cons getter strings-or-function) (cdr x))
+         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function))))
       (push (cons major (list (cons getter strings-or-function)))
             grugru--major-modes-grugru-alist))
     (grugru--major-mode-set-as-unloaded major))))
@@ -361,7 +362,8 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
-  (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist))
+  (unless (member (cons getter strings-or-function) grugru--buffer-local-grugru-alist)
+   (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
 
 ;;;###autoload
 (defun grugru-define-global (getter strings-or-function)
@@ -371,7 +373,8 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
-  (push (cons getter strings-or-function) grugru--global-grugru-alist))
+  (unless (member (cons getter strings-or-function) grugru--global-grugru-alist)
+   (push (cons getter strings-or-function) grugru--global-grugru-alist)))
 
 ;;;###autoload
 (defmacro grugru-define-function (name _ &optional docstring &rest body)
