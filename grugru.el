@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.6.1
+;; Version: 1.6.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -133,7 +133,7 @@ current thing as an argument and returns next text.
 You can add element to this with `grugru-define-global'.")
 
 (defvar-local grugru--buffer-local-grugru-alist '()
-    "This variable keeps buffer-local list of (GETTER . STRINGS-OR-FUNCTION).
+  "This variable keeps buffer-local list of (GETTER . STRINGS-OR-FUNCTION).
 GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
 `char' is available as GETTER.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
@@ -142,7 +142,7 @@ current thing as an argument and returns next text.
 You can add element to this with `grugru-define-local'.")
 
 (defvar-local grugru--buffer-local-major-mode-grugru-alist '()
-    "This variable keeps major-mode-specific list of (GETTER . STRINGS-OR-FUNCTION).
+  "This variable keeps major-mode-specific list of (GETTER . STRINGS-OR-FUNCTION).
 GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
 `char' is available as GETTER.
  STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
@@ -309,8 +309,7 @@ The change made by this function is saved in file `grugru-edit-save-file'."
                 `(grugru-redefine-on-major-mode ',(nth 0 (cdr cons)) ',(nth 1 (cdr cons))
                                                 ',(nth 2 (cdr cons)) ',new)
               `(grugru-remove-on-major-mode (nth 0 (cdr cons)) ',(nth 1 (cdr cons))
-                                            ',(nth 2 (cdr cons))))
-            )))
+                                            ',(nth 2 (cdr cons)))))))
     (eval expression)
     (with-temp-buffer
       (let (print-level print-length)
@@ -341,13 +340,13 @@ current thing as an argument and returns next text."
       (mapc (lambda (arg)
               (grugru-define-on-major-mode arg getter strings-or-function))
             major)
-   (let ((x (assoc major grugru--major-modes-grugru-alist)))
-    (if x
-        (unless (member (cons getter strings-or-function) (cdr x))
-         (setf (cdr (last (cdr x))) (list (cons getter strings-or-function))))
-      (push (cons major (list (cons getter strings-or-function)))
-            grugru--major-modes-grugru-alist))
-    (grugru--major-mode-set-as-unloaded major))))
+    (let ((x (assoc major grugru--major-modes-grugru-alist)))
+      (if x
+          (unless (member (cons getter strings-or-function) (cdr x))
+            (setf (cdr (last (cdr x))) (list (cons getter strings-or-function))))
+        (push (cons major (list (cons getter strings-or-function)))
+              grugru--major-modes-grugru-alist))
+      (grugru--major-mode-set-as-unloaded major))))
 
 ;;;###autoload
 (defmacro grugru-define-on-local-major-mode (getter strings-or-function)
@@ -363,7 +362,7 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (unless (member (cons getter strings-or-function) grugru--buffer-local-grugru-alist)
-   (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
+    (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
 
 ;;;###autoload
 (defun grugru-define-global (getter strings-or-function)
@@ -374,7 +373,7 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (unless (member (cons getter strings-or-function) grugru--global-grugru-alist)
-   (push (cons getter strings-or-function) grugru--global-grugru-alist)))
+    (push (cons getter strings-or-function) grugru--global-grugru-alist)))
 
 ;;;###autoload
 (defmacro grugru-define-function (name _ &optional docstring &rest body)
@@ -396,14 +395,14 @@ current thing as an argument and returns next text.
          (docs (when (stringp (car args))
                  (car args)))
          (args (if docs (cdr args) args)))
-   `(defun ,name ()
-      ,docs
-      (interactive)
-      (let ((grugru--global-grugru-alist ',args)
-            (grugru--buffer-local-grugru-alist nil)
-            (grugru--buffer-local-major-mode-grugru-alist nil)
-            (grugru--loaded-local t))
-       (call-interactively #'grugru)))))
+    `(defun ,name ()
+       ,docs
+       (interactive)
+       (let ((grugru--global-grugru-alist ',args)
+             (grugru--buffer-local-grugru-alist nil)
+             (grugru--buffer-local-major-mode-grugru-alist nil)
+             (grugru--loaded-local t))
+         (call-interactively #'grugru)))))
 
 ;;;###autoload
 (defun grugru-remove-on-major-mode (major getter strings-or-function)
