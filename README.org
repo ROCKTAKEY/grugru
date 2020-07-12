@@ -23,8 +23,15 @@
   (grugru-default-setup)
   #+END_SRC
   If you want to change default action at point, you can use ~grugru-edit~,
-  with which you can edit grugrus at point interactively. If you want to use
-  ivy or ido as completing-read, set ~grugru-edit-completing-function~.
+  with which you can edit grugrus at point interactively. The change edited by this
+  function is saved in ~grugru-edit-save-file~,
+  and loaded by run ~grugru-edit-load~. So to load the change, you can write
+  on init.el:
+  #+begin_src emacs-lisp :tangle yes
+  (grugru-edit-load)
+  #+end_src
+
+  If you want to use ivy or ido as completing-read, set ~grugru-edit-completing-function~.
   Or, you can use ~grugru-redefine-\*~ or ~grugru-remove-\*~
   for non-interactive editing of default setup.
 ** Examples
@@ -106,6 +113,32 @@
        (grugru-define-global 'symbol '("xxxx" "yyyyy" "zzzzz"))
        (grugru-define-global 'word '("abcd" "defd" "ghid")))
   #+END_SRC
+* Functions
+** ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
+   Define global grugru with GETTER and STRINGS-OR-FUNCTION.
+
+   GETTER is a function, or a symbol which is alias defined in ~grugru-getter-alist~.
+   By default, symbol, word, char is available.
+   If it is a function, it should return cons cell ~(begin . end)~
+   which express things at point, and with no argument.
+
+   STRINGS-OR-FUNCTION is list of string or function.
+
+   List of string: If it includes string gotten by GETTER,
+   the things gotten by GETTER is replaced to next string.
+
+   Function: It is passed things gotten by GETTER, and should return string
+   to replace the things to.
+** ~(grugru-define-on-major-mode MAJOR GETTER STRINGS-OR-FUNCTION)~
+   Define major-mode local grugru with GETTER and STRINGS-OR-FUNCTION.
+
+   Same as ~grugru-define-global~, but grugru defined with this is applied
+   only in buffer on MAJOR major-mode.
+** ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
+   Define buffer-local grugru with GETTER and STRINGS-OR-FUNCTION.
+
+   Same as ~grugru-define-global~, but grugru defined with this is applied
+   only in buffer where eval this expression.
 
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
