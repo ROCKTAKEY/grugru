@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.6.3
+;; Version: 1.6.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -498,19 +498,27 @@ Each element of CLAUSES can be:
            (t (error "Wrong clauses on `grugru-define-multiple'"))))
         clauses)))
 
-(with-eval-after-load 'find-func
-  (defun grugru--function-advice (original symbol type library)
-    "Advice for `find-function-search-for-symbol' from grugru."
-    (let ((name (symbol-name symbol)))
-      (or (funcall original symbol type library)
-          (and (null type)
-               (with-current-buffer (find-file-noselect library)
-                 (when (re-search-forward
-                        (format "\\|\\(^\\s-*(grugru-define-function\\s-*%s\\)"
-                                (regexp-quote name))
-                        nil t)
-                   (cons (current-buffer) (match-beginning 0))))))))
-  (advice-add #'find-function-search-for-symbol :around #'grugru--function-advice))
+(defun grugru--function-advice (original symbol type library)
+  "Advice for `find-function-search-for-symbol' from grugru.
+ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
+  (let ((name (symbol-name symbol)))
+    (or (funcall original symbol type library)
+        (and (null type)
+             (with-current-buffer (find-file-noselect library)
+               (when (re-search-forward
+                      (format "\\|\\(^\\s-*(grugru-define-function\\s-*%s\\)"
+                              (regexp-quote name))
+                      nil t)
+                 (cons (current-buffer) (match-beginning 0))))))))
+
+;;;###autoload
+(define-minor-mode grugru-find-function-integration-mode
+  "`describe-function' can find functions defined by `grugru-define-function'."
+  :global t
+  :require 'find-func
+  (if grugru-find-function-integration-mode
+      (advice-add #'find-function-search-for-symbol :around #'grugru--function-advice)
+    (advice-remove #'find-function-search-for-symbol #'grugru--function-advice)))
 
 (provide 'grugru)
 ;;; grugru.el ends here
