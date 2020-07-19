@@ -210,7 +210,10 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
 
 (defun grugru--get-tuple-list (alist &optional only-one)
   "Return tuple list constructed with ALIST.
-If ONLY-ONE is non-nil, returned value is 1 tuple, which matches first."
+If ONLY-ONE is non-nil, returned value is 1 tuple, which matches first.
+Each element of ALIST is (SYMBOL . GRUGRU-ALIST).
+Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
+`grugru-define-global'."
   (eval
    `(let (cache cached? begin end cons next element)
       (cl-loop
