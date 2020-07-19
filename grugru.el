@@ -188,6 +188,35 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
                 (setq grugru--loaded-local nil))))
           (buffer-list)))
 
+(defun grugru--get-tuple-list (alist)
+  "Return tuple list constructed with ALIST."
+  (let (cache sexp tmp begin end cons)
+    (cl-loop
+     for (symbol . grugrus) in alist
+     do
+     (cl-loop
+      for (getter . strs-or-func) in grugrus
+      do (setq sexp (cdr (assq getter grugru-getter-alist)))
+      if sexp
+      do
+      (setq cons
+            (or (setq tmp (cdr (assoc getter cache)))
+                (prog1 (if (functionp sexp) (funcall sexp) (eval sexp)))))
+      (unless tmp (push (cons getter cons) cache))
+
+      (setq begin (car cons) end (cdr cons))
+      and
+      if (pcase strs-or-func
+           ((pred functionp)
+            (funcall strs-or-func (buffer-substring begin end)))
+           ((pred listp)
+            (let ((list (member (buffer-substring begin end) strs-or-func)))
+              (when list
+                (if (eq (length list) 1)
+                    (car strs-or-func)
+                  (nth 1 list))))))
+      collect (list symbol getter strs-or-func)))))
+
 
 ;; For user interaction
 ;;;###autoload
@@ -261,35 +290,9 @@ The change made by this function is saved in file `grugru-edit-save-file'."
           (mapcar
            (lambda (arg)
              (cons (format "%S(%S): %S" (nth 0 arg) (nth 1 arg)(nth 2 arg)) arg))
-           (let ((separator (gensym))
-                 (flag nil)
-                 cache sexp tmp begin end cons)
-             (cl-loop
-              for (getter . strs-or-func)
-              in (append grugru--buffer-local-major-mode-grugru-alist
-                         (list (cons separator separator))
-                         grugru--global-grugru-alist)
-              do (setq sexp (cdr (assq getter grugru-getter-alist)))
-              do (when (eq getter separator) (setq flag t))
-              if sexp
-              do
-              (setq cons
-                    (or (setq tmp (cdr (assoc getter cache)))
-                        (prog1 (if (functionp sexp) (funcall sexp) (eval sexp)))))
-              (unless tmp (push (cons getter cons) cache))
-
-              (setq begin (car cons) end (cdr cons))
-              and
-              if (pcase strs-or-func
-                   ((pred functionp)
-                    (funcall strs-or-func (buffer-substring begin end)))
-                   ((pred listp)
-                    (let ((list (member (buffer-substring begin end) strs-or-func)))
-                      (when list
-                        (if (eq (length list) 1)
-                            (car strs-or-func)
-                          (nth 1 list))))))
-              collect (list (if flag 'global major-mode) getter strs-or-func)))))
+           (grugru--get-tuple-list
+            `((global . grugru--global-grugru-alist)
+              (,major-mode . grugru--buffer-local-major-mode-grugru-alist)))))
          ;; (reduced-lst
          ;;  (cl-loop for (s . (a b c)) collect c))
          (cons (assoc
