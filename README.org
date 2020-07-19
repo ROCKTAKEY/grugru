@@ -73,15 +73,6 @@
        ((string-match "b\\(.*\\)c" arg)
         (concat "a" (match-string 1 arg) "b")))))
 
-    ;; You can define function which rotate pre-specified texts.
-    ;; For example, three-state can rotate only 2 tuples,
-    ;; ("water" "ice" "vapor") and ("solid" "liquid" "gas"),
-    ;; not any other tuples defined by grugru-define-global and so on.
-    (grugru-define-function three-state ()
-     "Docstring. This is optional."
-     (symbol . ("water" "ice" "vapor"))
-     (symbol . ("solid" "liquid" "gas")))
-
     ;; You can also write like:
     (grugru-define-multiple
      (fundamental-mode
@@ -112,6 +103,19 @@
        (grugru-define-global 'word '("aaaa" "bbbb" "cccc"))
        (grugru-define-global 'symbol '("xxxx" "yyyyy" "zzzzz"))
        (grugru-define-global 'word '("abcd" "defd" "ghid")))
+
+
+    ;; You can define function which rotate pre-specified texts.
+    ;; For example, three-state can rotate only 2 tuples,
+    ;; ("water" "ice" "vapor") and ("solid" "liquid" "gas"),
+    ;; not any other tuples defined by grugru-define-global and so on.
+    (grugru-define-function three-state ()
+     "Docstring. This is optional."
+     (symbol . ("water" "ice" "vapor"))
+     (symbol . ("solid" "liquid" "gas")))
+    ;; If you want to find the functions defined by `grugru-define-function'
+    ;; with `describe-function', execute this:
+    (grugru-find-function-integration-mode +1)
   #+END_SRC
 * Functions
 ** ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
@@ -139,6 +143,11 @@
 
    Same as ~grugru-define-global~, but grugru defined with this is applied
    only in buffer where eval this expression.
+
+** ~(grugru-define-function NAME () &optional DOCSTRING &rest BODY)~
+   Define function which can roate only grugru defined by BODY.
+   Each element of BODY is ~(GETTER . STRINGS-OR-FUNCTION)~,
+   which meaning is same as ~grugru-define-*~ functions.
 
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
