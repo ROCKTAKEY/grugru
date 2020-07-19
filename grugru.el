@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.6.2
+;; Version: 1.6.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -177,7 +177,7 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
         (cdr (assq major-mode grugru--major-modes-grugru-alist)))
   (setq grugru--loaded-local t))
 
-(add-hook 'change-major-mode-after-body-hook 'grugru--major-mode-load)
+(add-hook 'change-major-mode-after-body-hook #'grugru--major-mode-load)
 
 (defun grugru--major-mode-set-as-unloaded (major)
   "Mark buffers on MAJOR `major-mode' as unloaded."
@@ -263,7 +263,7 @@ The change made by this function is saved in file `grugru-edit-save-file'."
              (cons (format "%S(%S): %S" (nth 0 arg) (nth 1 arg)(nth 2 arg)) arg))
            (let ((separator (gensym))
                  (flag nil)
-                 cache sexp tmp begin end cons now)
+                 cache sexp tmp begin end cons)
              (cl-loop
               for (getter . strs-or-func)
               in (append grugru--buffer-local-major-mode-grugru-alist
@@ -279,7 +279,6 @@ The change made by this function is saved in file `grugru-edit-save-file'."
               (unless tmp (push (cons getter cons) cache))
 
               (setq begin (car cons) end (cdr cons))
-              (setq now (- (point) begin))
               and
               if (pcase strs-or-func
                    ((pred functionp)
@@ -511,7 +510,7 @@ Each element of CLAUSES can be:
                                 (regexp-quote name))
                         nil t)
                    (cons (current-buffer) (match-beginning 0))))))))
-  (advice-add 'find-function-search-for-symbol :around 'grugru--function-advice))
+  (advice-add #'find-function-search-for-symbol :around #'grugru--function-advice))
 
 (provide 'grugru)
 ;;; grugru.el ends here
