@@ -254,26 +254,24 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
   (unless grugru--loaded-local
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
-  (let (begin end str now tuple)
-    (setq
-     tuple
-     (grugru--get-tuple-list
-      `((global      . grugru--buffer-local-grugru-alist)
-        (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
-        (local       . grugru--global-grugru-alist))
-      'only-one))
+  (let ((tuple
+         (grugru--get-tuple-list
+          `((global      . grugru--buffer-local-grugru-alist)
+            (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+            (local       . grugru--global-grugru-alist))
+          'only-one)))
     (when tuple
-      (setq begin (car (nth 1 tuple))
-            end   (cdr (nth 1 tuple)))
-      (setq str (nth 2 tuple))
-      (setq now (- (point) begin))
-      (delete-region begin end)
-      (insert str)
-      (goto-char
-       (if (and this-command (eq this-command last-command))
-           (+ begin (min grugru--point-cache (length str)))
-         (setq grugru--point-cache now)
-         (+ begin (min now (length str))))))))
+      (let* ((begin (car (nth 1 tuple)))
+             (end   (cdr (nth 1 tuple)))
+             (str (nth 2 tuple))
+             (now (- (point) begin)))
+        (delete-region begin end)
+        (insert str)
+        (goto-char
+         (if (and this-command (eq this-command last-command))
+             (+ begin (min grugru--point-cache (length str)))
+           (setq grugru--point-cache now)
+           (+ begin (min now (length str)))))))))
 
 ;;;###autoload
 (defun grugru-edit ()
