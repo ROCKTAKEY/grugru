@@ -313,15 +313,11 @@ The change made by this function is saved in file `grugru-edit-save-file'."
            (grugru--get-tuple-list
             `((global . grugru--global-grugru-alist)
               (,major-mode . grugru--buffer-local-major-mode-grugru-alist)))))
-         ;; (reduced-lst
-         ;;  (cl-loop for (s . (a b c)) collect c))
-         (cons (assoc
-                (funcall grugru-edit-completing-function "Edit grugru: "
-                         lst nil t nil nil (car lst))
+         (cons (assoc (funcall grugru-edit-completing-function "Edit grugru: "
+                               lst nil t nil nil (car lst))
                 lst))
-         (new (read
-               (read-from-minibuffer
-                (format "Edit '%s' to: " (nth 0 cons)) (format "%S" (nth 2 (cdr cons))))))
+         (new (read (read-from-minibuffer (format "Edit '%s' to: " (nth 0 cons))
+                                          (format "%S" (nth 2 (cdr cons))))))
          (expression (grugru--make-expression (cdr cons) new)))
     (eval expression)
     (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
