@@ -258,7 +258,7 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
     (if new
         `(grugru-redefine-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
                                         ',(nth 2 less-tuple) ',new)
-      `(grugru-remove-on-major-mode (nth 0 less-tuple) ',(nth 1 less-tuple)
+      `(grugru-remove-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
                                     ',(nth 2 less-tuple)))))
 
 
