@@ -160,6 +160,57 @@
          t)
         '(global (1 . 4) "ccc" (grugru--get-word) ("aaa" "bbb" "ccc")))))))
 
+(ert-deftest grugru--insert-sexp-append-to-file ()
+  (delete-file "test1")
+  (let((buffer-file-coding-system))
+   (grugru--insert-sexp-append-to-file '(aaa bbb) "test1")
+  (grugru--insert-sexp-append-to-file '((ccc) ddd) "test1")
+  (should
+   (string=
+    (with-temp-buffer
+      (let ((coding-system-for-write 'utf-8))
+        (insert-file-contents "test1")
+        (encode-coding-string (buffer-string) 'utf-8)))
+    "(aaa bbb)\n((ccc) ddd)\n"))))
+
+(ert-deftest grugru--make-expression-global-new ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(global word ("aaa" "bbb" "ccc"))
+     '("ddd" "eee" "fff"))
+    '(grugru-redefine-global
+      'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+
+(ert-deftest grugru--make-expression-global-remove ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(global word ("aaa" "bbb" "ccc"))
+     nil)
+    '(grugru-remove-global
+      'word '("aaa" "bbb" "ccc")))))
+
+(ert-deftest grugru--make-expression-major-mode-new ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(fundamental-mode word ("aaa" "bbb" "ccc"))
+     '("ddd" "eee" "fff"))
+    '(grugru-redefine-on-major-mode
+      'fundamental-mode
+      'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+
+(ert-deftest grugru--make-expression-major-mode-remove ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(fundamental-mode word ("aaa" "bbb" "ccc"))
+     nil)
+    '(grugru-remove-on-major-mode
+      'fundamental-mode
+      'word '("aaa" "bbb" "ccc")))))
+
 
 
 ;; Global
