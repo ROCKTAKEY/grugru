@@ -239,6 +239,28 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
              '(return element)
            '(append element))))))
 
+(defun grugru--insert-sexp-append-to-file (sexp file)
+  "Insert SEXP to the end of FILE."
+  (with-temp-buffer
+    (let (print-level print-length)
+      (encode-coding-string
+       (format "%S
+" sexp)
+       'utf-8 nil (current-buffer))
+      (write-region nil nil file t))))
+
+(defun grugru--make-expression (less-tuple new)
+  "Make sexp to change grugru from LESS-TUPLE to NEW."
+  (if (eq (nth 0 less-tuple) 'global)
+      (if new
+          `(grugru-redefine-global ',(nth 1 less-tuple) ',(nth 2 less-tuple) ',new)
+        `(grugru-remove-global ',(nth 1 less-tuple) ',(nth 2 less-tuple)))
+    (if new
+        `(grugru-redefine-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
+                                        ',(nth 2 less-tuple) ',new)
+      `(grugru-remove-on-major-mode (nth 0 less-tuple) ',(nth 1 less-tuple)
+                                    ',(nth 2 less-tuple)))))
+
 
 ;; For user interaction
 ;;;###autoload
@@ -299,24 +321,9 @@ The change made by this function is saved in file `grugru-edit-save-file'."
          (new (read
                (read-from-minibuffer
                 (format "Edit '%s' to: " (nth 0 cons)) (format "%S" (nth 2 (cdr cons))))))
-         (expression
-          (if (eq (nth 0 (cdr cons)) 'global)
-              (if new
-                  `(grugru-redefine-global ',(nth 1 (cdr cons)) ',(nth 2 (cdr cons)) ',new)
-                `(grugru-remove-global ',(nth 1 (cdr cons)) ',(nth 2 (cdr cons))))
-            (if new
-                `(grugru-redefine-on-major-mode ',(nth 0 (cdr cons)) ',(nth 1 (cdr cons))
-                                                ',(nth 2 (cdr cons)) ',new)
-              `(grugru-remove-on-major-mode (nth 0 (cdr cons)) ',(nth 1 (cdr cons))
-                                            ',(nth 2 (cdr cons)))))))
+         (expression (grugru--make-expression (cdr cons) new)))
     (eval expression)
-    (with-temp-buffer
-      (let (print-level print-length)
-        (encode-coding-string
-         (format "%S
-" expression)
-         'utf-8 nil (current-buffer))
-        (write-region nil nil grugru-edit-save-file t)))))
+    (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
 
 ;;;###autoload
 (defun grugru-edit-load ()
