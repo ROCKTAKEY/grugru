@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.6.4
+;; Version: 1.6.5
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -188,6 +188,79 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
                 (setq grugru--loaded-local nil))))
           (buffer-list)))
 
+(defun grugru--get-next-string (string strs-or-function)
+  "Get next string of STRING with STRS-OR-FUNCTION."
+  (pcase strs-or-function
+    ((pred functionp)
+     (funcall strs-or-function string))
+    ((pred listp)
+     (let ((list (member string strs-or-function)))
+       (when list
+         (if (eq (length list) 1)
+             (car strs-or-function)
+           (nth 1 list)))))
+    (_ nil)))
+
+(defun grugru--get-getter-function (getter)
+  "Get getter function from GETTER."
+  (setq getter (or (cdr (assq getter grugru-getter-alist)) getter))
+  (or (if (functionp getter)
+          getter
+        `(lambda () ,getter))))
+
+(defun grugru--get-tuple-list (alist &optional only-one)
+  "Return tuple list constructed with ALIST.
+If ONLY-ONE is non-nil, returned value is 1 tuple, which matches first.
+Each element of ALIST is (SYMBOL . GRUGRU-ALIST).
+Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
+`grugru-define-global'."
+  (eval
+   `(let (cache cached? begin end cons next element)
+      (cl-loop
+       for (symbol . grugrus) in ',alist
+       do
+       (setq
+        element
+        (cl-loop
+         for (getter . strs-or-func) in (symbol-value grugrus)
+         do
+         (setq cons
+               (or (setq cached? (cdr (assoc getter cache)))
+                   (funcall (grugru--get-getter-function getter))))
+         (unless cached? (push (cons getter cons) cache))
+
+         (setq begin (car cons) end (cdr cons))
+         if (setq next
+                  (grugru--get-next-string (buffer-substring begin end) strs-or-func))
+         ,(if only-one 'return 'collect)
+         (list symbol (cons begin end) next getter strs-or-func)))
+       when element
+       ,@(if only-one
+             '(return element)
+           '(append element))))))
+
+(defun grugru--insert-sexp-append-to-file (sexp file)
+  "Insert SEXP to the end of FILE."
+  (with-temp-buffer
+    (let (print-level print-length)
+      (encode-coding-string
+       (format "%S
+" sexp)
+       'utf-8 nil (current-buffer))
+      (write-region nil nil file t))))
+
+(defun grugru--make-expression (less-tuple new)
+  "Make sexp to change grugru from LESS-TUPLE to NEW."
+  (if (eq (nth 0 less-tuple) 'global)
+      (if new
+          `(grugru-redefine-global ',(nth 1 less-tuple) ',(nth 2 less-tuple) ',new)
+        `(grugru-remove-global ',(nth 1 less-tuple) ',(nth 2 less-tuple)))
+    (if new
+        `(grugru-redefine-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
+                                        ',(nth 2 less-tuple) ',new)
+      `(grugru-remove-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
+                                    ',(nth 2 less-tuple)))))
+
 
 ;; For user interaction
 ;;;###autoload
@@ -203,51 +276,24 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
   (unless grugru--loaded-local
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
-  (let (begin end sexp str now cons cache tmp)
-    (when
-        (cl-loop
-         for (getter . strs-or-func)
-         in (append grugru--buffer-local-grugru-alist
-                    grugru--buffer-local-major-mode-grugru-alist
-                    grugru--global-grugru-alist)
-
-         do (setq sexp (cdr (assq getter grugru-getter-alist)))
-
-         unless sexp do (error "Getter %s is not set in grugru-getter-alist" getter)
-
-         do
-         (setq cons
-               (or (setq tmp (cdr (assoc getter cache)))
-                   (prog1 (if (functionp sexp) (funcall sexp) (eval sexp)))))
-         (unless tmp (push (cons getter cons) cache))
-
-         (setq begin (car cons) end (cdr cons))
-         (setq now (- (point) begin))
-
-         do
-         (setq
-          str
-          (pcase strs-or-func
-            ((pred functionp)
-             (funcall strs-or-func (buffer-substring begin end)))
-            ((pred listp)
-             (let ((list (member (buffer-substring begin end) strs-or-func)))
-               (when list
-                 (if (eq (length list) 1)
-                     (car strs-or-func)
-                   (nth 1 list)))))
-            (_
-             (error "Wrong grugru is set in grugru--buffer-local-grugru-alist or \
-grugru--buffer-local-major-mode-grugru-alist"))))
-         if str return str
-         finally return nil)
-      (delete-region begin end)
-      (insert str)
-      (goto-char
-       (if (and this-command (eq this-command last-command))
-           (+ begin (min grugru--point-cache (length str)))
-         (setq grugru--point-cache now)
-         (+ begin (min now (length str))))))))
+  (let ((tuple
+         (grugru--get-tuple-list
+          `((global      . grugru--buffer-local-grugru-alist)
+            (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+            (local       . grugru--global-grugru-alist))
+          'only-one)))
+    (when tuple
+      (let* ((begin (car (nth 1 tuple)))
+             (end   (cdr (nth 1 tuple)))
+             (str (nth 2 tuple))
+             (now (- (point) begin)))
+        (delete-region begin end)
+        (insert str)
+        (goto-char
+         (if (and this-command (eq this-command last-command))
+             (+ begin (min grugru--point-cache (length str)))
+           (setq grugru--point-cache now)
+           (+ begin (min now (length str)))))))))
 
 ;;;###autoload
 (defun grugru-edit ()
@@ -258,65 +304,23 @@ The change made by this function is saved in file `grugru-edit-save-file'."
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
   (let* ((lst
+          ;; lst has list of cons cell (prompt . less-tuple)
+          ;; less-tuple means (symbol getter strs-or-func).
           (mapcar
            (lambda (arg)
-             (cons (format "%S(%S): %S" (nth 0 arg) (nth 1 arg)(nth 2 arg)) arg))
-           (let ((separator (gensym))
-                 (flag nil)
-                 cache sexp tmp begin end cons)
-             (cl-loop
-              for (getter . strs-or-func)
-              in (append grugru--buffer-local-major-mode-grugru-alist
-                         (list (cons separator separator))
-                         grugru--global-grugru-alist)
-              do (setq sexp (cdr (assq getter grugru-getter-alist)))
-              do (when (eq getter separator) (setq flag t))
-              if sexp
-              do
-              (setq cons
-                    (or (setq tmp (cdr (assoc getter cache)))
-                        (prog1 (if (functionp sexp) (funcall sexp) (eval sexp)))))
-              (unless tmp (push (cons getter cons) cache))
-
-              (setq begin (car cons) end (cdr cons))
-              and
-              if (pcase strs-or-func
-                   ((pred functionp)
-                    (funcall strs-or-func (buffer-substring begin end)))
-                   ((pred listp)
-                    (let ((list (member (buffer-substring begin end) strs-or-func)))
-                      (when list
-                        (if (eq (length list) 1)
-                            (car strs-or-func)
-                          (nth 1 list))))))
-              collect (list (if flag 'global major-mode) getter strs-or-func)))))
-         ;; (reduced-lst
-         ;;  (cl-loop for (s . (a b c)) collect c))
-         (cons (assoc
-                (funcall grugru-edit-completing-function "Edit grugru: "
-                         lst nil t nil nil (car lst))
+             (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg) (nth 4 arg))
+                   (mapcar (lambda (n) (nth n arg)) '(0 3 4))))
+           (grugru--get-tuple-list
+            `((global . grugru--global-grugru-alist)
+              (,major-mode . grugru--buffer-local-major-mode-grugru-alist)))))
+         (cons (assoc (funcall grugru-edit-completing-function "Edit grugru: "
+                               lst nil t nil nil (car lst))
                 lst))
-         (new (read
-               (read-from-minibuffer
-                (format "Edit '%s' to: " (nth 0 cons)) (format "%S" (nth 2 (cdr cons))))))
-         (expression
-          (if (eq (nth 0 (cdr cons)) 'global)
-              (if new
-                  `(grugru-redefine-global ',(nth 1 (cdr cons)) ',(nth 2 (cdr cons)) ',new)
-                `(grugru-remove-global ',(nth 1 (cdr cons)) ',(nth 2 (cdr cons))))
-            (if new
-                `(grugru-redefine-on-major-mode ',(nth 0 (cdr cons)) ',(nth 1 (cdr cons))
-                                                ',(nth 2 (cdr cons)) ',new)
-              `(grugru-remove-on-major-mode (nth 0 (cdr cons)) ',(nth 1 (cdr cons))
-                                            ',(nth 2 (cdr cons)))))))
+         (new (read (read-from-minibuffer (format "Edit '%s' to: " (nth 0 cons))
+                                          (format "%S" (nth 2 (cdr cons))))))
+         (expression (grugru--make-expression (cdr cons) new)))
     (eval expression)
-    (with-temp-buffer
-      (let (print-level print-length)
-        (encode-coding-string
-         (format "%S
-" expression)
-         'utf-8 nil (current-buffer))
-        (write-region nil nil grugru-edit-save-file t)))))
+    (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
 
 ;;;###autoload
 (defun grugru-edit-load ()

@@ -59,6 +59,160 @@
                 form))))))))
    (t form))))
 
+(ert-deftest grugru--get-next-string-strings ()
+  (should
+   (string=
+    "bar"
+    (grugru--get-next-string "foo" '("foo" "bar" "baz"))))
+  (should
+   (string=
+    "foo"
+    (grugru--get-next-string "baz" '("foo" "bar" "baz")))))
+
+(ert-deftest grugru--get-next-string-function ()
+  (should
+   (string=
+    "bar"
+    (grugru--get-next-string
+     "foo"
+     (lambda (arg)
+       (pcase arg
+         ("foo" "bar")
+         ("bar" "baz")
+         ("baz" "foo"))))))
+  (should-not
+   (grugru--get-next-string
+    "fo"
+    (lambda (arg)
+      (pcase arg
+        ("foo" "bar")
+        ("bar" "baz")
+        ("baz" "foo"))))))
+
+(ert-deftest grugru--get-getter-function ()
+  (let ((grugru-getter-alist
+         '((a . ignore)
+           (b . (lambda () t)))))
+    (should (eq (grugru--get-getter-function 'a) 'ignore))
+    (should (equal (grugru--get-getter-function 'b) (lambda () t)))
+    (should (equal (grugru--get-getter-function
+                    '(message "Hello"))
+                   '(lambda () (message "Hello"))))))
+
+(ert-deftest grugru--get-tuple-list-normal ()
+  (let ((grugru--global
+         '(((lambda () (grugru--get-word)) . ("foo" "bar" "baz"))
+           ((grugru--get-word) . ("aaa" "bbb" "ccc"))))
+        (grugru--local
+         '(((lambda () (grugru--get-word)) . ("fool" "bar" "bazl"))
+           ((grugru--get-word) . ("aaal" "bbb" "cccl")))))
+    (with-temp-buffer
+      (insert "bar hoge")
+      (goto-char 2)
+      (should
+       (equal
+        (grugru--get-tuple-list
+         '((global . grugru--global)
+           (local . grugru--local)))
+        '((global (1 . 4) "baz" (lambda () (grugru--get-word))
+                  ("foo" "bar" "baz"))
+          (local (1 . 4) "bazl" (lambda () (grugru--get-word))
+                 ("fool" "bar" "bazl"))))))
+    (with-temp-buffer
+      (insert "bbb hoge")
+      (goto-char 2)
+      (should
+       (equal
+        (grugru--get-tuple-list
+         '((global . grugru--global)
+           (local . grugru--local)))
+        '((global (1 . 4) "ccc" (grugru--get-word)
+                  ("aaa" "bbb" "ccc"))
+          (local (1 . 4) "cccl" (grugru--get-word)
+                 ("aaal" "bbb" "cccl"))))))))
+
+(ert-deftest grugru--get-tuple-list-only-one ()
+  (let ((grugru--global
+         '(((lambda () (grugru--get-word)) . ("foo" "bar" "baz"))
+           ((grugru--get-word) . ("aaa" "bbb" "ccc"))))
+        (grugru--local
+         '(((lambda () (grugru--get-word)) . ("fool" "bar" "bazl"))
+           ((grugru--get-word) . ("aaal" "bbb" "cccl")))))
+    (with-temp-buffer
+      (insert "bar hoge")
+      (goto-char 2)
+      (should
+       (equal
+        (grugru--get-tuple-list
+         '((global . grugru--global)
+           (local . grugru--local))
+         t)
+        '(global (1 . 4) "baz" (lambda () (grugru--get-word))
+                ("foo" "bar" "baz")))))
+    (with-temp-buffer
+      (insert "bbb hoge")
+      (goto-char 2)
+      (should
+       (equal
+        (grugru--get-tuple-list
+         '((global . grugru--global)
+           (local . grugru--local))
+         t)
+        '(global (1 . 4) "ccc" (grugru--get-word) ("aaa" "bbb" "ccc")))))))
+
+(ert-deftest grugru--insert-sexp-append-to-file ()
+  (let ((file "test1"))
+    (when (file-exists-p file)
+      (delete-file file))
+    (let((buffer-file-coding-system))
+      (grugru--insert-sexp-append-to-file '(aaa bbb) file)
+      (grugru--insert-sexp-append-to-file '((ccc) ddd) file)
+      (should
+       (string=
+        (with-temp-buffer
+          (let ((coding-system-for-write 'utf-8))
+            (insert-file-contents "test1")
+            (encode-coding-string (buffer-string) 'utf-8)))
+        "(aaa bbb)\n((ccc) ddd)\n")))))
+
+(ert-deftest grugru--make-expression-global-new ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(global word ("aaa" "bbb" "ccc"))
+     '("ddd" "eee" "fff"))
+    '(grugru-redefine-global
+      'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+
+(ert-deftest grugru--make-expression-global-remove ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(global word ("aaa" "bbb" "ccc"))
+     nil)
+    '(grugru-remove-global
+      'word '("aaa" "bbb" "ccc")))))
+
+(ert-deftest grugru--make-expression-major-mode-new ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(fundamental-mode word ("aaa" "bbb" "ccc"))
+     '("ddd" "eee" "fff"))
+    '(grugru-redefine-on-major-mode
+      'fundamental-mode
+      'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+
+(ert-deftest grugru--make-expression-major-mode-remove ()
+  (should
+   (equal
+    (grugru--make-expression
+     '(fundamental-mode word ("aaa" "bbb" "ccc"))
+     nil)
+    '(grugru-remove-on-major-mode
+      'fundamental-mode
+      'word '("aaa" "bbb" "ccc")))))
+
 
 
 ;; Global
