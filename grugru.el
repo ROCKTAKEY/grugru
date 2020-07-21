@@ -304,7 +304,8 @@ The change made by this function is saved in file `grugru-edit-save-file'."
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
   (let* ((lst
-          ;; lst has list of tuple (symbol getter strs-or-func)
+          ;; lst has list of cons cell (prompt . less-tuple)
+          ;; less-tuple means (symbol getter strs-or-func).
           (mapcar
            (lambda (arg)
              (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg) (nth 4 arg))
