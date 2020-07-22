@@ -1993,20 +1993,27 @@
 
 
 (ert-deftest grugru--find-function-integration ()
-  (let ((file "find-function-test"))
-    (when (file-exists-p file)
-      (delete-file file))
-    (with-temp-buffer
-    (let (print-level print-length)
-      (encode-coding-string
-       "(grugru-define-function some-grugru-function ()
+  (let ((file "find-function-test.el"))
+    (unwind-protect
+        (progn
+          (when (file-exists-p file)
+            (delete-file file))
+          (with-temp-buffer
+            (let (print-level print-length)
+              (encode-coding-string
+               "(grugru-define-function some-grugru-function ()
 '(\"aaa\" \"bbb\" \"ccc\")
-'(\"ddd\" \"eee\" \"fff\"))"
-       'utf-8 nil (current-buffer))
-      (write-region nil nil file)))
-   (should
-    (find-function-search-for-symbol
-     'some-grugru-function nil (expand-file-name file ".")))))
+'(\"ddd\" \"eee\" \"fff\"))
+(provide 'find-function-test)"
+               'utf-8 nil (current-buffer))
+              (write-region nil nil file)))
+          (grugru-find-function-integration-mode +1)
+          (should
+           (cdr
+            (find-function-search-for-symbol
+             'some-grugru-function nil (expand-file-name file ".")))))
+    (when (file-exists-p file)
+      (delete-file file)))))
 
 
 (ert-deftest grugru-default-setup ()
