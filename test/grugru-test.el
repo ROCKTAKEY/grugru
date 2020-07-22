@@ -26,7 +26,9 @@
 
 ;;; Code:
 (require 'undercover)
-(undercover "*.el")
+(undercover "*.el"
+            (:report-file "coverage-final.json")
+            (:send-report nil))
 
 (require 'grugru)
 (require 'grugru-default)

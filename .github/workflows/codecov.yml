@@ -1,4 +1,4 @@
-name: coveralls
+name: codecov
 
 on: [push, pull_request]
 
@@ -21,4 +21,9 @@ jobs:
       - run: make clean
       - run: make ert
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          UNDERCOVER_FORCE: true
+      - run: ls -a
+      - run: ls -a test/
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
