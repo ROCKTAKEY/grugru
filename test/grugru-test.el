@@ -164,18 +164,22 @@
 
 (ert-deftest grugru--insert-sexp-append-to-file ()
   (let ((file "test1"))
-    (when (file-exists-p file)
-      (delete-file file))
-    (let((buffer-file-coding-system))
-      (grugru--insert-sexp-append-to-file '(aaa bbb) file)
-      (grugru--insert-sexp-append-to-file '((ccc) ddd) file)
-      (should
-       (string=
-        (with-temp-buffer
-          (let ((coding-system-for-write 'utf-8))
-            (insert-file-contents "test1")
-            (encode-coding-string (buffer-string) 'utf-8)))
-        "(aaa bbb)\n((ccc) ddd)\n")))))
+    (unwind-protect
+        (progn
+          (when (file-exists-p file)
+            (delete-file file))
+          (let((buffer-file-coding-system))
+            (grugru--insert-sexp-append-to-file '(aaa bbb) file)
+            (grugru--insert-sexp-append-to-file '((ccc) ddd) file)
+            (should
+             (string=
+              (with-temp-buffer
+                (let ((coding-system-for-write 'utf-8))
+                  (insert-file-contents "test1")
+                  (encode-coding-string (buffer-string) 'utf-8)))
+              "(aaa bbb)\n((ccc) ddd)\n"))))
+      (when (file-exists-p file)
+        (delete-file file)))))
 
 (ert-deftest grugru--make-expression-global-new ()
   (should
@@ -2011,7 +2015,8 @@
           (should
            (cdr
             (find-function-search-for-symbol
-             'some-grugru-function nil (expand-file-name file ".")))))
+             'some-grugru-function nil (expand-file-name file "."))))
+          (grugru-find-function-integration-mode -1))
     (when (file-exists-p file)
       (delete-file file)))))
 
