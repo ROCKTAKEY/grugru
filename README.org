@@ -26,7 +26,7 @@
   with which you can edit grugrus at point interactively. The change edited by this
   function is saved in ~grugru-edit-save-file~,
   and loaded by run ~grugru-edit-load~. So to load the change, you can write
-  on init.el:
+  on init.el after ~(grugru-default-setup)~:
   #+begin_src emacs-lisp :tangle yes
   (grugru-edit-load)
   #+end_src
