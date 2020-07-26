@@ -16,6 +16,10 @@
   You can interactively use the function =grugru=. This function rotate the thing at point
   if it is assigned to =grugru-*-grugru-alist=. You can assign rotated things with
   =grugru-define-on-major-mode=, =grugru-define-on-local-major-mode=, and =grugru-define-local=.
+  If you use ~grugru~, you should assign ~grugru~ to 1 stroke key like ~M-g~.
+  #+begin_src emacs-lisp :tangle yes
+    (global-set-key (kbd "M-g") #'grugru)   ; Or other key.
+  #+end_src
 
   If you want use default grugru, eval ~grugru-default-setup~. In the other words,
   add to your init.el:
