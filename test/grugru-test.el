@@ -2046,6 +2046,32 @@
       (delete-file file)))))
 
 
+(ert-deftest grugru--highlight-add ()
+  (let (grugru--global-grugru-alist)
+    (grugru-define-global 'word '("aaa" "bbb"))
+    (with-temp-buffer
+      (insert "aaa")
+      (grugru--highlight-add)
+      (beginning-of-line)
+      (should
+       (member
+        grugru--highlight-overlay
+        (overlays-at (point)))))))
+
+(ert-deftest grugru--highlight-remove ()
+  (let (grugru--global-grugru-alist)
+    (grugru-define-global 'word '("aaa" "bbb"))
+    (with-temp-buffer
+      (insert "aaa")
+      (grugru--highlight-add)
+      (grugru--highlight-remove)
+      (beginning-of-line)
+      (should-not
+       (member
+        grugru--highlight-overlay
+        (overlays-at (point)))))))
+
+
 (ert-deftest grugru-default-setup ()
   (let (grugru--global-grugru-alist
         grugru-major-modes-grugru-alist)
