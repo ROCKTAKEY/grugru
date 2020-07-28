@@ -334,6 +334,9 @@ The change made by this function is saved in file `grugru-edit-save-file'."
             (new (read (read-from-minibuffer (format "Edit '%s' to: " (nth 0 cons))
                                              (format "%S" (nth 2 (cdr cons)))))))
        (list (cdr cons) new))))
+  (unless grugru--loaded-local
+    (grugru--major-mode-load)
+    (setq grugru--loaded-local t))
   (let ((expression (grugru--make-expression less-tuple new)))
     (eval expression)
     (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
