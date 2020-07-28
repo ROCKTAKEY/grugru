@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.1
+;; Version: 1.8.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -313,7 +313,7 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
 ;;;###autoload
 (defun grugru-edit (less-tuple new)
   "Edit grugru which can be rotated at point.
-LESS-TUPLE indicates which grugru is to edit, which is (symbol getter strs-or-func).
+LESS-TUPLE, (symbol getter strs-or-func), indicates which grugru is to edit.
 NEW indicates to which grugru is changed, which is new strs-or-func.
 The change made by this function is saved in file `grugru-edit-save-file'."
   (interactive
