@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.7.1
+;; Version: 1.7.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -293,18 +293,18 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
             (local       . grugru--global-grugru-alist))
           'only-one)))
     (if tuple
-      (let* ((begin (car (nth 1 tuple)))
-             (end   (cdr (nth 1 tuple)))
-             (str (nth 2 tuple))
-             (now (- (point) begin)))
-        (delete-region begin end)
-        (insert str)
-        (goto-char
-         (if (and this-command (eq this-command last-command))
-             (+ begin (min grugru--point-cache (length str)))
-           (setq grugru--point-cache now)
-           (+ begin (min now (length str)))))
-        (run-hooks 'grugru-after-hook))
+        (let* ((begin (car (nth 1 tuple)))
+               (end   (cdr (nth 1 tuple)))
+               (str (nth 2 tuple))
+               (now (- (point) begin)))
+          (delete-region begin end)
+          (insert str)
+          (goto-char
+           (if (and this-command (eq this-command last-command))
+               (+ begin (min grugru--point-cache (length str)))
+             (setq grugru--point-cache now)
+             (+ begin (min now (length str)))))
+          (run-hooks 'grugru-after-hook))
       (run-hooks 'grugru-after-no-rotate-hook))))
 
 ;;;###autoload
