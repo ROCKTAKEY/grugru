@@ -308,29 +308,33 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
       (run-hooks 'grugru-after-no-rotate-hook))))
 
 ;;;###autoload
-(defun grugru-edit ()
+(defun grugru-edit (less-tuple new)
   "Edit grugru which can be rotated at point.
+LESS-TUPLE indicates which grugru is to edit, which is (symbol getter strs-or-func).
+NEW indicates to which grugru is changed, which is new strs-or-func.
 The change made by this function is saved in file `grugru-edit-save-file'."
-  (interactive)
-  (unless grugru--loaded-local
-    (grugru--major-mode-load)
-    (setq grugru--loaded-local t))
-  (let* ((lst
-          ;; lst has list of cons cell (prompt . less-tuple)
-          ;; less-tuple means (symbol getter strs-or-func).
-          (mapcar
-           (lambda (arg)
-             (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg) (nth 4 arg))
-                   (mapcar (lambda (n) (nth n arg)) '(0 3 4))))
-           (grugru--get-tuple-list
-            `((global . grugru--global-grugru-alist)
-              (,major-mode . grugru--buffer-local-major-mode-grugru-alist)))))
-         (cons (assoc (funcall grugru-edit-completing-function "Edit grugru: "
-                               lst nil t nil nil (car lst))
-                lst))
-         (new (read (read-from-minibuffer (format "Edit '%s' to: " (nth 0 cons))
-                                          (format "%S" (nth 2 (cdr cons))))))
-         (expression (grugru--make-expression (cdr cons) new)))
+  (interactive
+   (progn
+     (unless grugru--loaded-local
+       (grugru--major-mode-load)
+       (setq grugru--loaded-local t))
+     (let* ((lst
+             ;; lst has list of cons cell (prompt . less-tuple)
+             ;; less-tuple means (symbol getter strs-or-func).
+             (mapcar
+              (lambda (arg)
+                (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg) (nth 4 arg))
+                      (mapcar (lambda (n) (nth n arg)) '(0 3 4))))
+              (grugru--get-tuple-list
+               `((global . grugru--global-grugru-alist)
+                 (,major-mode . grugru--buffer-local-major-mode-grugru-alist)))))
+            (cons (assoc (funcall grugru-edit-completing-function "Edit grugru: "
+                                  lst nil t nil nil (car lst))
+                         lst))
+            (new (read (read-from-minibuffer (format "Edit '%s' to: " (nth 0 cons))
+                                             (format "%S" (nth 2 (cdr cons)))))))
+       (list (cdr cons) new))))
+  (let ((expression (grugru--make-expression less-tuple new)))
     (eval expression)
     (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
 
