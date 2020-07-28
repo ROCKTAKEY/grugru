@@ -158,6 +158,15 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
 (defvar grugru--point-cache nil
   "Cache for keep position on sequentially executed `grugru'.")
 
+(defvar grugru-before-hook nil
+  "Hooks run before rotation by `grugru'.")
+
+(defvar grugru-after-hook nil
+  "Hooks run after rotation by `grugru'.")
+
+(defvar grugru-after-no-rotate-hook nil
+  "Hooks run after `grugru' tries to rotate text but cannot rotate.")
+
 
 ;; inner
 (defun grugru--get-word ()
@@ -276,13 +285,14 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
   (unless grugru--loaded-local
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
+  (run-hooks 'grugru-before-hook)
   (let ((tuple
          (grugru--get-tuple-list
           `((global      . grugru--buffer-local-grugru-alist)
             (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
             (local       . grugru--global-grugru-alist))
           'only-one)))
-    (when tuple
+    (if tuple
       (let* ((begin (car (nth 1 tuple)))
              (end   (cdr (nth 1 tuple)))
              (str (nth 2 tuple))
@@ -293,7 +303,9 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
          (if (and this-command (eq this-command last-command))
              (+ begin (min grugru--point-cache (length str)))
            (setq grugru--point-cache now)
-           (+ begin (min now (length str)))))))))
+           (+ begin (min now (length str)))))
+        (run-hooks 'grugru-after-hook))
+      (run-hooks 'grugru-after-no-rotate-hook))))
 
 ;;;###autoload
 (defun grugru-edit ()
