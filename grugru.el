@@ -545,5 +545,60 @@ ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
       (advice-add #'find-function-search-for-symbol :around #'grugru--function-advice)
     (advice-remove #'find-function-search-for-symbol #'grugru--function-advice)))
 
+
+;;; Highlight
+(defcustom grugru-highlight-idle-delay 1
+  "Idle delay to add highlight added by command `grugru-highlight-mode'."
+  :type 'number
+  :group 'grugru)
+
+(defface grugru-highlight-face
+  '((t (:box (:line-width 1 :color "#ff0000" :style nil))))
+  "Face used `grugru-highlight-mode'."
+  :group 'grugru)
+
+(defvar-local grugru--highlight-overlay nil)
+
+(defvar grugru--highlight-timer-cache nil)
+
+(defun grugru--highlight-add ()
+  "Put highlight if grugru is available at point.
+This is used by command `grugru-highlight-mode'."
+  (unless grugru--loaded-local
+    (grugru--major-mode-load)
+    (setq grugru--loaded-local t))
+  (grugru--highlight-remove)
+  (let* ((tuple (grugru--get-tuple-list
+                 `((local . grugru--buffer-local-grugru-alist)
+                   (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+                   (global . grugru--global-grugru-alist))
+                 t))
+         (cons (nth 1 tuple)))
+    (when cons
+      (setq grugru--highlight-overlay (make-overlay (car cons) (cdr cons)))
+      (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-face))))
+
+(defun grugru--highlight-remove ()
+  "Remove highlight added by command `grugru-highlight-mode' on current buffer."
+  (when grugru--highlight-overlay
+    (delete-overlay grugru--highlight-overlay)
+    (setq grugru--highlight-overlay nil)))
+
+;;;###autoload
+(define-minor-mode grugru-highlight-mode
+  "Highlight if any rotatable text is at point."
+  :global t
+  (if grugru-highlight-mode
+      (setq grugru--highlight-timer-cache
+            (run-with-idle-timer
+             grugru-highlight-idle-delay
+             t #'grugru--highlight-add))
+    (cancel-timer grugru--highlight-timer-cache)
+    (mapc
+     (lambda (arg)
+       (with-current-buffer arg
+         (grugru--highlight-remove)))
+     (buffer-list))))
+
 (provide 'grugru)
 ;;; grugru.el ends here
