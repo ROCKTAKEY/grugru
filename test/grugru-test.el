@@ -220,7 +220,32 @@
       'word '("aaa" "bbb" "ccc")))))
 
 
+(ert-deftest grugru-edit ()
+  (let ((grugru-edit-save-file
+         (expand-file-name ".grugru" "."))
+        grugru--global-grugru-alist)
+    (unwind-protect
+        (progn
+          (grugru-define-global 'word '("aaa" "bbb"))
+          (grugru-edit '(global word ("aaa" "bbb")) '("aaa" "bbb" "ccc"))
+          (cursor-test/equal*
+           :init "bbb| hoge"
+           :exercise
+           (lambda ()
+             (call-interactively #'grugru))
+           :expect "ccc| hoge")
+          (should
+           (equal
+            (read
+             (with-temp-buffer
+               (let ((coding-system-for-write 'utf-8))
+                 (insert-file-contents grugru-edit-save-file)
+                 (encode-coding-string (buffer-string) 'utf-8))))
+            '(grugru-redefine-global 'word '("aaa" "bbb") '("aaa" "bbb" "ccc")))))
+      (when (file-exists-p grugru-edit-save-file)
+            (delete-file grugru-edit-save-file)))))
 
+
 ;; Global
 
 (ert-deftest grugru-define-global-2-symbol-end-same-length ()
