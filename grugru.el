@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.0
+;; Version: 1.8.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -306,6 +306,7 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
                (+ begin (min grugru--point-cache (length str)))
              (setq grugru--point-cache now)
              (+ begin (min now (length str)))))
+          (when grugru-highlight-mode (grugru--highlight-add))
           (run-hooks 'grugru-after-hook))
       (run-hooks 'grugru-after-no-rotate-hook))))
 
