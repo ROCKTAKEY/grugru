@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.2
+;; Version: 1.8.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -290,9 +290,9 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
   (run-hooks 'grugru-before-hook)
   (let ((tuple
          (grugru--get-tuple-list
-          `((global      . grugru--buffer-local-grugru-alist)
+          `((local       . grugru--global-grugru-alist)
             (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
-            (local       . grugru--global-grugru-alist))
+            (global      . grugru--buffer-local-grugru-alist))
           'only-one)))
     (if tuple
         (let* ((begin (car (nth 1 tuple)))
@@ -329,8 +329,8 @@ The change made by this function is saved in file `grugru-edit-save-file'."
                 (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg) (nth 4 arg))
                       (mapcar (lambda (n) (nth n arg)) '(0 3 4))))
               (grugru--get-tuple-list
-               `((global . grugru--global-grugru-alist)
-                 (,major-mode . grugru--buffer-local-major-mode-grugru-alist)))))
+               `((,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+                 (global . grugru--global-grugru-alist)))))
             (cons (assoc (funcall grugru-edit-completing-function "Edit grugru: "
                                   lst nil t nil nil (car lst))
                          lst))
