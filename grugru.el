@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.7.2
+;; Version: 1.7.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -239,8 +239,10 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
          (unless cached? (push (cons getter cons) cache))
 
          (setq begin (car cons) end (cdr cons))
-         if (setq next
-                  (grugru--get-next-string (buffer-substring begin end) strs-or-func))
+         if (and
+             cons
+             (setq next
+                  (grugru--get-next-string (buffer-substring begin end) strs-or-func)))
          ,(if only-one 'return 'collect)
          (list symbol (cons begin end) next getter strs-or-func)))
        when element
