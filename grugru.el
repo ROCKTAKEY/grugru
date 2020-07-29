@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.3
+;; Version: 1.8.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -300,7 +300,7 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
                (str (nth 2 tuple))
                (now (- (point) begin)))
           (delete-region begin end)
-          (insert str)
+          (save-excursion (goto-char begin) (insert str))
           (goto-char
            (if (and this-command (eq this-command last-command))
                (+ begin (min grugru--point-cache (length str)))
