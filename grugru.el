@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.4
+;; Version: 1.8.5
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -171,7 +171,7 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
 ;; inner
 (defun grugru--get-word ()
   "Get beginning/end of current point."
-  (if (or (eq (point) (point-max))
+  (if (or (eq (point) (point-at-eol))
           (string-match "[-\\[\\]_:;&+^~|#$!?%'()<>=*{}.,/\\\\\n\t]\\| "
                         (buffer-substring (point) (1+ (point)))))
       (save-excursion (cons (subword-left) (subword-right)))
