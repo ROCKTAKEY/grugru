@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.6
+;; Version: 1.8.7
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -274,15 +274,16 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
 
 (defun grugru--strings-or-function-p (object)
   "Return non-nil if OBJECT is acceptable as `strs-or-func'."
-  (or
-   (functionp object)
-   (and (listp object)
-        (eval
-         `(and
-           ,@(mapcar
-              (lambda (arg)
-                `(stringp ',arg))
-              object))))))
+  (when object
+    (or
+     (functionp object)
+     (and (listp object)
+          (eval
+           `(and
+             ,@(mapcar
+                (lambda (arg)
+                  `(stringp ',arg))
+                object)))))))
 
 
 ;; For user interaction

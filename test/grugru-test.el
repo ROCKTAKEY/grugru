@@ -223,7 +223,8 @@
   (should (grugru--strings-or-function-p '("aaa" "bbb")))
   (should (grugru--strings-or-function-p #'grugru--strings-or-function-p))
   (should-not (grugru--strings-or-function-p '(xyz)))
-  (should-not (grugru--strings-or-function-p "aaa")))
+  (should-not (grugru--strings-or-function-p "aaa"))
+  (should-not (grugru--strings-or-function-p nil)))
 
 
 (ert-deftest grugru-edit ()
