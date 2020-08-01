@@ -219,6 +219,12 @@
       'fundamental-mode
       'word '("aaa" "bbb" "ccc")))))
 
+(ert-deftest grugru--strings-or-function-p ()
+  (should (grugru--strings-or-function-p '("aaa" "bbb")))
+  (should (grugru--strings-or-function-p #'grugru--strings-or-function-p))
+  (should-not (grugru--strings-or-function-p '(xyz)))
+  (should-not (grugru--strings-or-function-p "aaa")))
+
 
 (ert-deftest grugru-edit ()
   (let ((grugru-edit-save-file

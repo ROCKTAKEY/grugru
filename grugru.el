@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.5
+;; Version: 1.8.6
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -272,6 +272,18 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
       `(grugru-remove-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
                                     ',(nth 2 less-tuple)))))
 
+(defun grugru--strings-or-function-p (object)
+  "Return non-nil if OBJECT is acceptable as `strs-or-func'."
+  (or
+   (functionp object)
+   (and (listp object)
+        (eval
+         `(and
+           ,@(mapcar
+              (lambda (arg)
+                `(stringp ',arg))
+              object))))))
+
 
 ;; For user interaction
 ;;;###autoload
@@ -504,10 +516,15 @@ Each element of CLAUSES can be:
         (lambda (arg)
           (cond
            ;; (MAJOR-MODE . ((GETTER . STRINGS-OR-FUNCTION)...))
-           ((or (and (listp (car arg))
-                     (string-match "-mode$" (symbol-name (caar arg))))
-                (and (symbolp (car arg))
-                     (string-match "-mode$" (symbol-name (car arg)))))
+           ((and
+             (listp arg)
+             (listp (cdr arg))
+             (listp (cadr arg))
+             (grugru--strings-or-function-p (cdadr arg))
+             ;; car is not (getter . strs-or-func)
+             (not
+              (and (listp (car arg))
+                   (grugru--strings-or-function-p (cdar arg)))))
             `(progn
                ,@(cl-loop
                   for (getter . strings-or-function) in (cdr arg)
