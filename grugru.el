@@ -280,12 +280,7 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
     (or
      (functionp object)
      (and (listp object)
-          (eval
-           `(and
-             ,@(mapcar
-                (lambda (arg)
-                  `(stringp ',arg))
-                object)))))))
+          (cl-every #'stringp object)))))
 
 
 ;; For user interaction
