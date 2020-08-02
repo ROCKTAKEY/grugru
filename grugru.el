@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.7
+;; Version: 1.8.8
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -521,7 +521,7 @@ Each element of CLAUSES can be:
              (listp arg)
              (listp (cdr arg))
              (listp (cadr arg))
-             (grugru--strings-or-function-p (cdadr arg))
+             (grugru--strings-or-function-p (cdr (cadr arg)))
              ;; car is not (getter . strs-or-func)
              (not
               (and (listp (car arg))
