@@ -284,6 +284,9 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
 
 
 ;; For user interaction
+
+(defvar grugru-highlight-mode)
+
 ;;;###autoload
 (defun grugru ()
   "Rotate thing on point, if it is in `grugru-*-grugru-alist'.
