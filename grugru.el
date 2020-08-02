@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.8.8
+;; Version: 1.9.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -91,7 +91,9 @@
 (defcustom grugru-getter-alist
   '((symbol . (bounds-of-thing-at-point 'symbol))
     (word   . grugru--get-word)
-    (char   . (cons (point) (1+ (point)))))
+    (char   . (cons (point) (1+ (point))))
+    (line   . (bounds-of-thing-at-point 'line))
+    (defun  . (bounds-of-thing-at-point 'defun)))
   "An alist of getter of current thing.
 Each element should be (SYMBOL . FUNC-OR-SEXP).  SYMBOL is used to access to
 SEXP by `grugru'.  FUNC-OR-SEXP should be sexp or function
