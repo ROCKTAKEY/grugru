@@ -21,3 +21,8 @@ jobs:
       - uses: conao3/setup-cask@master
       - run: cask install
       - run: make test-all
+        env:
+          UNDERCOVER_FORCE: true
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
