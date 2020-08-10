@@ -276,6 +276,54 @@
    :expect
    "1234|56789"))
 
+(ert-deftest grugru--select-generate-strings ()
+  (should
+   (equal
+    (grugru--select-generate-strings
+     "add"
+     (lambda (str)
+       (pcase str
+         ("add" "remove")
+         ("remove" "res")
+         ("res" "for")))
+     10)
+    '("add" "remove" "res" "for")))
+  (should
+   (equal
+    (grugru--select-generate-strings
+     "add"
+     (lambda (str)
+       (pcase str
+         ("add" "remove")
+         ("remove" "res")
+         ("res" "for")
+         ("for" "add")))
+     10)
+    '("add" "remove" "res" "for")))
+  (should
+   (equal
+    (grugru--select-generate-strings
+     "add"
+     (lambda (str)
+       (pcase str
+         ("add" "remove")
+         ("remove" "res")
+         ("res" "for")))
+     2)
+    '("add" "remove")))
+  (should
+   (equal
+    (grugru--select-generate-strings
+     "add"
+     (lambda (str)
+       (pcase str
+         ("add" "remove")
+         ("remove" "res")
+         ("res" "for")
+         ("for" "add")))
+     2)
+    '("add" "remove"))))
+
 
 (ert-deftest grugru-edit ()
   (let ((grugru-edit-save-file
