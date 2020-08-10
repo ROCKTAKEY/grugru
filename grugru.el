@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.9.3
+;; Version: 1.9.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -289,7 +289,7 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
 
 (defun grugru--load-and-cache-position (begin len bef)
   "Load and cache position.
- `grugru--point-cache' has position from BEGIN, on first running of `grugru'.
+`grugru--point-cache' has position from BEGIN, on first running of `grugru'.
 If First running of `grugru', save BEF to `grugru--point-cache'.
 
 Goto there if LEN is longer then `grugru--point-cache'.
