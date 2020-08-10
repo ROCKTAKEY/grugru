@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.9.2
+;; Version: 1.9.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -282,6 +282,23 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
      (and (listp object)
           (cl-every #'stringp object)))))
 
+(defun grugru--replace (begin end str)
+  "Replace string between points, BEGIN and END, to STR."
+  (delete-region begin end)
+  (save-excursion (goto-char begin) (insert str)))
+
+(defun grugru--load-and-cache-position (begin len bef)
+  "Load and cache position.
+ `grugru--point-cache' has position from BEGIN, on first running of `grugru'.
+If First running of `grugru', save BEF to `grugru--point-cache'.
+
+Goto there if LEN is longer then `grugru--point-cache'.
+Otherwise, goto the end of the thing (begin + len)."
+  (when (or (not this-command)
+            (not (eq this-command last-command)))
+    (setq grugru--point-cache bef))
+  (goto-char (+ begin (min grugru--point-cache len))))
+
 
 ;; For user interaction
 
@@ -311,14 +328,9 @@ However, directly assignment is risky, so Using `grugru-define-on-major-mode',
         (let* ((begin (car (nth 1 tuple)))
                (end   (cdr (nth 1 tuple)))
                (str (nth 2 tuple))
-               (now (- (point) begin)))
-          (delete-region begin end)
-          (save-excursion (goto-char begin) (insert str))
-          (goto-char
-           (if (and this-command (eq this-command last-command))
-               (+ begin (min grugru--point-cache (length str)))
-             (setq grugru--point-cache now)
-             (+ begin (min now (length str)))))
+               (bef (- (point) begin)))
+          (grugru--replace begin end str)
+          (grugru--load-and-cache-position begin (length str) bef)
           (when grugru-highlight-mode (grugru--highlight-add))
           (run-hooks 'grugru-after-hook))
       (run-hooks 'grugru-after-no-rotate-hook))))

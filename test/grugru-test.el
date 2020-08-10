@@ -226,6 +226,56 @@
   (should-not (grugru--strings-or-function-p "aaa"))
   (should-not (grugru--strings-or-function-p nil)))
 
+(ert-deftest gruru--replace ()
+  (cursor-test/equal*
+   :init "12345678|9"
+   :exercise
+   (lambda ()
+     (grugru--replace 2 4 "bcd"))
+   :expect "1bcd45678|9"))
+
+(ert-deftest grugru--load-and-cache-position ()
+  (cursor-test/equal*
+   :init "12345678|9"
+   :exercise
+   (lambda ()
+     (let ((this-command #'grugru)
+           (last-command #'grugru)
+           (grugru--point-cache 7))
+       (grugru--load-and-cache-position 2 2 4)))
+   :expect
+   "123|456789")
+  (cursor-test/equal*
+   :init "12345678|9"
+   :exercise
+   (lambda ()
+     (let ((this-command #'grugru)
+           (last-command #'grugru)
+           (grugru--point-cache 2))
+       (grugru--load-and-cache-position 2 5 4)))
+   :expect
+   "123|456789")
+  (cursor-test/equal*
+   :init "12345678|9"
+   :exercise
+   (lambda ()
+     (let ((this-command #'grugru)
+           (last-command #'self-insert-command)
+           (grugru--point-cache 7))
+       (grugru--load-and-cache-position 2 2 5)))
+   :expect
+   "123|456789")
+  (cursor-test/equal*
+   :init "12345678|9"
+   :exercise
+   (lambda ()
+     (let ((this-command #'grugru)
+           (last-command #'self-insert-command)
+           (grugru--point-cache 2))
+       (grugru--load-and-cache-position 2 5 3)))
+   :expect
+   "1234|56789"))
+
 
 (ert-deftest grugru-edit ()
   (let ((grugru-edit-save-file
