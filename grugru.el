@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.10.0
+;; Version: 1.10.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -447,7 +447,7 @@ by `grugru-completing-function'."
                 strs-or-func)))
             (str
              (funcall grugru-completing-function
-                      (format "Replace \"%s\" to: "
+                      (format "Replace \"%s\" with: "
                               (buffer-substring-no-properties begin end))
                       strings nil t nil nil (car strings))))
        (list begin end str))))
