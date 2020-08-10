@@ -14,11 +14,11 @@
   #+end_center
 * How to Use?
   You can interactively use the function =grugru=. This function rotate the thing at point
-  if it is assigned to =grugru-*-grugru-alist=. You can assign rotated things with
+  if assigned. You can assign rotated things with
   =grugru-define-on-major-mode=, =grugru-define-on-local-major-mode=, and =grugru-define-local=.
-  If you use ~grugru~, you should assign ~grugru~ to 1 stroke key like ~M-g~.
+  If you use ~grugru~, you should assign ~grugru~ to 1 stroke key like ~C-;~, or ~M-g~.
   #+begin_src emacs-lisp :tangle yes
-    (global-set-key (kbd "M-g") #'grugru)   ; Or other key.
+    (global-set-key (kbd "C-;") #'grugru)   ; Or other key.
   #+end_src
 
   If you want use default grugru, eval ~grugru-default-setup~. In the other words,
@@ -256,5 +256,31 @@
      (emacs-lisp-mode
       (word "add" "remove")))
   #+end_src
+* Custom Variables
+** ~grugru-getter-alist~
+   Alist of getter.
+
+   Each key (car) of element is a symbol, which is regarded as ~GETTER~.
+
+   Each value (cdr) of element is a function or sexp.
+   It should return things at point.
+
+** ~grugru-edit-save-file~
+   The name of file saved the information by ~grugru-edit~.
+   Default value is "~/.emacs.d/.grugru".
+
+** ~grugru-completing-function~
+   Completing function. Default value is ~completing-read~.
+   If you would like to use ivy or ido, write:
+   #+begin_src emacs-lisp :tangle yes
+     ;; For ivy:
+     (setq grugru-completing-function #'ivy-completing-read)
+     ;; For ido:
+     (setq grugru-completing-function #'ido-completing-read)
+   #+end_src
+
+** ~grugru-select-function-generate-number~
+   This variable have how many strings are generated from function
+   in ~STRINGS-OR-FUNCTION~, on ~grugru-select~.
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
