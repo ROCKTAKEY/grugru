@@ -121,7 +121,24 @@
     ;; with `describe-function', execute this:
     (grugru-find-function-integration-mode +1)
   #+END_SRC
-* Functions
+* Interactive Functions
+** ~grugru~
+   This function rotates text at point.
+   Rotated text is defined by ~grugru-define-*~ functions.
+** ~grugru-select~
+   This function replace text at point.
+   You can select grugru and string replaced to.
+
+   You can assign completing function to ~grugru-completing-function~.
+** ~grugru-edit~
+   This function edits grugru at point defined by default.
+
+   First, select grugru from grugrus available at point.
+   Then, edit the list in minibuffer.
+
+   The change is saved to file ~grugru-edit-save-file~.
+   You can assign completing function to ~grugru-completing-function~.
+* Functions Defining grugru
 ** ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
    Define global grugru with GETTER and STRINGS-OR-FUNCTION.
 
@@ -137,21 +154,107 @@
 
    Function: It is passed things gotten by GETTER, and should return string
    to replace the things to.
+
+   You can use like:
+   #+begin_src emacs-lisp :tangle yes
+     ;; Replace "yes" at point, to "no".
+     ;; Or replace "no" at point, to "yes".
+     (grugru-define-global 'symbol '("yes" "no"))
+   #+end_src
 ** ~(grugru-define-on-major-mode MAJOR GETTER STRINGS-OR-FUNCTION)~
    Define major-mode local grugru with GETTER and STRINGS-OR-FUNCTION.
 
    Same as ~grugru-define-global~, but grugru defined with this is applied
-   only in buffer on MAJOR major-mode.
-** ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
+   only in buffer on MAJOR major-mode. MAJOR can be list of major-modes.
+   #+begin_src emacs-lisp :tangle yes
+     ;; Replace "yes" at point, to "no", or replace "no" at point, to "yes",
+     ;; only in lisp-interaction-mode.
+     (grugru-define-on-major-mode lisp-interaction-mode 'symbol '("yes" "no"))
+   #+end_src
+** ~(grugru-define-local GETTER STRINGS-OR-FUNCTION)~
    Define buffer-local grugru with GETTER and STRINGS-OR-FUNCTION.
 
    Same as ~grugru-define-global~, but grugru defined with this is applied
    only in buffer where eval this expression.
+   #+begin_src emacs-lisp :tangle yes
+     ;; This should be used in hook or others.
+     ;; Because this definition is buffer-local.
+     (add-hook 'text-mode-hook
+                (lambda ()
+                 (grugru-define-local 'word '("is" "was"))
+                 (grugru-define-local 'word '("I" "my" "me" "mine"))))
+   #+end_src
+** ~(grugru-define-multiple &rest CLAUSES)~
+   This function define multiple grugru.
 
+   Each ~CLAUSE~ is:
+   - ~(GETTER . STRINGS-OR-FUNCTION)~: means ~(grugru-define-global GETTER  STRINGS-OR-FUNCTION)~.
+   - ~(MAJOR (GETTER . STRINGS-OR-FUNCTION)...)~: means ~(grugru-define-on-major-mode MAJOR GETTER  STRINGS-OR-FUNCTION)...~.
+   - List of above.
+
+   #+begin_src emacs-lisp :tangle yes
+    (grugru-define-multiple
+     (fundamental-mode
+      . ((word . ("aaa" "bbb" "ccc"))
+         ;; (symbol "xxx" "yyy" "zzz") is same as below.
+         ;; You can use both.
+         (symbol . ("xxx" "yyy" "zzz"))
+         (word . ("abc" "def" "ghi"))))
+      (word . ("aaaa" "bbbb" "cccc"))
+      (symbol . ("xxxx" "yyyyy" "zzzzz"))
+      (word . ("abcd" "defd" "ghid")))
+    ;; or
+    (grugru-define-multiple
+     (fundamental-mode
+       (word "aaa" "bbb" "ccc")
+       (symbol "xxx" "yyy" "zzz")
+       (word "abc" "def" "ghi"))
+      (word "aaaa" "bbbb" "cccc")
+      (symbol "xxxx" "yyyyy" "zzzzz")
+      (word "abcd" "defd" "ghid"))
+
+    ;; Above two examples are both expanded to:
+    (progn
+      (progn
+         (grugru-define-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc"))
+         (grugru-define-on-major-mode 'fundamental-mode 'symbol '("xxx" "yyy" "zzz"))
+         (grugru-define-on-major-mode 'fundamental-mode 'word '("abc" "def" "ghi")))
+       (grugru-define-global 'word '("aaaa" "bbbb" "cccc"))
+       (grugru-define-global 'symbol '("xxxx" "yyyyy" "zzzzz"))
+       (grugru-define-global 'word '("abcd" "defd" "ghid")))
+   #+end_src
 ** ~(grugru-define-function NAME () &optional DOCSTRING &rest BODY)~
    Define function which can roate only grugru defined by BODY.
    Each element of BODY is ~(GETTER . STRINGS-OR-FUNCTION)~,
    which meaning is same as ~grugru-define-*~ functions.
+   #+begin_src emacs-lisp :tangle yes
+     ;; The function `three-state' rotate like "water"=>"ice"=>"vapor"=>"water",
+     ;; or "solid"=>"liquid"=>"gas"=>"solid".
+     (grugru-define-function three-state ()
+      "Docstring. This is optional."
+      (symbol . ("water" "ice" "vapor"))
+      (symbol . ("solid" "liquid" "gas")))
 
+     ;; This sentense do NOT affect to the function `three-state'.
+     (grugru-define-global 'symbol '("yes" "no"))
+   #+end_src
+* leaf-keyword ~:grugru~
+  You can use ~:grugru~ keyword on [[https://github.com/conao3/leaf.el][leaf.el]], if you use [[https://github.com/conao3/leaf-keywords.el][leaf-keywords.el]].
+
+  By default, ~leaf--name~ is used as major-mode.
+  Or you can write major-mode obviously.
+  #+begin_src emacs-lisp :tangle yes
+    (leaf lisp-mode
+     :grugru
+     (symbol "nil" "t")
+     (emacs-lisp-mode
+      (word "add" "remove"))
+     ...)
+    ;; The section of `:grugru' means:
+    (grugru-define-multiple
+     (symbol "nil" "t")
+     (emacs-lisp-mode
+      (word "add" "remove")))
+  #+end_src
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
