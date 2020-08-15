@@ -2,6 +2,7 @@
 [[file:LICENSE][https://img.shields.io/github/license/ROCKTAKEY/grugru.svg?style=flat-square]]
 [[https://github.com/ROCKTAKEY/grugru/actions][https://img.shields.io/github/workflow/status/ROCKTAKEY/grugru/CI/master.svg?style=flat-square]]
 [[https://codecov.io/gh/ROCKTAKEY/grugru?branch=master][https://img.shields.io/codecov/c/github/ROCKTAKEY/grugru/master.svg?style=flat-square]]
+[[https://melpa.org/#/grugru][file:https://melpa.org/packages/grugru-badge.svg]]
 * Grugru: Rotate text at point.
   With this package, you can rotate things at point.
 
