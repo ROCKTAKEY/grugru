@@ -384,6 +384,18 @@ If PREFIX is negative number, rotate text previously - PREFIX times."
           (run-hooks 'grugru-after-no-rotate-hook))))))
 
 ;;;###autoload
+(defalias 'grugru-forward 'grugru
+  "`grugru' forwardly PREFIX times.
+If PREFIX is positive, same as calling `grugru-backward' with - PREFIX.")
+
+;;;###autoload
+(defun grugru-backward (&optional prefix)
+  "`grugru' backwardly PREFIX times.
+If PREFIX is negative, same as calling `grugru-forward' with - PREFIX."
+  (interactive "p")
+  (grugru (and prefix (- prefix))))
+
+;;;###autoload
 (defun grugru-edit (less-tuple new)
   "Edit grugru which can be rotated at point.
 LESS-TUPLE, (symbol getter strs-or-func), indicates which grugru is to edit.
