@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.11.1
+;; Version: 1.11.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -552,6 +552,9 @@ Otherwise, goto the end of the thing (begin + len)."
   (goto-char (+ begin (min grugru--point-cache len))))
 
 (defun grugru--select-generate-strings (init func num)
+  "Generate string list.
+INIT is initial term, and FUNC generates string recursively.
+NUM is a maximum length of the generated list."
   (let (all
         (now init))
     (cl-loop
