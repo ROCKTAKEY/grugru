@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.10.1
+;; Version: 1.11.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -220,6 +220,23 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
            (nth 1 list)))))
     (_ nil)))
 
+(defun grugru--get-previous-string (string strs-or-function)
+  "Get previous string of STRING with STRS-OR-FUNCTION.
+If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil."
+  (pcase strs-or-function
+    ((pred functionp)
+     (condition-case nil
+         (funcall strs-or-function string 'reverse)
+       ('wrong-number-of-arguments nil)))
+    ((pred listp)
+     (let* ((reversed-strs (reverse strs-or-function))
+            (list (member string reversed-strs)))
+       (when list
+         (if (eq (length list) 1)
+             (car reversed-strs)
+           (nth 1 list)))))
+    (_ nil)))
+
 (defun grugru--get-getter-function (getter)
   "Get getter function from GETTER."
   (setq getter (or (cdr (assq getter grugru-getter-alist)) getter))
@@ -227,12 +244,13 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
           getter
         `(lambda () ,getter))))
 
-(defun grugru--get-tuple-list (alist &optional only-one)
+(defun grugru--get-tuple-list (alist &optional only-one reverse)
   "Return tuple list constructed with ALIST.
 If ONLY-ONE is non-nil, returned value is 1 tuple, which matches first.
 Each element of ALIST is (SYMBOL . GRUGRU-ALIST).
 Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
-`grugru-define-global'."
+`grugru-define-global'.
+If optional argument REVERSE is non-nil, get string reversely."
   (eval
    `(let (cache cached? begin end cons next element)
       (cl-loop
@@ -252,7 +270,9 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
          if (and
              cons
              (setq next
-                  (grugru--get-next-string (buffer-substring begin end) strs-or-func)))
+                   (if ,reverse
+                       (grugru--get-previous-string (buffer-substring begin end) strs-or-func)
+                     (grugru--get-next-string (buffer-substring begin end) strs-or-func))))
          ,(if only-one 'return 'collect)
          (list symbol (cons begin end) next getter strs-or-func)))
        when element
@@ -325,35 +345,55 @@ Otherwise, goto the end of the thing (begin + len)."
 (defvar grugru-highlight-mode)
 
 ;;;###autoload
-(defun grugru ()
+(defun grugru (&optional prefix)
   "Rotate thing on point, if it is in `grugru-*-grugru-alist'.
 
 You can directly add element to `grugru--global-grugru-alist',
 `grugru--buffer-local-grugru-alist', and `grugru--major-modes-grugru-alist'.
 However, directly assignment is risky, so Using `grugru-define-on-major-mode',
 `grugru-define-on-local-major-mode', `grugru-define-local', or
-`grugru-define-global' is recommended."
-  (interactive)
+`grugru-define-global' is recommended.
+
+If PREFIX is 0, `grugru-select' is called.
+If PREFIX is positive number, rotate text PREFIX times.
+If PREFIX is negative number, rotate text previously - PREFIX times."
+  (interactive "p")
   (unless grugru--loaded-local
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
   (run-hooks 'grugru-before-hook)
-  (let ((tuple
-         (grugru--get-tuple-list
-          `((local       . grugru--global-grugru-alist)
-            (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
-            (global      . grugru--buffer-local-grugru-alist))
-          'only-one)))
-    (if tuple
-        (let* ((begin (car (nth 1 tuple)))
-               (end   (cdr (nth 1 tuple)))
-               (str (nth 2 tuple))
-               (bef (- (point) begin)))
-          (grugru--replace begin end str)
-          (grugru--load-and-cache-position begin (length str) bef)
-          (when grugru-highlight-mode (grugru--highlight-add))
-          (run-hooks 'grugru-after-hook))
-      (run-hooks 'grugru-after-no-rotate-hook))))
+  (setq prefix (or prefix 1))
+  (if (eq prefix 0)
+      (call-interactively #'grugru-select)
+    (dotimes (_ (abs prefix))
+      (let ((tuple
+             (grugru--get-tuple-list
+              `((local       . grugru--global-grugru-alist)
+                (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+                (global      . grugru--buffer-local-grugru-alist))
+              'only-one (< prefix 0))))
+        (if tuple
+            (let* ((begin (car (nth 1 tuple)))
+                   (end   (cdr (nth 1 tuple)))
+                   (str (nth 2 tuple))
+                   (bef (- (point) begin)))
+              (grugru--replace begin end str)
+              (grugru--load-and-cache-position begin (length str) bef)
+              (when grugru-highlight-mode (grugru--highlight-add))
+              (run-hooks 'grugru-after-hook))
+          (run-hooks 'grugru-after-no-rotate-hook))))))
+
+;;;###autoload
+(defalias 'grugru-forward 'grugru
+  "`grugru' forwardly PREFIX times.
+If PREFIX is positive, same as calling `grugru-backward' with - PREFIX.")
+
+;;;###autoload
+(defun grugru-backward (&optional prefix)
+  "`grugru' backwardly PREFIX times.
+If PREFIX is negative, same as calling `grugru-forward' with - PREFIX."
+  (interactive "p")
+  (grugru (and prefix (- prefix))))
 
 ;;;###autoload
 (defun grugru-edit (less-tuple new)

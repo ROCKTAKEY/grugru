@@ -1654,6 +1654,450 @@
      :expect "hoge |foo-aaa")))
 
 
+;; Forward
+(ert-deftest grugru-forward-grugru-define-global-2-symbol-end-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru-forward))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-forward-grugru-define-global-3-symbol-end-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru-forward))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru-forward))
+     :expect "baz| hoge")
+
+    (cursor-test/equal*
+     :init "baz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-forward-grugru-define-global-2-symbol-end-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru-forward))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-forward-grugru-define-global-3-symbol-end-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward))
+     :expect "baaa|z hoge")
+    (cursor-test/equal*
+     :init "baaaz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-forward-grugru-define-global-2-symbol-beginning-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-forward-grugru-define-global-3-symbol-beginning-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |baz")
+
+    (cursor-test/equal*
+     :init "hoge |baz"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar" "baz"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-forward-grugru-define-global-2-symbol-beginning-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |baar")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")
+
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar"))
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-forward-grugru-define-global-3-symbol-beginning-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |baar")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |baaaz")
+    (cursor-test/equal*
+     :init "hoge |baaaz"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")
+
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "baar" "baaaz"))
+       (call-interactively #'grugru-forward)
+       (call-interactively #'grugru-forward))
+     :expect "hoge |foo")))
+
+
+;; Backward
+(ert-deftest grugru-backward-grugru-define-global-2-symbol-end-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru-backward))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol '("foo" "bar"))
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-backward-grugru-define-global-3-symbol-end-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar" "baz")))
+       (call-interactively #'grugru-backward))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar" "baz")))
+       (call-interactively #'grugru-backward))
+     :expect "baz| hoge")
+
+    (cursor-test/equal*
+     :init "baz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar" "baz")))
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-backward-grugru-define-global-2-symbol-end-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar")))
+       (call-interactively #'grugru-backward))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar")))
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar")))
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-backward-grugru-define-global-3-symbol-end-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward))
+     :expect "baa|r hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward))
+     :expect "baaa|z hoge")
+    (cursor-test/equal*
+     :init "baaaz| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")
+
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")
+    (cursor-test/equal*
+     :init "baar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-backward-grugru-define-global-2-symbol-beginning-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-backward-grugru-define-global-3-symbol-beginning-same-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar" "baz")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar" "baz")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |baz")
+
+    (cursor-test/equal*
+     :init "hoge |baz"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "bar" "baz")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-backward-grugru-define-global-2-symbol-beginning-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |baar")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")
+
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar")))
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")))
+
+(ert-deftest grugru-backward-grugru-define-global-3-symbol-beginning-different-length ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |baar")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |baaaz")
+    (cursor-test/equal*
+     :init "hoge |baaaz"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")
+
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")
+    (cursor-test/equal*
+     :init "hoge |baar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 'symbol (reverse '("foo" "baar" "baaaz")))
+       (call-interactively #'grugru-backward)
+       (call-interactively #'grugru-backward))
+     :expect "hoge |foo")))
+
+
 ;; Remove
 (ert-deftest grugru-remove-on-major-mode ()
   (let (grugru--major-modes-grugru-alist)

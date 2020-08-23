@@ -126,6 +126,8 @@
 ** ~grugru~
    This function rotates text at point.
    Rotated text is defined by ~grugru-define-*~ functions.
+   If prefix argument is passed, repeatedly executed. Negative prefix arguments means
+   backward rotation. Also, ~grugru-backward~ can be used for backward rotation.
 ** ~grugru-select~
    This function replace text at point.
    You can select grugru and string replaced to.
