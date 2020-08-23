@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.11.0
+;; Version: 1.11.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -462,18 +462,18 @@ by `grugru-completing-function'."
                                     (car (nth 1 arg)) (cdr (nth 1 arg)))
                                    (nth 4 arg)
                                    grugru-select-function-generate-number)
-                              (nth 4 arg)))
+                                (nth 4 arg)))
                       (mapcar
                        (lambda (n)
                          (nth n arg))
                        '(0 1 3 4))))
               tuples))
             (cons
-               (if (eq (length tuples) 1)
-                   (car lst)
-                 (assoc (funcall grugru-completing-function " Choose grugru: "
-                                 lst nil t nil nil (car lst))
-                        lst)))
+             (if (eq (length tuples) 1)
+                 (car lst)
+               (assoc (funcall grugru-completing-function " Choose grugru: "
+                               lst nil t nil nil (car lst))
+                      lst)))
             (begin (car (nth 1 (cdr cons))))
             (end   (cdr (nth 1 (cdr cons))))
             (strs-or-func (nth 3 (cdr cons)))
