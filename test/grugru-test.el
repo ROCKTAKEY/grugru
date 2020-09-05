@@ -61,6 +61,28 @@
                 form))))))))
    (t form))))
 
+(ert-deftest grugru--get-non-alphabet ()
+  (with-temp-buffer
+    (insert "abc || efg")
+    (goto-char 5)
+    (should (equal (grugru--get-non-alphabet)
+                   (cons 5 6))))
+  (with-temp-buffer
+    (insert "abc || efg")
+    (goto-char 6)
+    (should (equal (grugru--get-non-alphabet)
+                   (cons 5 6))))
+  (with-temp-buffer
+    (insert "abc||efg")
+    (goto-char 4)
+    (should (equal (grugru--get-non-alphabet)
+                   (cons 4 5))))
+  (with-temp-buffer
+    (insert "abc||efg")
+    (goto-char 5)
+    (should (equal (grugru--get-non-alphabet)
+                   (cons 4 5)))))
+
 (ert-deftest grugru--get-next-string-strings ()
   (should
    (string=

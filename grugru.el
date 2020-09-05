@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.11.2
+;; Version: 1.12.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -317,7 +317,8 @@
     (word   . grugru--get-word)
     (char   . (cons (point) (1+ (point))))
     (line   . (bounds-of-thing-at-point 'line))
-    (defun  . (bounds-of-thing-at-point 'defun)))
+    (defun  . (bounds-of-thing-at-point 'defun))
+    (non-alphabet . grugru--get-non-alphabet))
   "An alist of getter of current thing.
 Each element should be (SYMBOL . FUNC-OR-SEXP).  SYMBOL is used to access to
 SEXP by `grugru'.  FUNC-OR-SEXP should be sexp or function
@@ -401,6 +402,15 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
 (defvar grugru-after-no-rotate-hook nil
   "Hooks run after `grugru' tries to rotate text but cannot rotate.")
 
+(defconst grugru--non-alphabet-regexp
+  (mapconcat
+   (lambda (arg)
+     (regexp-quote (string arg)))
+   "-^\\@;:,\\./=~|`+*<>?_!\"#$%&'"
+   "\\|")
+  "Regexp which match non alphabet character.
+Used in `grugru--get-non-alphabet'.")
+
 
 ;; inner
 (defun grugru--get-word ()
@@ -413,6 +423,29 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
       (let ((x (subword-right))
             (y (subword-left)))
         (cons y x)))))
+
+(defun grugru--get-non-alphabet ()
+  "Get non-alphabet sequence at point."
+  (let* ((point (point))
+         (beg
+          (progn
+            (while (and (<= (point-min) point)
+                        (string-match grugru--non-alphabet-regexp
+                                      (buffer-substring-no-properties
+                                       point (1+ point))))
+              (setq point (1- point)))
+            point))
+         (point (point))
+         (end
+          (progn
+            (while (and (<= point (point-max))
+                        (string-match grugru--non-alphabet-regexp
+                                      (buffer-substring-no-properties
+                                       point (1+ point))))
+              (setq point (1+ point)))
+            point)))
+    (unless (= beg end)
+      (cons (1+ beg) (1- end)))))
 
 (defun grugru--major-mode-load ()
   "Load grugru in current buffer."
