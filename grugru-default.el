@@ -49,7 +49,35 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (symbol "setq" "setq-default")
     (word   "global" "local"))
    ((tex-mode latex-mode yatex-mode)
-    (symbol "figure" "table"))))
+    (symbol "figure" "table"))
+   ((org-mode) ;; v9.3.6
+    (word ":t" ":nil")
+    (word "overview" "showall")
+    (word "fold" "unfold" "content" "showeverything")
+    (word "indent" "noindent")
+    (word "align" "noalign")
+    (word "inlineimages" "noinlineimages")
+    (word "latexpreview" "nolatexpreview")
+    (word "hideblocks" "showblocks") ;; nohideblocks
+    (word "odd" "oddeven")
+    (word "nologrefile" "logrefile" "lognoterefile")
+    (word "nologdone" "logdone" "lognotedone")
+    (word "nologreschedule" "logreschedule" "lognotereschedule")
+    (word "nologredeadline" "logredeadline" "lognoteredeadline")
+    (word "lognoteclock-out" "nolognoteclock-out")
+    (word "logdrawer" "nologdrawer")
+    (word "logstatesreversed" "nologstatesreversed")
+    (word "nologrepeat" "logrepeat" "lognoterepeat")
+    (word "hidestars" "showstars")
+    (word "fninline" "nofninline" "fnlocal")
+    (word "fnauto" "fnprompt" "fnconfirm" "fnplain") ;; TODO
+    (word "nofnadjust" "fnadjust")
+    (word "entitiespretty" "entitiesplain")
+    (word "title" "author" "email" "date")
+    (word "todo" "done")
+    ;; source block
+    ;; TODO
+    )))
 
 (provide 'grugru-default)
 ;;; grugru-default.el ends here
