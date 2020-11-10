@@ -50,7 +50,7 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (word   "global" "local"))
    ((tex-mode latex-mode yatex-mode)
     (symbol "figure" "table"))
-   ((org-mode) ;; v9.3.6
+   (org-mode ;; v9.3.6
     (word ":t" ":nil")
     (word "overview" "showall")
     (word "fold" "unfold" "content" "showeverything")
