@@ -74,7 +74,6 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (word "nofnadjust" "fnadjust")
     (word "entitiespretty" "entitiesplain")
     (word "title" "author" "email" "date")
-    (word "todo" "done")
     ;; source block
     ;; TODO
     )))
