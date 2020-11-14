@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.13.0
+;; Version: 1.13.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -30,7 +30,7 @@
 ;;   `grugru-define-on-major-mode', `grugru-define-on-local-major-mode', and `grugru-define-local'.
 ;;   If you use ~grugru~, you should assign ~grugru~ to 1 stroke key like ~C-;~, or ~M-g~.
 ;;
-;;     (global-set-key (kbd "C-;")
+;;     (global-set-key (kbd "C-;") #'grugru)   ; Or other key.
 ;;
 ;;
 ;;   If you want use default grugru, eval ~grugru-default-setup~.  In the other words,
@@ -289,9 +289,9 @@
 ;;    If you would like to use ivy or ido, write:
 ;;
 ;;      ;; For ivy:
-;;      (setq grugru-completing-function
+;;      (setq grugru-completing-function #'ivy-completing-read)
 ;;      ;; For ido:
-;;      (setq grugru-completing-function
+;;      (setq grugru-completing-function #'ido-completing-read)
 ;;
 ;;
 ;;;; ~grugru-select-function-generate-number~
