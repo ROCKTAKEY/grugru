@@ -21,7 +21,7 @@ jobs:
         with:
           version: ${{ matrix.emacs_version }}
       - uses: conao3/setup-cask@master
-      - run: cask install
+      - run: cask install --verbose --debug
       - run: make test-all
         env:
           UNDERCOVER_FORCE: true
