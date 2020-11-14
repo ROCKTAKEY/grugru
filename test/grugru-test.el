@@ -83,6 +83,38 @@
     (should (equal (grugru--get-non-alphabet)
                    (cons 4 5)))))
 
+(ert-deftest grugru--get-with-integer ()
+  (with-temp-buffer
+    (insert "123456789")
+    (goto-char 5)
+    (should (equal (grugru--get-with-integer 1)
+                   (cons 5 6))))
+  (with-temp-buffer
+    (insert "123456789")
+    (goto-char 5)
+    (should (equal (grugru--get-with-integer -1)
+                   (cons 4 5))))
+  (with-temp-buffer
+    (insert "123456789")
+    (goto-char 5)
+    (should (equal (grugru--get-with-integer 2)
+                   (cons 5 7))))
+  (with-temp-buffer
+    (insert "123456789")
+    (goto-char 5)
+    (should (equal (grugru--get-with-integer -2)
+                   (cons 3 5))))
+  (with-temp-buffer
+    (insert "123456789")
+    (goto-char 1)
+    (should (equal (grugru--get-with-integer -1)
+                   nil)))
+  (with-temp-buffer
+    (insert "123456789")
+    (goto-char 10)
+    (should (equal (grugru--get-with-integer 1)
+                   nil))))
+
 (ert-deftest grugru--get-next-string-strings ()
   (should
    (string=
@@ -816,6 +848,42 @@
        (call-interactively #'grugru)
        (call-interactively #'grugru))
      :expect "hoge |foo-aaa")))
+
+
+
+(ert-deftest grugru-define-global-2-integer-negative ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "foo| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global -3 '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "bar| hoge")
+    (cursor-test/equal*
+     :init "bar| hoge"
+     :exercise
+     (lambda ()
+       (grugru-define-global '-3 '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "foo| hoge")))
+
+(ert-deftest grugru-define-global-2-integer-positive ()
+  (let (grugru--global-grugru-alist)
+    (cursor-test/equal*
+     :init "hoge |foo"
+     :exercise
+     (lambda ()
+       (grugru-define-global 3 '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |bar")
+    (cursor-test/equal*
+     :init "hoge |bar"
+     :exercise
+     (lambda ()
+       (grugru-define-global 3 '("foo" "bar"))
+       (call-interactively #'grugru))
+     :expect "hoge |foo")))
 
 
 ;; Local
