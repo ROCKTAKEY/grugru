@@ -11,7 +11,8 @@ jobs:
         emacs_version:
           - '24.5'
           - '25.3'
-          - '26.1'
+          - '26.3'
+          - '27.1'
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1.1.1
