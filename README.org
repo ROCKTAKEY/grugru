@@ -146,6 +146,8 @@
    Define global grugru with GETTER and STRINGS-OR-FUNCTION.
 
    GETTER is a function, or a symbol which is alias defined in ~grugru-getter-alist~.
+   GETTER also can be positive or negative number, which means the number of characters
+   after point.
    By default, symbol, word, char is available.
    If it is a function, it should return cons cell ~(begin . end)~
    which express things at point, and with no argument.
