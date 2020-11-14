@@ -447,6 +447,15 @@ Used in `grugru--get-non-alphabet'.")
     (unless (= beg end)
       (cons (1+ beg) (1- end)))))
 
+(defun grugru--get-with-integer (number)
+  "Get string of buffer from point by NUMBER characters.
+NUMBER can be negative."
+  (let ((p (+ (point)))
+        (q (+ (point) number)))
+    (when (and (<= (point-min) p) (<= (point-min) q)
+               (<= p (point-max)) (<= q (point-max)))
+      (cons (min p q) (max p q)))))
+
 (defun grugru--major-mode-load ()
   "Load grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
@@ -520,7 +529,9 @@ If optional argument REVERSE is non-nil, get string reversely."
          do
          (setq cons
                (or (setq cached? (cdr (assoc getter cache)))
-                   (funcall (grugru--get-getter-function getter))))
+                   (if (integerp getter)
+                       (grugru--get-with-integer getter)
+                    (funcall (grugru--get-getter-function getter)))))
          (unless cached? (push (cons getter cons) cache))
 
          (setq begin (car cons) end (cdr cons))
