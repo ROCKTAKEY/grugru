@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.13.1
+;; Version: 1.13.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -774,7 +774,9 @@ by `grugru-completing-function'."
 
 MAJOR is `major-mode' or list of that where the grugru is set.
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char' is available as GETTER.
+`char', `line', `defun', `non-alphabet', integer or function are available as GETTER.
+Integer means getting string from point by NUMBER characters.
+If function, it should return cons cell (BEG END), which indicates buffer substring.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (if (listp major)
@@ -799,7 +801,9 @@ current thing as an argument and returns next text."
   "Add new grugru STRINGS-OR-FUNCTION with GETTER on buffer-local.
 
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char' is available as GETTER.
+`char', `line', `defun', `non-alphabet', integer or function are available as GETTER.
+Integer means getting string from point by NUMBER characters.
+If function, it should return cons cell (BEG END), which indicates buffer substring.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (unless (member (cons getter strings-or-function) grugru--buffer-local-grugru-alist)
@@ -810,7 +814,9 @@ current thing as an argument and returns next text."
   "Add new grugru STRINGS-OR-FUNCTION with GETTER globally.
 
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char' is available as GETTER.
+`char', `line', `defun', `non-alphabet', integer or function are available as GETTER.
+Integer means getting string from point by NUMBER characters.
+If function, it should return cons cell (BEG END), which indicates buffer substring.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text."
   (unless (member (cons getter strings-or-function) grugru--global-grugru-alist)
@@ -826,7 +832,9 @@ DOCSTRING is optional argument, which is passed to defun as DOCSTRING,
 and BODY is sequence of (GETTER . STRING-OR-FUNCTION).
 
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char' is available as GETTER.
+`char', `line', `defun', `non-alphabet', integer or function are available as GETTER.
+Integer means getting string from point by NUMBER characters.
+If function, it should return cons cell (BEG END), which indicates buffer substring.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text.
 
