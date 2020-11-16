@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.13.3
+;; Version: 1.14.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -199,6 +199,13 @@
 ;;                  (grugru-define-local 'word '("is" "was"))
 ;;                  (grugru-define-local 'word '("I" "my" "me" "mine"))))
 ;;
+;;
+;;    Also, you can run it interactively (though cannot set STRINGS-OR-FUNCTION to a function).
+;;    On interactive usage, by default, GETTER is the length of car of STRINGS-OR-FUNCTION,
+;;    and STRINGS-OR-FUNCTION is a list which has 2 elements, constructed interactively.
+;;    With prefix argument, you can select GETTER and length of STRINGS-OR-FUNCTION.
+;;    Default GETTER is set by ~grugru-local-interactively-default-getter~.
+;;
 ;;;; ~(grugru-define-multiple &rest CLAUSES)~
 ;;    This function define multiple grugru.
 ;;
@@ -297,6 +304,11 @@
 ;;;; ~grugru-select-function-generate-number~
 ;;    This variable have how many strings are generated from function
 ;;    in ~STRINGS-OR-FUNCTION~, on ~grugru-select~.
+;;
+;;;; ~grugru-local-interactively-default-getter~
+;;    Indicate default getter on interactive usage of ~grugru-define-local~.
+;;    0 means If 0, gets number from first string, otherwise it should be
+;;    symbol in ~grugru-getter-alist~ or a function which gets things at point.
 ;;; License
 ;;   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
 
@@ -349,6 +361,13 @@ You can also use `ivy-completing-read' or `ido-completing-read'."
   :group 'grugru
   :type 'number)
 
+(defcustom grugru-local-interactively-default-getter 0
+  "Default getter of `grugru-define-local' on interactive usage.
+If 0, gets number from first string."
+  :group 'grugru
+  :risky t
+  :type '(choice (const 0) function symbol))
+
 (defvar grugru--major-modes-grugru-alist '()
   "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
@@ -367,6 +386,8 @@ STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
 current thing as an argument and returns next text.
 
 You can add element to this with `grugru-define-global'.")
+
+(defvar grugru--local-interactively-history nil)
 
 (defvar-local grugru--buffer-local-grugru-alist '()
   "This variable keeps buffer-local list of (GETTER . STRINGS-OR-FUNCTION).
@@ -805,7 +826,50 @@ GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 Integer means getting string from point by NUMBER characters.
 If function, it should return cons cell (BEG END), which indicates buffer substring.
 STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text."
+current thing as an argument and returns next text.
+
+On interactive usage, by default, GETTER is the length of car of STRINGS-OR-FUNCTION,
+and STRINGS-OR-FUNCTION is a list which has 2 elements, constructed interactively.
+With prefix argument, you can select GETTER and length of STRINGS-OR-FUNCTION.
+Default GETTER is set by `grugru-local-interactively-default-getter'."
+  (interactive
+   (if current-prefix-arg
+       (let* ((getter
+               (read
+                (funcall grugru-completing-function
+                         "String getter(can be integer): "
+                         grugru-getter-alist)))
+              (num (read-number "How many string?: "))
+              (strings
+               (nreverse
+                (let (result)
+                  (dotimes (i num)
+                    (push
+                     (read-from-minibuffer
+                      (concat "Grugru string " (number-to-string (1+ i)) ": ")
+                      nil nil nil 'grugru--local-interactively-history)
+                     result))
+                  result))))
+         (list getter strings))
+     (let* ((string1 (read-string "First grugru string: " ))
+            (getter
+             (if (eq grugru-local-interactively-default-getter 0)
+                 (- (length string1))
+               grugru-local-interactively-default-getter))
+            (string2
+             (or (read-from-minibuffer
+                  (concat
+                   "Second grugru string"
+                   (when mark-active
+                     " (default: region)")
+                   ": ")
+                  (when mark-active
+                    (buffer-substring-no-properties
+                     (region-beginning) (region-end)))
+                  nil nil
+                  'grugru--local-interactively-history)
+                 (error "Void string"))))
+       (list getter (list string1 string2)))))
   (unless (member (cons getter strings-or-function) grugru--buffer-local-grugru-alist)
     (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
 

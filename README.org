@@ -189,6 +189,13 @@
                  (grugru-define-local 'word '("is" "was"))
                  (grugru-define-local 'word '("I" "my" "me" "mine"))))
    #+end_src
+
+   Also, you can run it interactively (though cannot set STRINGS-OR-FUNCTION to a function).
+   On interactive usage, by default, GETTER is the length of car of STRINGS-OR-FUNCTION,
+   and STRINGS-OR-FUNCTION is a list which has 2 elements, constructed interactively.
+   With prefix argument, you can select GETTER and length of STRINGS-OR-FUNCTION.
+   Default GETTER is set by ~grugru-local-interactively-default-getter~.
+
 ** ~(grugru-define-multiple &rest CLAUSES)~
    This function define multiple grugru.
 
@@ -287,5 +294,10 @@
 ** ~grugru-select-function-generate-number~
    This variable have how many strings are generated from function
    in ~STRINGS-OR-FUNCTION~, on ~grugru-select~.
+
+** ~grugru-local-interactively-default-getter~
+   Indicate default getter on interactive usage of ~grugru-define-local~.
+   0 means If 0, gets number from first string, otherwise it should be
+   symbol in ~grugru-getter-alist~ or a function which gets things at point.
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
