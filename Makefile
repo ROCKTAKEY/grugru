@@ -1,19 +1,19 @@
 EMACS ?= emacs
 TESTINGFILE := test/*.el
 TESTEDFILES := *.el
-CASK ?= cask
+KEG ?= keg
 WGET ?= wget
 GIT ?= git
 
 ert:
-	${CASK} exec ${EMACS} -batch -Q -L . -l $(wildcard ${TESTINGFILE}) \
+	${KEG} exec ${EMACS} -batch -Q -L . -l $(wildcard ${TESTINGFILE}) \
 	-f  ert-run-tests-batch-and-exit
 
 travis:
 	${MAKE} test-all
 
 compile:
-	${CASK} exec ${EMACS} -batch -Q -L . -eval "(batch-byte-compile)" \
+	${KEG} exec ${EMACS} -batch -Q -L . -eval "(batch-byte-compile)" \
 	${TESTEDFILES}
 
 clean:
@@ -26,5 +26,7 @@ test-all:
 	${MAKE} ert
 	${MAKE} clean
 
+lint:
+	${KEG} lint
 
-.PHONY: ert travis compile clean  test-all
+.PHONY: ert travis compile clean  test-all lint
