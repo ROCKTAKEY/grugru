@@ -1,0 +1,6 @@
+(source gnu melpa)
+
+(package (grugru
+          (recipe . (:fetcher github :repo "ROCKTAKEY/grugru"))))
+
+(dev-dependency undercover cursor-test)
