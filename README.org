@@ -299,5 +299,10 @@
    Indicate default getter on interactive usage of ~grugru-define-local~.
    0 means If 0, gets number from first string, otherwise it should be
    symbol in ~grugru-getter-alist~ or a function which gets things at point.
+** ~grugru-point-after-rotate~
+   Where the point is after rotation by ~grugru~.
+   - ~as-is~ means keeping first position.
+   - ~beginning~ means beginning of rotated things.
+   - ~end~ means end of rotated things.
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].

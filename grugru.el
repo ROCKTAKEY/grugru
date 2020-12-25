@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.14.0
+;; Version: 1.15.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -368,6 +368,17 @@ If 0, gets number from first string."
   :risky t
   :type '(choice (const 0) function symbol))
 
+(defcustom grugru-point-after-rotate 'as-is
+  "Where the point is after rotation by `grugru'.
+`as-is' means keeping first position.
+`beginning' means beginning of rotated things.
+`end' means end of rotated things."
+  :group 'grugru
+  :type '(choice
+          (const as-is)
+          (const beginning)
+          (const end)))
+
 (defvar grugru--major-modes-grugru-alist '()
   "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
@@ -671,7 +682,10 @@ If PREFIX is negative number, rotate text previously - PREFIX times."
                    (str (nth 2 tuple))
                    (bef (- (point) begin)))
               (grugru--replace begin end str)
-              (grugru--load-and-cache-position begin (length str) bef)
+              (pcase grugru-point-after-rotate
+                (`as-is (grugru--load-and-cache-position begin (length str) bef))
+                (`beginning (goto-char begin))
+                (`end (goto-char (+ begin (length str)))))
               (when grugru-highlight-mode (grugru--highlight-add))
               (run-hooks 'grugru-after-hook))
           (run-hooks 'grugru-after-no-rotate-hook))))))
