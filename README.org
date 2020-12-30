@@ -264,7 +264,8 @@
      ...)
     ;; The section of `:grugru' means:
     (grugru-define-multiple
-     (symbol "nil" "t")
+     (lisp-mode
+      (symbol "nil" "t"))
      (emacs-lisp-mode
       (word "add" "remove")))
   #+end_src
