@@ -347,7 +347,8 @@ which return cons cell whose car/cdr is beginning/end point of current thing."
   :type 'string)
 
 (define-obsolete-variable-alias 'grugru-edit-completing-function
-  'grugru-completing-function)
+  'grugru-completing-function
+  "1.10.0")
 
 (defcustom grugru-completing-function #'completing-read
   "Completing read function used `grugru-edit'.
