@@ -1,6 +1,6 @@
 ;;; grugru-default.el --- Default setting of grugru  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2020  ROCKTAKEY
+;; Copyright (C) 2020-2021  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: tools
@@ -58,13 +58,24 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (symbol "static_cast" "dynamic_cast" "reinterpret_cast" "const_cast"))
    (emacs-lisp-mode
     (symbol "nil" "t")
+    (symbol "eq" "equal")
     (symbol "let" "let*")
     (symbol "defun" "cl-defun")
     (symbol "defvar" "defcustom" "defconst")
-    (word   "add" "remove")
+    (symbol "add-hook" "remove-hook")
     (symbol "setq" "setq-default")
     (word   "global" "local")
-    (symbol "if" "when" "unless"))
+    (symbol "if" "when" "unless")
+    (symbol "assoc" "assq" "alist-get")
+    (symbol "assoc-delete-all" "assq-delete-all")
+    (symbol "rassoc" "rassq")
+    (symbol "member" "memq")
+    (symbol "delete" "delq")
+    (symbol "remove" "remq")
+    (symbol "plist-get" "plist-put")
+    (symbol "lax-plist-get" "lax-plist-put")
+    (symbol "car" "cdr")
+    (symbol "car-safe" "cdr-safe"))
    ((tex-mode latex-mode yatex-mode)
     (symbol "figure" "table"))
    (org-mode ;; v9.3.6
