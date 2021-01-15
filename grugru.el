@@ -381,6 +381,12 @@ If 0, gets number from first string."
           (const beginning)
           (const end)))
 
+(defcustom grugru-indent-after-rotate t
+  "Indent rotated text after `grugru' or not.
+Indent happens only if text after rotation has a newline."
+  :group 'grugru
+  :type 'boolean)
+
 (defvar grugru--major-modes-grugru-alist '()
   "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
@@ -688,6 +694,8 @@ If PREFIX is negative number, rotate text previously - PREFIX times."
                 (`as-is (grugru--load-and-cache-position begin (length str) bef))
                 (`beginning (goto-char begin))
                 (`end (goto-char (+ begin (length str)))))
+              (when (and grugru-indent-after-rotate (string-match-p "\n" str))
+                (indent-region begin (+ begin (length str))))
               (when grugru-highlight-mode (grugru--highlight-add))
               (run-hooks 'grugru-after-hook))
           (run-hooks 'grugru-after-no-rotate-hook))))))
