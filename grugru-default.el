@@ -87,6 +87,7 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (symbol "lax-plist-get" "lax-plist-put")
     (symbol "car" "cdr")
     (symbol "car-safe" "cdr-safe")
+    (symbol "mapc" "mapcar")
     (list grugru-default@emacs-lisp+nth/aref))
    ((tex-mode latex-mode yatex-mode)
     (symbol "figure" "table"))
