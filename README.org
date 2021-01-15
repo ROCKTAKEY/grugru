@@ -305,5 +305,22 @@
    - ~as-is~ means keeping first position.
    - ~beginning~ means beginning of rotated things.
    - ~end~ means end of rotated things.
+** ~grugru-indent-after-rotate~
+   Indent rotated text after ~grugru~ or not.
+   Indent happens only if text after rotation has a newline.
+   #+begin_src emacs-lisp :tangle yes
+     (grugru-define-local 'list '("(abc def)" "(ghi\njkl)"))
+     ;; If `grugru-indent-after-rotate' is nil,
+     (abc def)
+     ;; is rotated to:
+     (ghi
+     jkl)
+
+     ;; If `grugru-indent-after-rotate' is t,
+     (abc def)
+     ;; is rotated to:
+     (ghi
+      jkl)
+   #+end_src
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
