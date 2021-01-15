@@ -1,11 +1,11 @@
 ;;; grugru.el --- Rotate text at point             -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019-2020  ROCKTAKEY
+;; Copyright (C) 2019-2021  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.18.2
+;; Version: 1.18.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
