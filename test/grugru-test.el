@@ -2809,11 +2809,5 @@
         grugru--highlight-overlay
         (overlays-at (point)))))))
 
-
-(ert-deftest grugru-default-setup ()
-  (let (grugru--global-grugru-alist
-        grugru-major-modes-grugru-alist)
-   (grugru-default-setup)))
-
 (provide 'grugru-test)
 ;;; grugru-test.el ends here
