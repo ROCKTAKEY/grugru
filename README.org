@@ -250,6 +250,37 @@
      ;; This sentense do NOT affect to the function `three-state'.
      (grugru-define-global 'symbol '("yes" "no"))
    #+end_src
+* Utilities to define grugru
+** ~(grugru-utils-lisp-exchange-args LIST-STRING PERMUTATION)~
+   Permute argument of sexp read from ~LIST-STRING~ according to ~PERMUTATION~.
+
+   For example, ~(grugru-utils-lisp-exchange-args \"(nth 1 '(x y z))\" '(2 1))~
+   returns ~(nth '(x y z) 1)~.  Newlines and whitespaces are also kept.
+
+   This function is defined for user to define the function for grugru which rotate
+   not only fuction's name but also arguments' order.
+*** Usage
+    #+begin_src emacs-lisp :tangle yes
+      (defun grugru-rotate-nth-aref (str)
+        (cond
+         ((string-match "^(\\(\\_<nth\\_>\\)" str) ;match to "(nth"
+          (grugru-utils-lisp-exchange-args
+           (replace-match "aref" nil nil str 1) ;replace function's name to "aref"
+           '(2 1)))                             ;exchange arguments' order
+         ((string-match "^(\\(\\_<aref\\_>\\)" str) ;match to "(aref"
+          (grugru-utils-lisp-exchange-args
+           (replace-match "nth" nil nil str 1) ;replace function's name to "nth"
+           '(2 1)))))                          ;exchange arguments' order
+      (grugru-define-on-major-mode
+       'emacs-lisp-mode
+       'list
+       #'grugru-rotate-nth-aref)
+
+      ;; Then,
+      (nth 3 '(foo bar))
+      ;; is rotated to:
+      (aref '(foo bar) 3)
+    #+end_src
 * leaf-keyword ~:grugru~
   You can use ~:grugru~ keyword on [[https://github.com/conao3/leaf.el][leaf.el]], if you use [[https://github.com/conao3/leaf-keywords.el][leaf-keywords.el]].
 
