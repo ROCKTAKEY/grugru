@@ -1,12 +1,12 @@
 EMACS ?= emacs
-TESTINGFILE := test/*.el
+TESTINGFILES := test/*.el
 TESTEDFILES := *.el
 KEG ?= keg
 WGET ?= wget
 GIT ?= git
 
 ert:
-	${KEG} exec ${EMACS} -batch -Q -L . -l $(wildcard ${TESTINGFILE}) \
+	${KEG} exec ${EMACS} --batch -Q -L . $(addprefix --load=, $(wildcard ${TESTINGFILES})) \
 	-f  ert-run-tests-batch-and-exit
 
 travis:
