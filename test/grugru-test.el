@@ -1744,7 +1744,29 @@
      :expect "hoge |foo-aaa")))
 
 
+(ert-deftest grugru-indent-after-rotate ()
+  (let (grugru--buffer-local-grugru-alist
+        (grugru-indent-after-rotate t))
+    (should
+     (cursor-test/equal*
+      :init "hoge |foo"
+      :exercise
+      (lambda ()
+        (grugru-define-local 'symbol '("foo" "(baar\nfuga)"))
+        (call-interactively #'grugru))
+      :expect "hoge |(baar\n fuga)")))
+  (let (grugru--buffer-local-grugru-alist
+        (grugru-indent-after-rotate nil))
+    (should
+     (cursor-test/equal*
+      :init "hoge |foo"
+      :exercise
+      (lambda ()
+        (grugru-define-local 'symbol '("foo" "(baar\nfuga)"))
+        (call-interactively #'grugru))
+      :expect "hoge |(baar\nfuga)"))))
 
+
 (ert-deftest grugru-define-global-point-after-rotate-as-is ()
   (let (grugru--global-grugru-alist
         (grugru-point-after-rotate 'as-is))
