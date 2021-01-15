@@ -28,6 +28,17 @@
 
 (require 'grugru)
 
+(defun grugru-default@emacs-lisp+nth/aref (str)
+  (cond
+   ((string-match "^(\\(\\_<nth\\_>\\)" str)
+    (grugru-utils-lisp-exchange-args
+     (replace-match "aref" nil nil str 1)
+     '(2 1)))
+   ((string-match "^(\\(\\_<aref\\_>\\)" str)
+    (grugru-utils-lisp-exchange-args
+     (replace-match "nth" nil nil str 1)
+     '(2 1)))))
+
 ;;;###autoload
 (defun grugru-default-setup ()
   "Setup default value.
@@ -75,7 +86,8 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (symbol "plist-get" "plist-put")
     (symbol "lax-plist-get" "lax-plist-put")
     (symbol "car" "cdr")
-    (symbol "car-safe" "cdr-safe"))
+    (symbol "car-safe" "cdr-safe")
+    (list grugru-default@emacs-lisp+nth/aref))
    ((tex-mode latex-mode yatex-mode)
     (symbol "figure" "table"))
    (org-mode ;; v9.3.6
