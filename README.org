@@ -281,25 +281,6 @@
       ;; is rotated to:
       (aref '(foo bar) 3)
     #+end_src
-* leaf-keyword ~:grugru~
-  You can use ~:grugru~ keyword on [[https://github.com/conao3/leaf.el][leaf.el]], if you use [[https://github.com/conao3/leaf-keywords.el][leaf-keywords.el]].
-
-  By default, ~leaf--name~ is used as major-mode.
-  Or you can write major-mode obviously.
-  #+begin_src emacs-lisp :tangle yes
-    (leaf lisp-mode
-     :grugru
-     (symbol "nil" "t")
-     (emacs-lisp-mode
-      (word "add" "remove"))
-     ...)
-    ;; The section of `:grugru' means:
-    (grugru-define-multiple
-     (lisp-mode
-      (symbol "nil" "t"))
-     (emacs-lisp-mode
-      (word "add" "remove")))
-  #+end_src
 * Custom Variables
 ** ~grugru-getter-alist~
    Alist of getter.
@@ -353,5 +334,24 @@
      (ghi
       jkl)
    #+end_src
+* leaf-keyword ~:grugru~
+  You can use ~:grugru~ keyword on [[https://github.com/conao3/leaf.el][leaf.el]], if you use [[https://github.com/conao3/leaf-keywords.el][leaf-keywords.el]].
+
+  By default, ~leaf--name~ is used as major-mode.
+  Or you can write major-mode obviously.
+  #+begin_src emacs-lisp :tangle yes
+    (leaf lisp-mode
+     :grugru
+     (symbol "nil" "t")
+     (emacs-lisp-mode
+      (word "add" "remove"))
+     ...)
+    ;; The section of `:grugru' means:
+    (grugru-define-multiple
+     (lisp-mode
+      (symbol "nil" "t"))
+     (emacs-lisp-mode
+      (word "add" "remove")))
+  #+end_src
 * License
   This package is licensed by GPLv3. See [[file:LICENSE][LICENSE]].
