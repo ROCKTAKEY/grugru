@@ -1,6 +1,6 @@
 ;;; grugru-test.el --- test for grugru
 
-;; Copyright (C) 2019-2020  ROCKTAKEY
+;; Copyright (C) 2019-2021  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords:
