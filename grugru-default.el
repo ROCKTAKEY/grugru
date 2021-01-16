@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'grugru)
+(require 'grugru-utils)
 
 (defun grugru-default@emacs-lisp+nth/aref (str)
   (cond

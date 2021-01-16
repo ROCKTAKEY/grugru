@@ -25,6 +25,7 @@
 
 (require 'cl-lib)
 
+;;;###autoload
 (defun grugru-utils-lisp-exchange-args (list-string permutation)
   "Permute argument of sexp read from LIST-STRING according to PERMUTATION.
 
