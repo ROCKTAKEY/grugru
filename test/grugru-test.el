@@ -96,6 +96,68 @@
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "||")))
 
+(ert-deftest grugru--get-tex-command ()
+  (with-temp-buffer
+    (insert "Take $\\alpha$.")
+    (goto-char 7)
+    (should (equal (grugru--get-tex-command)
+                   (cons 7 13)))
+    (should
+     (string= (let ((bounds (grugru--get-tex-command)))
+                (buffer-substring-no-properties (car bounds) (cdr bounds)))
+              "\\alpha")))
+  (with-temp-buffer
+    (insert "Take $\\alpha$.")
+    (goto-char 8)
+    (should (equal (grugru--get-tex-command)
+                   (cons 7 13)))
+    (should
+     (string= (let ((bounds (grugru--get-tex-command)))
+                (buffer-substring-no-properties (car bounds) (cdr bounds)))
+              "\\alpha")))
+  (with-temp-buffer
+    (insert "Take $\\alpha$.")
+    (goto-char 13)
+    (should (equal (grugru--get-tex-command)
+                   (cons 7 13)))
+    (should
+     (string= (let ((bounds (grugru--get-tex-command)))
+                (buffer-substring-no-properties (car bounds) (cdr bounds)))
+              "\\alpha")))
+  (with-temp-buffer
+    (insert "Take $\\alpha$.")
+    (goto-char 14)
+    (should (equal (grugru--get-tex-command) nil)))
+
+  (with-temp-buffer
+    (insert "Hello \\textit{world}.")
+    (goto-char 7)
+    (should (equal (grugru--get-tex-command)
+                   (cons 7 14)))
+    (string= (let ((bounds (grugru--get-tex-command)))
+               (buffer-substring-no-properties (car bounds) (cdr bounds)))
+             "\\textit"))
+  (with-temp-buffer
+    (insert "Hello \\textit{world}.")
+    (goto-char 8)
+    (should (equal (grugru--get-tex-command)
+                   (cons 7 14)))
+    (string= (let ((bounds (grugru--get-tex-command)))
+               (buffer-substring-no-properties (car bounds) (cdr bounds)))
+             "\\textit"))
+  (with-temp-buffer
+    (insert "Hello \\textit{world}.")
+    (goto-char 14)
+    (should (equal (grugru--get-tex-command)
+                   (cons 7 14)))
+    (string= (let ((bounds (grugru--get-tex-command)))
+               (buffer-substring-no-properties (car bounds) (cdr bounds)))
+             "\\textit"))
+  (with-temp-buffer
+    (insert "Hello \\textit{world}.")
+    (goto-char 15)
+    (should (equal (grugru--get-tex-command) nil))))
+
 (ert-deftest grugru--get-with-integer ()
   (with-temp-buffer
     (insert "123456789")
