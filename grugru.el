@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.18.4
+;; Version: 1.18.5
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -465,28 +465,30 @@ Used in `grugru--get-non-alphabet'.")
             (y (subword-left)))
         (cons y x)))))
 
+(defun grugru--get-from-regexp (regexp)
+  "Get things at point matched to REGEXP repeatedly, at least once."
+  (let ((beg
+         (save-excursion
+           (let ((bef (point)))
+             (while (and (<= (point-min) (point))
+                         (re-search-backward regexp nil t)
+                         (eq (match-end 0) bef))
+               (setq bef (point)))
+             bef)))
+        (end
+         (save-excursion
+           (let ((bef (point)))
+             (while (and (<= (point) (point-max))
+                         (re-search-forward regexp nil t)
+                         (eq (match-beginning 0) bef))
+               (setq bef (point)))
+             bef))))
+    (unless (= beg end)
+      (cons beg (1- end)))))
+
 (defun grugru--get-non-alphabet ()
   "Get non-alphabet sequence at point."
-  (let* ((point (point))
-         (beg
-          (progn
-            (while (and (<= (point-min) point)
-                        (string-match grugru--non-alphabet-regexp
-                                      (buffer-substring-no-properties
-                                       point (1+ point))))
-              (setq point (1- point)))
-            point))
-         (point (point))
-         (end
-          (progn
-            (while (and (<= point (point-max))
-                        (string-match grugru--non-alphabet-regexp
-                                      (buffer-substring-no-properties
-                                       point (1+ point))))
-              (setq point (1+ point)))
-            point)))
-    (unless (= beg end)
-      (cons (1+ beg) (1- end)))))
+  (grugru--get-from-regexp grugru--non-alphabet-regexp))
 
 (defun grugru--get-with-integer (number)
   "Get string of buffer from point by NUMBER characters.
