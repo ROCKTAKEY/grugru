@@ -29,7 +29,7 @@
 (require 'grugru)
 (require 'grugru-utils)
 
-(defun grugru-default@emacs-lisp+nth/aref (str)
+(defun grugru-default@emacs-lisp+nth!aref (str)
   (cond
    ((string-match "^(\\(\\_<nth\\_>\\)" str)
     (grugru-utils-lisp-exchange-args
@@ -89,7 +89,7 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (symbol "car" "cdr")
     (symbol "car-safe" "cdr-safe")
     (symbol "mapc" "mapcar")
-    (list grugru-default@emacs-lisp+nth/aref))
+    (list grugru-default@emacs-lisp+nth!aref))
    ((tex-mode latex-mode yatex-mode)
     (symbol "figure" "table"))
    (org-mode ;; v9.3.6

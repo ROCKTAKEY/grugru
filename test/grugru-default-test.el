@@ -39,11 +39,11 @@
 (ert-deftest grugru-default@emacs-lisp ()
   (should
    (string=
-    (grugru-default@emacs-lisp+nth/aref "(nth 1 '(foo bar))")
+    (grugru-default@emacs-lisp+nth!aref "(nth 1 '(foo bar))")
     "(aref '(foo bar) 1)"))
   (should
    (string=
-    (grugru-default@emacs-lisp+nth/aref "(aref '(foo bar) 1)")
+    (grugru-default@emacs-lisp+nth!aref "(aref '(foo bar) 1)")
     "(nth 1 '(foo bar))")))
 
 (ert-deftest grugru-default-setup ()
