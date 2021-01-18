@@ -332,7 +332,8 @@
     (char   . (cons (point) (1+ (point))))
     (list   . (bounds-of-thing-at-point 'list))
     (line   . (bounds-of-thing-at-point 'line))
-    (non-alphabet . grugru--get-non-alphabet))
+    (non-alphabet . grugru--get-non-alphabet)
+    (tex-command . grugru--get-tex-command))
   "An alist of getter of current thing.
 Each element should be (SYMBOL . FUNC-OR-SEXP).  SYMBOL is used to access to
 SEXP by `grugru'.  FUNC-OR-SEXP should be sexp or function
@@ -489,6 +490,19 @@ Used in `grugru--get-non-alphabet'.")
 (defun grugru--get-non-alphabet ()
   "Get non-alphabet sequence at point."
   (grugru--get-from-regexp grugru--non-alphabet-regexp))
+
+(defun grugru--get-tex-command ()
+  "Get TeX command sequence at point.
+For example, \"\\alpha\", \"\\mathrm\" is valid sequence."
+  (save-excursion
+    (when (string= (buffer-substring-no-properties (point) (1+ (point))) "\\")
+      (goto-char (1+ (point))))
+   (let ((cons (grugru--get-from-regexp "[a-zA-Z]")))
+    (when (and cons
+               (string=
+                (buffer-substring-no-properties (1- (car cons)) (car cons))
+                "\\"))
+      (cons (1- (car cons)) (cdr cons))))))
 
 (defun grugru--get-with-integer (number)
   "Get string of buffer from point by NUMBER characters.
