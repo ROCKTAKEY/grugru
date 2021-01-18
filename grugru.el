@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.18.5
+;; Version: 1.18.6
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -484,7 +484,7 @@ Used in `grugru--get-non-alphabet'.")
                (setq bef (point)))
              bef))))
     (unless (= beg end)
-      (cons beg (1- end)))))
+      (cons beg end))))
 
 (defun grugru--get-non-alphabet ()
   "Get non-alphabet sequence at point."
