@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.19.0
+;; Version: 1.19.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -495,14 +495,17 @@ Used in `grugru--get-non-alphabet'.")
   "Get TeX command sequence at point.
 For example, \"\\alpha\", \"\\mathrm\" is valid sequence."
   (save-excursion
-    (when (string= (buffer-substring-no-properties (point) (1+ (point))) "\\")
+    (when (and
+           (not (eq (point) (point-max)))
+           (string= (buffer-substring-no-properties (point) (1+ (point))) "\\"))
       (goto-char (1+ (point))))
-   (let ((cons (grugru--get-from-regexp "[a-zA-Z]")))
-    (when (and cons
-               (string=
-                (buffer-substring-no-properties (1- (car cons)) (car cons))
-                "\\"))
-      (cons (1- (car cons)) (cdr cons))))))
+    (let ((cons (grugru--get-from-regexp "[a-zA-Z]")))
+      (when (and cons
+                 (not (eq (point-min) (car cons)))
+                 (string=
+                  (buffer-substring-no-properties (1- (car cons)) (car cons))
+                  "\\"))
+        (cons (1- (car cons)) (cdr cons))))))
 
 (defun grugru--get-with-integer (number)
   "Get string of buffer from point by NUMBER characters.
