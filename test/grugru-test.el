@@ -230,7 +230,7 @@
                     '(message "Hello"))
                    '(lambda () (message "Hello"))))))
 
-(ert-deftest grugru--get-tuple-list-normal ()
+(ert-deftest grugru--get-plist-normal ()
   (let ((grugru--global
          '(((lambda () (grugru--get-word)) . ("foo" "bar" "baz"))
            ((grugru--get-word) . ("aaa" "bbb" "ccc"))))
@@ -240,29 +240,45 @@
     (with-temp-buffer
       (insert "bar hoge")
       (goto-char 2)
-      (should
-       (equal
-        (grugru--get-tuple-list
-         '((global . grugru--global)
-           (local . grugru--local)))
-        '((global (1 . 4) "baz" (lambda () (grugru--get-word))
-                  ("foo" "bar" "baz"))
-          (local (1 . 4) "bazl" (lambda () (grugru--get-word))
-                 ("fool" "bar" "bazl"))))))
-    (with-temp-buffer
-      (insert "bbb hoge")
-      (goto-char 2)
-      (should
-       (equal
-        (grugru--get-tuple-list
-         '((global . grugru--global)
-           (local . grugru--local)))
-        '((global (1 . 4) "ccc" (grugru--get-word)
-                  ("aaa" "bbb" "ccc"))
-          (local (1 . 4) "cccl" (grugru--get-word)
-                 ("aaal" "bbb" "cccl"))))))))
+      (let* ((plists
+              (grugru--get-plist
+               '((global . grugru--global)
+                 (local . grugru--local))))
+             (plist1 (nth 0 plists))
+             (plist2 (nth 1 plists)))
+        (should (equal (plist-get plist1 :symbol) 'global))
+        (should (equal (plist-get plist1 :bound) '(1 . 4)))
+        (should (equal (plist-get plist1 :next) "baz"))
+        (should (equal (plist-get plist1 :getter) '(lambda () (grugru--get-word))))
+        (should (equal (plist-get plist1 :strs-or-func) '("foo" "bar" "baz")))
 
-(ert-deftest grugru--get-tuple-list-only-one ()
+        (should (equal (plist-get plist2 :symbol) 'local))
+        (should (equal (plist-get plist2 :bound) '(1 . 4)))
+        (should (equal (plist-get plist2 :next) "bazl"))
+        (should (equal (plist-get plist2 :getter) '(lambda () (grugru--get-word))))
+        (should (equal (plist-get plist2 :strs-or-func) '("fool" "bar" "bazl")))))
+    (with-temp-buffer
+      (insert "bbb hoge")
+      (goto-char 2)
+      (let* ((plists
+              (grugru--get-plist
+               '((global . grugru--global)
+                 (local . grugru--local))))
+             (plist1 (nth 0 plists))
+             (plist2 (nth 1 plists)))
+        (should (equal (plist-get plist1 :symbol) 'global))
+        (should (equal (plist-get plist1 :bound) '(1 . 4)))
+        (should (equal (plist-get plist1 :next) "ccc"))
+        (should (equal (plist-get plist1 :getter) '(grugru--get-word)))
+        (should (equal (plist-get plist1 :strs-or-func) '("aaa" "bbb" "ccc")))
+
+        (should (equal (plist-get plist2 :symbol) 'local))
+        (should (equal (plist-get plist2 :bound) '(1 . 4)))
+        (should (equal (plist-get plist2 :next) "cccl"))
+        (should (equal (plist-get plist2 :getter) '(grugru--get-word)))
+        (should (equal (plist-get plist2 :strs-or-func) '("aaal" "bbb" "cccl")))))))
+
+(ert-deftest grugru--get-plist-only-one ()
   (let ((grugru--global
          '(((lambda () (grugru--get-word)) . ("foo" "bar" "baz"))
            ((grugru--get-word) . ("aaa" "bbb" "ccc"))))
@@ -272,24 +288,29 @@
     (with-temp-buffer
       (insert "bar hoge")
       (goto-char 2)
-      (should
-       (equal
-        (grugru--get-tuple-list
-         '((global . grugru--global)
-           (local . grugru--local))
-         t)
-        '(global (1 . 4) "baz" (lambda () (grugru--get-word))
-                ("foo" "bar" "baz")))))
+      (let* ((plist
+              (grugru--get-plist
+               '((global . grugru--global)
+                 (local . grugru--local))
+               t)))
+        (should (equal (plist-get plist :symbol) 'global))
+        (should (equal (plist-get plist :bound) '(1 . 4)))
+        (should (equal (plist-get plist :next) "baz"))
+        (should (equal (plist-get plist :getter) '(lambda () (grugru--get-word))))
+        (should (equal (plist-get plist :strs-or-func) '("foo" "bar" "baz")))))
     (with-temp-buffer
       (insert "bbb hoge")
       (goto-char 2)
-      (should
-       (equal
-        (grugru--get-tuple-list
-         '((global . grugru--global)
-           (local . grugru--local))
-         t)
-        '(global (1 . 4) "ccc" (grugru--get-word) ("aaa" "bbb" "ccc")))))))
+      (let* ((plist
+              (grugru--get-plist
+               '((global . grugru--global)
+                 (local . grugru--local))
+                t)))
+        (should (equal (plist-get plist :symbol) 'global))
+        (should (equal (plist-get plist :bound) '(1 . 4)))
+        (should (equal (plist-get plist :next) "ccc"))
+        (should (equal (plist-get plist :getter) '(grugru--get-word)))
+        (should (equal (plist-get plist :strs-or-func) '("aaa" "bbb" "ccc")))))))
 
 (ert-deftest grugru--insert-sexp-append-to-file ()
   (let ((file "test1"))
@@ -314,39 +335,28 @@
   (should
    (equal
     (grugru--make-expression
-     '(global word ("aaa" "bbb" "ccc"))
-     '("ddd" "eee" "fff"))
-    '(grugru-redefine-global
-      'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+     'global 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff"))
+    '(grugru-redefine-global 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
 
 (ert-deftest grugru--make-expression-global-remove ()
   (should
    (equal
-    (grugru--make-expression
-     '(global word ("aaa" "bbb" "ccc"))
-     nil)
-    '(grugru-remove-global
-      'word '("aaa" "bbb" "ccc")))))
+    (grugru--make-expression 'global 'word '("aaa" "bbb" "ccc") nil)
+    '(grugru-remove-global 'word '("aaa" "bbb" "ccc")))))
 
 (ert-deftest grugru--make-expression-major-mode-new ()
   (should
    (equal
     (grugru--make-expression
-     '(fundamental-mode word ("aaa" "bbb" "ccc"))
-     '("ddd" "eee" "fff"))
+     'fundamental-mode 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff"))
     '(grugru-redefine-on-major-mode
-      'fundamental-mode
-      'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+      'fundamental-mode 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
 
 (ert-deftest grugru--make-expression-major-mode-remove ()
   (should
    (equal
-    (grugru--make-expression
-     '(fundamental-mode word ("aaa" "bbb" "ccc"))
-     nil)
-    '(grugru-remove-on-major-mode
-      'fundamental-mode
-      'word '("aaa" "bbb" "ccc")))))
+    (grugru--make-expression 'fundamental-mode 'word '("aaa" "bbb" "ccc") nil)
+    '(grugru-remove-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc")))))
 
 (ert-deftest grugru--strings-or-function-p ()
   (should (grugru--strings-or-function-p '("aaa" "bbb")))
@@ -461,7 +471,7 @@
     (unwind-protect
         (progn
           (grugru-define-global 'word '("aaa" "bbb"))
-          (grugru-edit '(global word ("aaa" "bbb")) '("aaa" "bbb" "ccc"))
+          (grugru-edit 'global 'word '("aaa" "bbb") '("aaa" "bbb" "ccc"))
           (cursor-test/equal*
            :init "bbb| hoge"
            :exercise
