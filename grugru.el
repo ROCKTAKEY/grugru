@@ -570,9 +570,9 @@ If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil."
           getter
         `(lambda () ,getter))))
 
-(defun grugru--get-tuple-list (alist &optional only-one reverse)
-  "Return tuple list constructed with ALIST.
-If ONLY-ONE is non-nil, returned value is 1 tuple, which matches first.
+(defun grugru--get-plist (alist &optional only-one reverse)
+  "Return plist list constructed with ALIST.
+If ONLY-ONE is non-nil, returned value is 1 plist, which matches first.
 Each element of ALIST is (SYMBOL . GRUGRU-ALIST).
 Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
 `grugru-define-global'.
@@ -602,7 +602,11 @@ If optional argument REVERSE is non-nil, get string reversely."
                        (grugru--get-previous-string (buffer-substring begin end) strs-or-func)
                      (grugru--get-next-string (buffer-substring begin end) strs-or-func))))
          ,(if only-one 'return 'collect)
-         (list symbol (cons begin end) next getter strs-or-func)))
+         (list :symbol symbol
+               :bound (cons begin end)
+               :next next
+               :getter getter
+               :strs-or-func strs-or-func)))
        when element
        ,@(if only-one
              '(return element)
@@ -618,17 +622,16 @@ If optional argument REVERSE is non-nil, get string reversely."
        'utf-8 nil (current-buffer))
       (write-region nil nil file t))))
 
-(defun grugru--make-expression (less-tuple new)
-  "Make sexp to change grugru from LESS-TUPLE to NEW."
-  (if (eq (nth 0 less-tuple) 'global)
+(defun grugru--make-expression (symbol getter strs-or-func &optional new)
+  "Make sexp to change old grugru to NEW grugru.
+Old one is specified by SYMBOL, GETTER and STRS-OR-FUNC."
+  (if (eq symbol 'global)
       (if new
-          `(grugru-redefine-global ',(nth 1 less-tuple) ',(nth 2 less-tuple) ',new)
-        `(grugru-remove-global ',(nth 1 less-tuple) ',(nth 2 less-tuple)))
+          `(grugru-redefine-global ',getter ',strs-or-func ',new)
+        `(grugru-remove-global ',getter ',strs-or-func))
     (if new
-        `(grugru-redefine-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
-                                        ',(nth 2 less-tuple) ',new)
-      `(grugru-remove-on-major-mode ',(nth 0 less-tuple) ',(nth 1 less-tuple)
-                                    ',(nth 2 less-tuple)))))
+        `(grugru-redefine-on-major-mode ',symbol ',getter ',strs-or-func ',new)
+      `(grugru-remove-on-major-mode ',symbol ',getter ',strs-or-func))))
 
 (defun grugru--strings-or-function-p (object)
   "Return non-nil if OBJECT is acceptable as `strs-or-func'."
@@ -697,16 +700,17 @@ If PREFIX is negative number, rotate text previously - PREFIX times."
   (if (eq prefix 0)
       (call-interactively #'grugru-select)
     (dotimes (_ (abs prefix))
-      (let ((tuple
-             (grugru--get-tuple-list
+      (let ((plist
+             (grugru--get-plist
               `((local       . grugru--global-grugru-alist)
                 (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
                 (global      . grugru--buffer-local-grugru-alist))
               'only-one (< prefix 0))))
-        (if tuple
-            (let* ((begin (car (nth 1 tuple)))
-                   (end   (cdr (nth 1 tuple)))
-                   (str (nth 2 tuple))
+        (if plist
+            (let* ((bound (plist-get plist :bound))
+                   (begin (car bound))
+                   (end   (cdr bound))
+                   (str (plist-get plist :next))
                    (bef (- (point) begin)))
               (grugru--replace begin end str)
               (pcase grugru-point-after-rotate
@@ -732,10 +736,11 @@ If PREFIX is negative, same as calling `grugru-forward' with - PREFIX."
   (grugru (and prefix (- prefix))))
 
 ;;;###autoload
-(defun grugru-edit (less-tuple new)
+(defun grugru-edit (symbol getter strs-or-func new)
   "Edit grugru which can be rotated at point.
-LESS-TUPLE, (symbol getter strs-or-func), indicates which grugru is to edit.
-NEW indicates to which grugru is changed, which is new strs-or-func.
+SYMBOL indicates what type (global, local or major mode) of grugru is edited.
+GETTER and STRS-OR-FUNC are used by `grugru-define-global' edited.
+NEW indicates to which grugru is changed, which is new STRS-OR-FUNC.
 The change made by this function is saved in file `grugru-edit-save-file'."
   (interactive
    (progn
@@ -743,25 +748,34 @@ The change made by this function is saved in file `grugru-edit-save-file'."
        (grugru--major-mode-load)
        (setq grugru--loaded-local t))
      (let* ((lst
-             ;; lst has list of cons cell (prompt . less-tuple)
-             ;; less-tuple means (symbol getter strs-or-func).
+             ;; lst has list of cons cell (prompt . plist)
              (mapcar
               (lambda (arg)
-                (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg) (nth 4 arg))
-                      (mapcar (lambda (n) (nth n arg)) '(0 3 4))))
-              (grugru--get-tuple-list
+                (cons (format "%S(%S): %S"
+                              (plist-get arg :symbol)
+                              (plist-get arg :getter)
+                              (plist-get arg :strs-or-func))
+                      arg))
+              (grugru--get-plist
                `((,major-mode . grugru--buffer-local-major-mode-grugru-alist)
                  (global . grugru--global-grugru-alist)))))
-            (cons (assoc (funcall grugru-completing-function "Edit grugru: "
-                                  lst nil t nil nil (car lst))
-                         lst))
-            (new (read (read-from-minibuffer (format "Edit '%s' to: " (nth 0 cons))
-                                             (format "%S" (nth 2 (cdr cons)))))))
-       (list (cdr cons) new))))
+            (cons
+             (assoc (funcall grugru-completing-function "Edit grugru: "
+                             lst nil t nil nil (car lst))
+                    lst))
+            (prompt (car cons))
+            (plist (cdr cons))
+            (getter (plist-get plist :getter))
+            (strs-or-func (plist-get plist :strs-or-func))
+            (symbol (plist-get plist :symbol))
+            (new (read (read-from-minibuffer
+                        (format "Edit '%s' to: " prompt)
+                        (format "%S" strs-or-func)))))
+       (list symbol getter strs-or-func new))))
   (unless grugru--loaded-local
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
-  (let ((expression (grugru--make-expression less-tuple new)))
+  (let* ((expression (grugru--make-expression symbol getter strs-or-func new)))
     (eval expression)
     (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
 
@@ -781,38 +795,41 @@ by `grugru-completing-function'."
      (unless grugru--loaded-local
        (grugru--major-mode-load)
        (setq grugru--loaded-local t))
-     (let* ((tuples (grugru--get-tuple-list
+     (let* ((plists (grugru--get-plist
                      `((local . grugru--buffer-local-grugru-alist)
                        (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
                        (global . grugru--global-grugru-alist))))
             (lst
-             ;; lst has list of cons cell (prompt . another-less-tuple)
-             ;; another-less-tuple means (symbol (begin . end) getter strs-or-func).
+             ;; lst has list of cons cell (prompt . plist)
              (mapcar
-              (lambda (arg)
-                (cons (format "%S(%S): %S" (nth 0 arg) (nth 3 arg)
-                              (if (functionp (nth 4 arg))
-                                  ;; Replace function to strings on strs-or-func.
-                                  (grugru--select-generate-strings
-                                   (buffer-substring-no-properties
-                                    (car (nth 1 arg)) (cdr (nth 1 arg)))
-                                   (nth 4 arg)
-                                   grugru-select-function-generate-number)
-                                (nth 4 arg)))
-                      (mapcar
-                       (lambda (n)
-                         (nth n arg))
-                       '(0 1 3 4))))
-              tuples))
+              (lambda (plist)
+                (let* ((symbol (plist-get plist :symbol))
+                       (getter (plist-get plist :getter))
+                       (strs-or-func (plist-get plist :strs-or-func))
+                       (bound (plist-get plist :bound))
+                       (begin (car bound))
+                       (end (cdr bound)))
+                  (cons (format "%S(%S): %S" symbol getter
+                                (if (functionp strs-or-func)
+                                    ;; Replace function to strings on strs-or-func.
+                                    (grugru--select-generate-strings
+                                     (buffer-substring-no-properties begin end)
+                                     strs-or-func
+                                     grugru-select-function-generate-number)
+                                  strs-or-func))
+                        plist)))
+              plists))
             (cons
-             (if (eq (length tuples) 1)
+             (if (eq (length plists) 1)
                  (car lst)
                (assoc (funcall grugru-completing-function " Choose grugru: "
                                lst nil t nil nil (car lst))
                       lst)))
-            (begin (car (nth 1 (cdr cons))))
-            (end   (cdr (nth 1 (cdr cons))))
-            (strs-or-func (nth 3 (cdr cons)))
+            (plist (cdr cons))
+            (bound (plist-get plist :bound))
+            (begin (car bound))
+            (end   (cdr bound))
+            (strs-or-func (plist-get plist :strs-or-func))
             (strings
              (remove
               (buffer-substring-no-properties begin end)
@@ -1114,14 +1131,16 @@ This is used by command `grugru-highlight-mode'."
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
   (grugru--highlight-remove)
-  (let* ((tuple (grugru--get-tuple-list
+  (let* ((plist (grugru--get-plist
                  `((local . grugru--buffer-local-grugru-alist)
                    (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
                    (global . grugru--global-grugru-alist))
                  t))
-         (cons (nth 1 tuple)))
-    (when cons
-      (setq grugru--highlight-overlay (make-overlay (car cons) (cdr cons)))
+         (bound (plist-get plist :bound))
+         (begin (car bound))
+         (end (cdr bound)))
+    (when bound
+      (setq grugru--highlight-overlay (make-overlay begin end))
       (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-face))))
 
 (defun grugru--highlight-remove ()
