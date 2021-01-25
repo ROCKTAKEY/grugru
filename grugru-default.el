@@ -32,14 +32,18 @@
 (defun grugru-default@emacs-lisp+nth!aref (str)
   "Return STR exchanged `nth' and `aref' with argument permutation."
   (cond
-   ((string-match "^(\\(\\_<nth\\_>\\)" str)
-    (grugru-utils-lisp-exchange-args
+   ((string-match "^(\\_<\\(nth\\)\\_>" str)
+    (cons
+     (cons (match-beginning 1) (match-end 1))
+     (grugru-utils-lisp-exchange-args
      (replace-match "aref" nil nil str 1)
-     '(2 1)))
-   ((string-match "^(\\(\\_<aref\\_>\\)" str)
-    (grugru-utils-lisp-exchange-args
+     '(2 1))))
+   ((string-match "^(\\_<\\(aref\\)\\_>" str)
+    (cons
+     (cons (match-beginning 1) (match-end 1))
+     (grugru-utils-lisp-exchange-args
      (replace-match "nth" nil nil str 1)
-     '(2 1)))))
+     '(2 1))))))
 
 ;;;###autoload
 (defun grugru-default-setup ()

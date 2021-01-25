@@ -38,13 +38,13 @@
 
 (ert-deftest grugru-default@emacs-lisp ()
   (should
-   (string=
+   (equal
     (grugru-default@emacs-lisp+nth!aref "(nth 1 '(foo bar))")
-    "(aref '(foo bar) 1)"))
+    (cons '(1 . 4) "(aref '(foo bar) 1)")))
   (should
-   (string=
+   (equal
     (grugru-default@emacs-lisp+nth!aref "(aref '(foo bar) 1)")
-    "(nth 1 '(foo bar))")))
+    (cons '(1 . 5) "(nth 1 '(foo bar))"))))
 
 (ert-deftest grugru-default-setup ()
   (let (grugru--global-grugru-alist
