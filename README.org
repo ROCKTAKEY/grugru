@@ -71,12 +71,54 @@
     ;; You can use function instead of list of strings.
     (grugru-define-on-major-mode
      'c-mode 'symbol
-     (lambda (arg)
+     ;; Optional argument `rev' is flag for backward rotation.
+     ;; If the second argument `rev' is ignoreable (for example, rotate two strings),
+     ;; you can just use the function receiving only 1 argument.
+     (lambda (arg &optional rev)
+       (if rev
+           ;; backward
+           (cond
+            ((string-match "a\\(.*\\)b" arg)
+             ;; Rotate axyzb to cxyzd
+             (concat "c" (match-string 1 arg) "d"))
+            ((string-match "b\\(.*\\)c" arg)
+             ;; Rotate bxyzc to axyzb
+             (concat "a" (match-string 1 arg) "b"))
+            ((string-match "c\\(.*\\)d" arg)
+             ;; Rotate cxyzd to bxyzc
+             (concat "b" (match-string 1 arg) "c")))
+         ;; forward
+         (cond
+          ((string-match "a\\(.*\\)b" arg)
+           ;; Rotate axyzb to bxyzc
+           (concat "b" (match-string 1 arg) "c"))
+          ((string-match "b\\(.*\\)c" arg)
+           ;; Rotate bxyzc to cxyzd
+           (concat "c" (match-string 1 arg) "d"))
+          ((string-match "c\\(.*\\)d" arg)
+           ;; Rotate cxyzd to axyzb
+           (concat "a" (match-string 1 arg) "b"))))))
+
+    ;; You can indicate which position is valid to grugru in strings.
+    ;; The function can return not only string but also cons cell (BOUNDS . STRING).
+    ;; BOUNDS is a list of cons cell (BEG . END), which is pair of numbers indicating
+    ;; range valid to rotate.
+    (defun grugru-default@emacs-lisp+nth!aref (str)
+      "Return STR exchanged `nth' and `aref' with argument permutation."
       (cond
-       ((string-match "a\\(.*\\)b" arg)
-        (concat "b" (match-string 1 arg) "c"))
-       ((string-match "b\\(.*\\)c" arg)
-        (concat "a" (match-string 1 arg) "b")))))
+       ((string-match "^(\\_<\\(nth\\)\\_>" str)
+        (cons
+         (cons (match-beginning 1) (match-end 1))
+         ;; This function permutate arguments on lisp.
+         (grugru-utils-lisp-exchange-args
+         (replace-match "aref" nil nil str 1)
+         '(2 1))))
+       ((string-match "^(\\_<\\(aref\\)\\_>" str)
+        (cons
+         (cons (match-beginning 1) (match-end 1))
+         (grugru-utils-lisp-exchange-args
+         (replace-match "nth" nil nil str 1)
+         '(2 1))))))
 
     ;; You can also write like:
     (grugru-define-multiple
