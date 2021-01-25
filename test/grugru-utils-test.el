@@ -21,6 +21,7 @@
 
 (require 'undercover)
 (undercover "*.el"
+            (:report-format 'codecov)
             (:report-file "coverage-final.json")
             (:send-report nil))
 
