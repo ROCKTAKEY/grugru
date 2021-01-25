@@ -537,7 +537,7 @@ NUMBER can be negative."
   "Return bound if POINT is among VALID-BOUNDS.
 VALID-BOUNDS is list of cons cell (BEG . END), which is pair of numbers
 indicating range valid to rotate."
-  (some
+  (cl-some
    (lambda (bound)
      (let ((begin (car bound))
            (end (cdr bound)))
