@@ -190,15 +190,35 @@
     (should (equal (grugru--get-with-integer 1)
                    nil))))
 
+(ert-deftest grugru--get-valid-bound ()
+  (should (grugru--get-valid-bound 1 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 2 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 3 '((1 . 3) (6 . 8))))
+  (should-not (grugru--get-valid-bound 4 '((1 . 3) (6 . 8))))
+  (should-not (grugru--get-valid-bound 5 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 6 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 7 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 8 '((1 . 3) (6 . 8))))
+  (should-not (grugru--get-valid-bound 9 '((1 . 3) (6 . 8))))
+
+  (should (grugru--get-valid-bound 9 '((1 . 3) (9 . 9))))
+  (should (grugru--get-valid-bound 9 '((9 . 9))))
+
+  (should (grugru--get-valid-bound 1 '((1 . 3))))
+  (should (grugru--get-valid-bound 2 '((1 . 3))))
+  (should (grugru--get-valid-bound 3 '((1 . 3))))
+  (should-not (grugru--get-valid-bound 4 '((1 . 3))))
+  (should-not (grugru--get-valid-bound 5 '((1 . 3)))))
+
 (ert-deftest grugru--get-next-string-strings ()
   (should
    (string=
     "bar"
-    (grugru--get-next-string "foo" '("foo" "bar" "baz"))))
+    (grugru--get-next-string "foo" '("foo" "bar" "baz") 1)))
   (should
    (string=
     "foo"
-    (grugru--get-next-string "baz" '("foo" "bar" "baz")))))
+    (grugru--get-next-string "baz" '("foo" "bar" "baz") 5))))
 
 (ert-deftest grugru--get-next-string-function ()
   (should
@@ -210,7 +230,8 @@
        (pcase arg
          ("foo" "bar")
          ("bar" "baz")
-         ("baz" "foo"))))))
+         ("baz" "foo")))
+     1)))
   (should-not
    (grugru--get-next-string
     "fo"
@@ -218,7 +239,116 @@
       (pcase arg
         ("foo" "bar")
         ("bar" "baz")
-        ("baz" "foo"))))))
+        ("baz" "foo")))
+    5)))
+
+(ert-deftest grugru--get-next-string-function-valid-bound ()
+  (should
+   (string=
+    "bar"
+    (cdr
+     (grugru--get-next-string
+      "foo"
+      (lambda (arg)
+        (cons
+         (cons 0 1)
+         (pcase arg
+           ("foo" "bar")
+           ("bar" "baz")
+           ("baz" "foo"))))
+      1))))
+  (should-not
+   (grugru--get-next-string
+    "foo"
+    (lambda (arg)
+      (let ((cons (cons
+                   (cons 0 1)
+                   (pcase arg
+                     ("foo" "bar")
+                     ("bar" "baz")
+                     ("baz" "foo")))))
+        (when (cdr cons) cons)))
+    2)))
+
+(ert-deftest grugru--get-previous-string-strings ()
+  (should
+   (string=
+    "bar"
+    (grugru--get-previous-string "foo" (nreverse '("foo" "bar" "baz")) 1)))
+  (should
+   (string=
+    "foo"
+    (grugru--get-previous-string "baz" (nreverse '("foo" "bar" "baz")) 5))))
+
+(ert-deftest grugru--get-previous-string-function ()
+  (should
+   (string=
+    "baz"
+    (grugru--get-previous-string
+     "foo"
+     (lambda (arg &optional rev)
+       (if rev
+           (pcase arg
+             ("foo" "baz")
+             ("bar" "foo")
+             ("baz" "bar"))
+         (pcase arg
+           ("foo" "bar")
+           ("bar" "baz")
+           ("baz" "foo"))))
+     1)))
+  (should-not
+   (grugru--get-previous-string
+    "fo"
+    (lambda (arg &optional rev)
+      (if rev
+          (pcase arg
+            ("foo" "baz")
+            ("bar" "foo")
+            ("baz" "bar"))
+        (pcase arg
+          ("foo" "bar")
+          ("bar" "baz")
+          ("baz" "foo"))))
+    5)))
+
+(ert-deftest grugru--get-previous-string-function-valid-bound ()
+  (should
+   (string=
+    "baz"
+    (cdr
+     (grugru--get-previous-string
+      "foo"
+      (lambda (arg &optional rev)
+        (cons
+         (cons 0 1)
+         (if rev
+             (pcase arg
+               ("foo" "baz")
+               ("bar" "foo")
+               ("baz" "bar"))
+           (pcase arg
+             ("foo" "bar")
+             ("bar" "baz")
+             ("baz" "foo")))))
+      1))))
+  (should-not
+   (grugru--get-previous-string
+    "foo"
+    (lambda (arg &optional rev)
+      (let ((cons (cons
+                   (cons 0 1)
+                   (if rev
+                       (pcase arg
+                         ("foo" "baz")
+                         ("bar" "foo")
+                         ("baz" "bar"))
+                     (pcase arg
+                       ("foo" "bar")
+                       ("bar" "baz")
+                       ("baz" "foo"))))))
+        (when (cdr cons) cons)))
+    2)))
 
 (ert-deftest grugru--get-getter-function ()
   (let ((grugru-getter-alist

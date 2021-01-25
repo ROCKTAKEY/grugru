@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.19.2
+;; Version: 1.20.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -533,11 +533,38 @@ NUMBER can be negative."
                 (setq grugru--loaded-local nil))))
           (buffer-list)))
 
-(defun grugru--get-next-string (string strs-or-function)
-  "Get next string of STRING with STRS-OR-FUNCTION."
+(defun grugru--get-valid-bound (point valid-bounds)
+  "Return bound if POINT is among VALID-BOUNDS.
+VALID-BOUNDS is list of cons cell (BEG . END), which is pair of numbers
+indicating range valid to rotate."
+  (cl-some
+   (lambda (bound)
+     (let ((begin (car bound))
+           (end (cdr bound)))
+       (when (and (<= begin point) (<= point end))
+         bound)))
+   valid-bounds))
+
+(defun grugru--get-next-string (string strs-or-function point)
+  "Get next string of STRING with STRS-OR-FUNCTION.
+POINT is relative from beggining of STRING,
+and used when valid-bounds are detected.  This function returns
+cons cell (valid-bounds . next-string), or only next-string."
   (pcase strs-or-function
     ((pred functionp)
-     (funcall strs-or-function string))
+     (let* ((result (funcall strs-or-function string))
+            (valid-bounds (car-safe result))
+            (string (or (cdr-safe result) result))
+            valid-bound)
+       (when (and (not (null valid-bounds))
+                  (listp valid-bounds)
+                  (not (consp (car valid-bounds))))
+         (setq valid-bounds (list valid-bounds)))
+       (when (or (null valid-bounds)
+                 (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
+         (if valid-bound
+             (cons valid-bound string)
+           string))))
     ((pred listp)
      (let ((list (member string strs-or-function)))
        (when list
@@ -546,13 +573,29 @@ NUMBER can be negative."
            (nth 1 list)))))
     (_ nil)))
 
-(defun grugru--get-previous-string (string strs-or-function)
+(defun grugru--get-previous-string (string strs-or-function point)
   "Get previous string of STRING with STRS-OR-FUNCTION.
-If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil."
+If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil.
+POINT is relative from beggining of STRING, and used when
+valid-bounds are detected.
+
+This function returns cons cell (valid-bounds . prev-string), or only prev-string."
   (pcase strs-or-function
     ((pred functionp)
      (condition-case nil
-         (funcall strs-or-function string 'reverse)
+         (let* ((result (funcall strs-or-function string 'reverse))
+                (valid-bounds (car-safe result))
+                (string (or (cdr-safe result) result))
+                valid-bound)
+           (when (and (not (null valid-bounds))
+                      (listp valid-bounds)
+                      (not (consp (car valid-bounds))))
+             (setq valid-bounds (list valid-bounds)))
+           (when (or (null valid-bounds)
+                     (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
+             (if valid-bound
+                 (cons valid-bound string)
+               string)))
        ('wrong-number-of-arguments nil)))
     ((pred listp)
      (let* ((reversed-strs (reverse strs-or-function))
@@ -578,7 +621,7 @@ Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
 `grugru-define-global'.
 If optional argument REVERSE is non-nil, get string reversely."
   (eval
-   `(let (cache cached? begin end cons next element)
+   `(let (cache cached? begin end cons next valid-bound element)
       (cl-loop
        for (symbol . grugrus) in ',alist
        do
@@ -599,14 +642,23 @@ If optional argument REVERSE is non-nil, get string reversely."
              cons
              (setq next
                    (if ,reverse
-                       (grugru--get-previous-string (buffer-substring begin end) strs-or-func)
-                     (grugru--get-next-string (buffer-substring begin end) strs-or-func))))
+                       (grugru--get-previous-string
+                        (buffer-substring begin end) strs-or-func
+                        (- (point) begin))
+                     (grugru--get-next-string
+                      (buffer-substring begin end) strs-or-func
+                      (- (point) begin)))))
+         do (when (consp next)
+              (cl-psetq next         (cdr next)
+                        valid-bound (car next)))
+         and
          ,(if only-one 'return 'collect)
          (list :symbol symbol
                :bound (cons begin end)
                :next next
                :getter getter
-               :strs-or-func strs-or-func)))
+               :strs-or-func strs-or-func
+               :valid-bound valid-bound)))
        when element
        ,@(if only-one
              '(return element)
@@ -1120,7 +1172,14 @@ ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
   "Face used `grugru-highlight-mode'."
   :group 'grugru)
 
+(defface grugru-highlight-sub-face
+  '((t (:underline (:line-width 1 :color "#0000ff"))))
+  "Face used `grugru-highlight-mode'."
+  :group 'grugru)
+
 (defvar-local grugru--highlight-overlay nil)
+
+(defvar-local grugru--highlight-overlay-sub nil)
 
 (defvar grugru--highlight-timer-cache nil)
 
@@ -1138,16 +1197,28 @@ This is used by command `grugru-highlight-mode'."
                  t))
          (bound (plist-get plist :bound))
          (begin (car bound))
-         (end (cdr bound)))
+         (end (cdr bound))
+         (valid-bound (plist-get plist :valid-bound)))
     (when bound
-      (setq grugru--highlight-overlay (make-overlay begin end))
-      (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-face))))
+      (if valid-bound
+          (progn
+            (setq grugru--highlight-overlay-sub
+                  (make-overlay (+ begin (car valid-bound))
+                                (+ begin (cdr valid-bound))))
+            (overlay-put grugru--highlight-overlay-sub 'face 'grugru-highlight-face)
+            (setq grugru--highlight-overlay (make-overlay begin end))
+            (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-sub-face))
+        (setq grugru--highlight-overlay (make-overlay begin end))
+        (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-face)))))
 
 (defun grugru--highlight-remove ()
   "Remove highlight added by command `grugru-highlight-mode' on current buffer."
-  (when grugru--highlight-overlay
-    (delete-overlay grugru--highlight-overlay)
-    (setq grugru--highlight-overlay nil)))
+  (mapc
+   (lambda (ov)
+     (when (symbol-value ov)
+    (delete-overlay (symbol-value ov))
+    (set ov nil)))
+   '(grugru--highlight-overlay grugru--highlight-overlay-sub)))
 
 ;;;###autoload
 (define-minor-mode grugru-highlight-mode
