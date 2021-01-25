@@ -547,8 +547,9 @@ indicating range valid to rotate."
 
 (defun grugru--get-next-string (string strs-or-function point)
   "Get next string of STRING with STRS-OR-FUNCTION.
-POINT is relative from beggining of STRING, and used when valid-bounds are detected.
-This function returns cons cell (valid-bounds . next-string), or only next-string."
+POINT is relative from beggining of STRING,
+and used when valid-bounds are detected.  This function returns
+cons cell (valid-bounds . next-string), or only next-string."
   (pcase strs-or-function
     ((pred functionp)
      (let* ((result (funcall strs-or-function string))
@@ -575,8 +576,8 @@ This function returns cons cell (valid-bounds . next-string), or only next-strin
 (defun grugru--get-previous-string (string strs-or-function point)
   "Get previous string of STRING with STRS-OR-FUNCTION.
 If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil.
-
-POINT is relative from beggining of STRING, and used when valid-bounds are detected.
+POINT is relative from beggining of STRING, and used when
+valid-bounds are detected.
 
 This function returns cons cell (valid-bounds . prev-string), or only prev-string."
   (pcase strs-or-function
@@ -1171,7 +1172,14 @@ ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
   "Face used `grugru-highlight-mode'."
   :group 'grugru)
 
+(defface grugru-highlight-sub-face
+  '((t (:underline (:line-width 1 :color "#0000ff"))))
+  "Face used `grugru-highlight-mode'."
+  :group 'grugru)
+
 (defvar-local grugru--highlight-overlay nil)
+
+(defvar-local grugru--highlight-overlay-sub nil)
 
 (defvar grugru--highlight-timer-cache nil)
 
@@ -1189,16 +1197,28 @@ This is used by command `grugru-highlight-mode'."
                  t))
          (bound (plist-get plist :bound))
          (begin (car bound))
-         (end (cdr bound)))
+         (end (cdr bound))
+         (valid-bound (plist-get plist :valid-bound)))
     (when bound
-      (setq grugru--highlight-overlay (make-overlay begin end))
-      (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-face))))
+      (if valid-bound
+          (progn
+            (setq grugru--highlight-overlay-sub
+                  (make-overlay (+ begin (car valid-bound))
+                                (+ begin (cdr valid-bound))))
+            (overlay-put grugru--highlight-overlay-sub 'face 'grugru-highlight-face)
+            (setq grugru--highlight-overlay (make-overlay begin end))
+            (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-sub-face))
+        (setq grugru--highlight-overlay (make-overlay begin end))
+        (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-face)))))
 
 (defun grugru--highlight-remove ()
   "Remove highlight added by command `grugru-highlight-mode' on current buffer."
-  (when grugru--highlight-overlay
-    (delete-overlay grugru--highlight-overlay)
-    (setq grugru--highlight-overlay nil)))
+  (mapc
+   (lambda (ov)
+     (when (symbol-value ov)
+    (delete-overlay (symbol-value ov))
+    (set ov nil)))
+   '(grugru--highlight-overlay grugru--highlight-overlay-sub)))
 
 ;;;###autoload
 (define-minor-mode grugru-highlight-mode
