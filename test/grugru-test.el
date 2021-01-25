@@ -190,6 +190,26 @@
     (should (equal (grugru--get-with-integer 1)
                    nil))))
 
+(ert-deftest grugru--get-valid-bound ()
+  (should (grugru--get-valid-bound 1 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 2 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 3 '((1 . 3) (6 . 8))))
+  (should-not (grugru--get-valid-bound 4 '((1 . 3) (6 . 8))))
+  (should-not (grugru--get-valid-bound 5 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 6 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 7 '((1 . 3) (6 . 8))))
+  (should (grugru--get-valid-bound 8 '((1 . 3) (6 . 8))))
+  (should-not (grugru--get-valid-bound 9 '((1 . 3) (6 . 8))))
+
+  (should (grugru--get-valid-bound 9 '((1 . 3) (9 . 9))))
+  (should (grugru--get-valid-bound 9 '((9 . 9))))
+
+  (should (grugru--get-valid-bound 1 '((1 . 3))))
+  (should (grugru--get-valid-bound 2 '((1 . 3))))
+  (should (grugru--get-valid-bound 3 '((1 . 3))))
+  (should-not (grugru--get-valid-bound 4 '((1 . 3))))
+  (should-not (grugru--get-valid-bound 5 '((1 . 3)))))
+
 (ert-deftest grugru--get-next-string-strings ()
   (should
    (string=
