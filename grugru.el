@@ -545,7 +545,7 @@ indicating range valid to rotate."
          bound)))
    valid-bounds))
 
-(defun grugru--get-next-string (string strs-or-function point)
+(defun grugru--get-next-string (string strs-or-function &optional point)
   "Get next string of STRING with STRS-OR-FUNCTION.
 POINT is relative from beggining of STRING,
 and used when valid-bounds are detected.  This function returns
@@ -560,11 +560,15 @@ cons cell (valid-bounds . next-string), or only next-string."
                   (listp valid-bounds)
                   (not (consp (car valid-bounds))))
          (setq valid-bounds (list valid-bounds)))
-       (when (or (null valid-bounds)
-                 (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
-         (if valid-bound
-             (cons valid-bound string)
-           string))))
+       (when valid-bounds
+           (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
+       (cond
+        ((or (not point)
+             (null valid-bounds))
+         string)
+        (valid-bound
+         (cons valid-bound string))
+        (t nil))))
     ((pred listp)
      (let ((list (member string strs-or-function)))
        (when list
@@ -573,7 +577,7 @@ cons cell (valid-bounds . next-string), or only next-string."
            (nth 1 list)))))
     (_ nil)))
 
-(defun grugru--get-previous-string (string strs-or-function point)
+(defun grugru--get-previous-string (string strs-or-function &optional point)
   "Get previous string of STRING with STRS-OR-FUNCTION.
 If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil.
 POINT is relative from beggining of STRING, and used when
@@ -591,11 +595,15 @@ This function returns cons cell (valid-bounds . prev-string), or only prev-strin
                       (listp valid-bounds)
                       (not (consp (car valid-bounds))))
              (setq valid-bounds (list valid-bounds)))
-           (when (or (null valid-bounds)
-                     (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
-             (if valid-bound
-                 (cons valid-bound string)
-               string)))
+           (when valid-bounds
+             (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
+           (cond
+            ((or (not point)
+                 (null valid-bounds))
+             string)
+            (valid-bound
+             (cons valid-bound string))
+            (t nil)))
        ('wrong-number-of-arguments nil)))
     ((pred listp)
      (let* ((reversed-strs (reverse strs-or-function))
