@@ -545,6 +545,16 @@ indicating range valid to rotate."
          bound)))
    valid-bounds))
 
+(defun grugru--simple-generator (strings string &optional reverse)
+  "Return string next to STRING from STRINGS.
+If REVERSE is non-nil, return previous STRING."
+  (when reverse
+    (setq strings (reverse strings)))
+  (let ((match-list (member string strings)))
+    (when match-list
+      (or (cadr match-list)
+          (car strings)))))
+
 (defun grugru--get-next-string (string strs-or-function &optional point)
   "Get next string of STRING with STRS-OR-FUNCTION.
 POINT is relative from beggining of STRING,

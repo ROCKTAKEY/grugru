@@ -211,6 +211,16 @@
   (should-not (grugru--get-valid-bound 4 '((1 . 3))))
   (should-not (grugru--get-valid-bound 5 '((1 . 3)))))
 
+(ert-deftest grugru--simple-generator-forward ()
+  (should (equal (grugru--simple-generator '("abc" "def" "ghi") "abc") "def"))
+  (should (equal (grugru--simple-generator '("abc" "def" "ghi") "def") "ghi"))
+  (should (equal (grugru--simple-generator '("abc" "def" "ghi") "ghi") "abc")))
+
+(ert-deftest grugru--simple-generator-backward ()
+  (should (equal (grugru--simple-generator '("abc" "def" "ghi") "abc" t) "ghi"))
+  (should (equal (grugru--simple-generator '("abc" "def" "ghi") "def" t) "abc"))
+  (should (equal (grugru--simple-generator '("abc" "def" "ghi") "ghi" t) "def")))
+
 (ert-deftest grugru--get-next-string-strings ()
   (should
    (string=
