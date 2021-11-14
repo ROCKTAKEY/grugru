@@ -11,7 +11,7 @@
   [[https://raw.githubusercontent.com/ROCKTAKEY/images/7baf9507a8fb9c20eda7395be1c9d91d0ae61c51/emacs-lisp-mode.gif]]
   Fig. 1 demo on =emacs-lisp-mode=
 
-  [[https://raw.githubusercontent.com/ROCKTAKEY/images/7baf9507a8fb9c20eda7395be1c9d91d0ae61c51/c%2B%2B-mode.gif]]
+  [[https://raw.githubusercontent.com/ROCKTAKEY/images/35e323db33f4da1545c289f2741782c4ac04968b/c++-mode.gif]]
   Fig. 2 demo on =c++-mode=
   #+end_center
 * How to Use?
