@@ -555,37 +555,41 @@ If REVERSE is non-nil, return previous STRING."
       (or (cadr match-list)
           (car strings)))))
 
-(defun grugru--get-next-string (string strs-or-function &optional point)
+(defun grugru--call-generator (func string reverse)
+  "Call FUNC with STRING and REVERSE.
+When REVERSE is non-nil, ignore the `wrong-number-of-arguments' error."
+  (if reverse
+      (condition-case nil
+          (funcall func string t)
+        ('wrong-number-of-arguments nil))
+    (funcall func string)))
+
+(defun grugru--get-next-string (string strs-or-function &optional point reverse)
   "Get next string of STRING with STRS-OR-FUNCTION.
 POINT is relative from beggining of STRING,
 and used when valid-bounds are detected.  This function returns
-cons cell (valid-bounds . next-string), or only next-string."
-  (pcase strs-or-function
-    ((pred functionp)
-     (let* ((result (funcall strs-or-function string))
-            (valid-bounds (car-safe result))
-            (string (or (cdr-safe result) result))
-            valid-bound)
-       (when (and (not (null valid-bounds))
-                  (listp valid-bounds)
-                  (not (consp (car valid-bounds))))
-         (setq valid-bounds (list valid-bounds)))
-       (when valid-bounds
-           (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
-       (cond
-        ((or (not point)
-             (null valid-bounds))
-         string)
-        (valid-bound
-         (cons valid-bound string))
-        (t nil))))
-    ((pred listp)
-     (let ((list (member string strs-or-function)))
-       (when list
-         (if (eq (length list) 1)
-             (car strs-or-function)
-           (nth 1 list)))))
-    (_ nil)))
+cons cell (valid-bounds . next-string), or only next-string.
+
+If REVERSE is non-nil, get previous string instead."
+  (let* ((func (if (functionp strs-or-function) strs-or-function
+                 (apply-partially #'grugru--simple-generator strs-or-function)))
+         (result (grugru--call-generator func string reverse))
+         (valid-bounds (car-safe result))
+         (string (or (cdr-safe result) result))
+         valid-bound)
+    (when (and (not (null valid-bounds))
+               (listp valid-bounds)
+               (not (consp (car valid-bounds))))
+      (setq valid-bounds (list valid-bounds)))
+    (when valid-bounds
+      (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
+    (cond
+     ((or (not point)
+          (null valid-bounds))
+      string)
+     (valid-bound
+      (cons valid-bound string))
+     (t nil))))
 
 (defun grugru--get-previous-string (string strs-or-function &optional point)
   "Get previous string of STRING with STRS-OR-FUNCTION.
@@ -594,35 +598,7 @@ POINT is relative from beggining of STRING, and used when
 valid-bounds are detected.
 
 This function returns cons cell (valid-bounds . prev-string), or only prev-string."
-  (pcase strs-or-function
-    ((pred functionp)
-     (condition-case nil
-         (let* ((result (funcall strs-or-function string 'reverse))
-                (valid-bounds (car-safe result))
-                (string (or (cdr-safe result) result))
-                valid-bound)
-           (when (and (not (null valid-bounds))
-                      (listp valid-bounds)
-                      (not (consp (car valid-bounds))))
-             (setq valid-bounds (list valid-bounds)))
-           (when valid-bounds
-             (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
-           (cond
-            ((or (not point)
-                 (null valid-bounds))
-             string)
-            (valid-bound
-             (cons valid-bound string))
-            (t nil)))
-       ('wrong-number-of-arguments nil)))
-    ((pred listp)
-     (let* ((reversed-strs (reverse strs-or-function))
-            (list (member string reversed-strs)))
-       (when list
-         (if (eq (length list) 1)
-             (car reversed-strs)
-           (nth 1 list)))))
-    (_ nil)))
+  (grugru--get-next-string string strs-or-function point t))
 
 (defun grugru--get-getter-function (getter)
   "Get getter function from GETTER."
