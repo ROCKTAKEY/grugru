@@ -28,6 +28,12 @@
   #+BEGIN_SRC emacs-lisp :tangle yes
   (grugru-default-setup)
   #+END_SRC
+
+  If you want ~grugru~ to highlight gurgruable thing, add to your init.el:
+  #+begin_src emacs-lisp :tangle yes
+    (grugru-highlight-mode)
+  #+end_src
+
   If you want to change default action at point, you can use ~grugru-edit~,
   with which you can edit grugrus at point interactively. The change edited by this
   function is saved in ~grugru-edit-save-file~,
