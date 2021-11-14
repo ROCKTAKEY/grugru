@@ -13,6 +13,9 @@
 
   [[https://raw.githubusercontent.com/ROCKTAKEY/images/35e323db33f4da1545c289f2741782c4ac04968b/c++-mode.gif]]
   Fig. 2 demo on =c++-mode=
+
+  [[https://raw.githubusercontent.com/ROCKTAKEY/images/698f33489645a6e7b0c29d879771dbb15fa3fcd9/grugru-define-local.gif]]
+  Fig. 3 Use =grugru-define-local= interactively
   #+end_center
 * How to Use?
   You can interactively use the function =grugru=. This function rotate the thing at point
