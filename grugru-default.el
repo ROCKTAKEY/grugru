@@ -56,6 +56,7 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (non-alphabet "&" "|")
     (non-alphabet "+" "-")
     (non-alphabet "*" "/" "%")
+    (non-alphabet ">>" "<<")
     (non-alphabet "+=" "-=")
     (non-alphabet "*=" "/=" "%=")
     (non-alphabet "&=" "|=" "^=")
