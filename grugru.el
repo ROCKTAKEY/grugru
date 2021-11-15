@@ -497,7 +497,7 @@ Used in `grugru--getter-non-alphabet'.")
       (cons beg end))))
 
 (defun grugru--metagetter-with-integer (number)
-  "Get beginning/end of string at point by NUMBER characters backward.
+  "Get beginning/end of string at point by NUMBER characters.
 NUMBER can be negative."
   (let ((p (+ (point)))
         (q (+ (point) number)))
