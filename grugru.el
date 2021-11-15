@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.20.3
+;; Version: 1.20.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -562,7 +562,7 @@ For example, \"\\alpha\", \"\\mathrm\" is valid sequence."
 
 ;;; Metagenerator
 
-(defun grugru--simple-metagenerator (strings string &optional reverse)
+(defun grugru--metagenerator-simple (strings string &optional reverse)
   "Return string next to STRING in STRINGS.
 If REVERSE is non-nil, return previous STRING."
   (when reverse
@@ -612,7 +612,7 @@ This function returns cons cell (valid-bounds . next-string).
 
 If REVERSE is non-nil, get previous string instead."
   (let* ((func (if (functionp strings-or-generator) strings-or-generator
-                 (apply-partially #'grugru--simple-metagenerator strings-or-generator)))
+                 (apply-partially #'grugru--metagenerator-simple strings-or-generator)))
          (result (grugru--call-generator func string reverse))
          (valid-bounds (car-safe result))
          (next-string (or (cdr-safe result) result))
