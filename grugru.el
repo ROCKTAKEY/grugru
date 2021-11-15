@@ -572,6 +572,27 @@ If REVERSE is non-nil, return previous STRING."
       (or (cadr match-list)
           (car strings)))))
 
+(defun grugru--metagenerator-keep-case (strings string &optional reverse)
+  "Return string next to STRING in STRINGS.
+If REVERSE is non-nil, return previous STRING.
+
+This function is not case-sensitive and keeps case."
+  (when reverse
+    (setq strings (nreverse strings)))
+
+  (let ((match-list
+         (member-ignore-case string strings)))
+    (when match-list
+      (let ((case-insensitive-result (or (cadr match-list)
+                                         (car strings))))
+        (cond
+         ((string= string (capitalize string))
+          (capitalize case-insensitive-result))
+         ((string= string (upcase string))
+          (upcase case-insensitive-result))
+         ((string= string (downcase string))
+          (downcase case-insensitive-result)))))))
+
 
 ;;; Miscs
 
