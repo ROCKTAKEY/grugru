@@ -646,37 +646,38 @@ If optional argument REVERSE is non-nil, get string reversely."
         symbol grugrus getter strings-or-generator begin end)
     (while (and alist
                 (if only-one (null result) t))
-      (cl-letf* (((cons symbol grugrus) (pop alist))
-                 (grugrus (symbol-value grugrus)))
-        (setq result
-              (append
-               result
-               (let (next-string valid-bound inner-result)
-                 (while (and grugrus
-                             (if only-one (null inner-result) t))
-                   (cl-letf* (((cons getter strings-or-generator) (pop grugrus))
-                              (cached? (assoc getter cache))
-                              (bound
-                               (if cached?
-                                   (cdr cached?)
-                                 (funcall (grugru--get-getter-function getter))))
-                              ((cons begin end) bound))
-                     (unless cached? (push (cons getter bound) cache))
-                     (when bound
-                       (setf (cons valid-bound next-string)
-                             (grugru--get-next-string
-                              (buffer-substring begin end)
-                              strings-or-generator
-                              (- (point) begin) reverse)))
-                     (when next-string
-                       (push (list :symbol symbol
-                                   :bound (cons begin end)
-                                   :next next-string
-                                   :getter getter
-                                   :strings-or-generator strings-or-generator
-                                   :valid-bound valid-bound)
-                             inner-result))))
-                 (nreverse inner-result))))))
+      (setf (cons symbol grugrus) (pop alist))
+      (setq grugrus (symbol-value grugrus))
+      (setq result
+            (append
+             result
+             (let (inner-result)
+               (while (and grugrus
+                           (if only-one (null inner-result) t))
+                 (let (cached? bound valid-bound next-string)
+                   (setf (cons getter strings-or-generator) (pop grugrus))
+                   (setq cached? (assoc getter cache))
+                   (setq bound
+                         (if cached?
+                             (cdr cached?)
+                           (funcall (grugru--get-getter-function getter))))
+                   (setf (cons begin end) bound)
+                   (unless cached? (push (cons getter bound) cache))
+                   (when bound
+                     (setf (cons valid-bound next-string)
+                           (grugru--get-next-string
+                            (buffer-substring begin end)
+                            strings-or-generator
+                            (- (point) begin) reverse)))
+                   (when next-string
+                     (push (list :symbol symbol
+                                 :bound (cons begin end)
+                                 :next next-string
+                                 :getter getter
+                                 :strings-or-generator strings-or-generator
+                                 :valid-bound valid-bound)
+                           inner-result))))
+               (nreverse inner-result)))))
     (if only-one
         (car result)
       result)))
