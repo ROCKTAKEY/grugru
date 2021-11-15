@@ -62,133 +62,133 @@
                 form))))))))
    (t form))))
 
-(ert-deftest grugru--get-non-alphabet ()
+(ert-deftest grugru--getter-non-alphabet ()
   (with-temp-buffer
     (insert "abc || efg")
     (goto-char 5)
-    (should (equal (grugru--get-non-alphabet)
+    (should (equal (grugru--getter-non-alphabet)
                    (cons 5 7)))
     (should
-     (string= (let ((bounds (grugru--get-non-alphabet)))
+     (string= (let ((bounds (grugru--getter-non-alphabet)))
                 (buffer-substring-no-properties (car bounds) (cdr bounds)))
               "||")))
   (with-temp-buffer
     (insert "abc || efg")
     (goto-char 6)
-    (should (equal (grugru--get-non-alphabet)
+    (should (equal (grugru--getter-non-alphabet)
                    (cons 5 7)))
-    (string= (let ((bounds (grugru--get-non-alphabet)))
+    (string= (let ((bounds (grugru--getter-non-alphabet)))
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "||"))
   (with-temp-buffer
     (insert "abc||efg")
     (goto-char 4)
-    (should (equal (grugru--get-non-alphabet)
+    (should (equal (grugru--getter-non-alphabet)
                    (cons 4 6)))
-    (string= (let ((bounds (grugru--get-non-alphabet)))
+    (string= (let ((bounds (grugru--getter-non-alphabet)))
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "||"))
   (with-temp-buffer
     (insert "abc||efg")
     (goto-char 5)
-    (should (equal (grugru--get-non-alphabet)
+    (should (equal (grugru--getter-non-alphabet)
                    (cons 4 6)))
-    (string= (let ((bounds (grugru--get-non-alphabet)))
+    (string= (let ((bounds (grugru--getter-non-alphabet)))
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "||")))
 
-(ert-deftest grugru--get-tex-command ()
+(ert-deftest grugru--getter-tex-command ()
   (with-temp-buffer
     (insert "Take $\\alpha$.")
     (goto-char 7)
-    (should (equal (grugru--get-tex-command)
+    (should (equal (grugru--getter-tex-command)
                    (cons 7 13)))
     (should
-     (string= (let ((bounds (grugru--get-tex-command)))
+     (string= (let ((bounds (grugru--getter-tex-command)))
                 (buffer-substring-no-properties (car bounds) (cdr bounds)))
               "\\alpha")))
   (with-temp-buffer
     (insert "Take $\\alpha$.")
     (goto-char 8)
-    (should (equal (grugru--get-tex-command)
+    (should (equal (grugru--getter-tex-command)
                    (cons 7 13)))
     (should
-     (string= (let ((bounds (grugru--get-tex-command)))
+     (string= (let ((bounds (grugru--getter-tex-command)))
                 (buffer-substring-no-properties (car bounds) (cdr bounds)))
               "\\alpha")))
   (with-temp-buffer
     (insert "Take $\\alpha$.")
     (goto-char 13)
-    (should (equal (grugru--get-tex-command)
+    (should (equal (grugru--getter-tex-command)
                    (cons 7 13)))
     (should
-     (string= (let ((bounds (grugru--get-tex-command)))
+     (string= (let ((bounds (grugru--getter-tex-command)))
                 (buffer-substring-no-properties (car bounds) (cdr bounds)))
               "\\alpha")))
   (with-temp-buffer
     (insert "Take $\\alpha$.")
     (goto-char 14)
-    (should (equal (grugru--get-tex-command) nil)))
+    (should (equal (grugru--getter-tex-command) nil)))
 
   (with-temp-buffer
     (insert "Hello \\textit{world}.")
     (goto-char 7)
-    (should (equal (grugru--get-tex-command)
+    (should (equal (grugru--getter-tex-command)
                    (cons 7 14)))
-    (string= (let ((bounds (grugru--get-tex-command)))
+    (string= (let ((bounds (grugru--getter-tex-command)))
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "\\textit"))
   (with-temp-buffer
     (insert "Hello \\textit{world}.")
     (goto-char 8)
-    (should (equal (grugru--get-tex-command)
+    (should (equal (grugru--getter-tex-command)
                    (cons 7 14)))
-    (string= (let ((bounds (grugru--get-tex-command)))
+    (string= (let ((bounds (grugru--getter-tex-command)))
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "\\textit"))
   (with-temp-buffer
     (insert "Hello \\textit{world}.")
     (goto-char 14)
-    (should (equal (grugru--get-tex-command)
+    (should (equal (grugru--getter-tex-command)
                    (cons 7 14)))
-    (string= (let ((bounds (grugru--get-tex-command)))
+    (string= (let ((bounds (grugru--getter-tex-command)))
                (buffer-substring-no-properties (car bounds) (cdr bounds)))
              "\\textit"))
   (with-temp-buffer
     (insert "Hello \\textit{world}.")
     (goto-char 15)
-    (should (equal (grugru--get-tex-command) nil))))
+    (should (equal (grugru--getter-tex-command) nil))))
 
-(ert-deftest grugru--get-with-integer ()
+(ert-deftest grugru--metagetter-with-integer ()
   (with-temp-buffer
     (insert "123456789")
     (goto-char 5)
-    (should (equal (grugru--get-with-integer 1)
+    (should (equal (grugru--metagetter-with-integer 1)
                    (cons 5 6))))
   (with-temp-buffer
     (insert "123456789")
     (goto-char 5)
-    (should (equal (grugru--get-with-integer -1)
+    (should (equal (grugru--metagetter-with-integer -1)
                    (cons 4 5))))
   (with-temp-buffer
     (insert "123456789")
     (goto-char 5)
-    (should (equal (grugru--get-with-integer 2)
+    (should (equal (grugru--metagetter-with-integer 2)
                    (cons 5 7))))
   (with-temp-buffer
     (insert "123456789")
     (goto-char 5)
-    (should (equal (grugru--get-with-integer -2)
+    (should (equal (grugru--metagetter-with-integer -2)
                    (cons 3 5))))
   (with-temp-buffer
     (insert "123456789")
     (goto-char 1)
-    (should (equal (grugru--get-with-integer -1)
+    (should (equal (grugru--metagetter-with-integer -1)
                    nil)))
   (with-temp-buffer
     (insert "123456789")
     (goto-char 10)
-    (should (equal (grugru--get-with-integer 1)
+    (should (equal (grugru--metagetter-with-integer 1)
                    nil))))
 
 (ert-deftest grugru--get-valid-bound ()
@@ -223,18 +223,18 @@
 
 (ert-deftest grugru--get-next-string-strings ()
   (should
-   (string=
-    "bar"
+   (equal
+    '((0 . 3) . "bar")
     (grugru--get-next-string "foo" '("foo" "bar" "baz") 1)))
   (should
-   (string=
-    "foo"
+   (equal
+    '((0 . 3) . "foo")
     (grugru--get-next-string "baz" '("foo" "bar" "baz") 5))))
 
 (ert-deftest grugru--get-next-string-function ()
   (should
-   (string=
-    "bar"
+   (equal
+    '((0 . 3) . "bar")
     (grugru--get-next-string
      "foo"
      (lambda (arg)
@@ -255,7 +255,7 @@
 
 (ert-deftest grugru--get-next-string-function-valid-bound ()
   (should
-   (string=
+   (equal
     "bar"
     (cdr
      (grugru--get-next-string
@@ -283,19 +283,19 @@
 
 (ert-deftest grugru--get-previous-string-strings ()
   (should
-   (string=
-    "bar"
-    (grugru--get-previous-string "foo" (nreverse '("foo" "bar" "baz")) 1)))
+   (equal
+    '((0 . 3) . "bar")
+    (grugru--get-next-string "foo" (nreverse '("foo" "bar" "baz")) 1 t)))
   (should
-   (string=
-    "foo"
-    (grugru--get-previous-string "baz" (nreverse '("foo" "bar" "baz")) 5))))
+   (equal
+    '((0 . 3) . "foo")
+    (grugru--get-next-string "baz" (nreverse '("foo" "bar" "baz")) 5 t))))
 
 (ert-deftest grugru--get-previous-string-function ()
   (should
-   (string=
-    "baz"
-    (grugru--get-previous-string
+   (equal
+    '((0 . 3) . "baz")
+    (grugru--get-next-string
      "foo"
      (lambda (arg &optional rev)
        (if rev
@@ -307,9 +307,9 @@
            ("foo" "bar")
            ("bar" "baz")
            ("baz" "foo"))))
-     1)))
+     1 t)))
   (should-not
-   (grugru--get-previous-string
+   (grugru--get-next-string
     "fo"
     (lambda (arg &optional rev)
       (if rev
@@ -321,14 +321,14 @@
           ("foo" "bar")
           ("bar" "baz")
           ("baz" "foo"))))
-    5)))
+    5 t)))
 
 (ert-deftest grugru--get-previous-string-function-valid-bound ()
   (should
    (string=
     "baz"
     (cdr
-     (grugru--get-previous-string
+     (grugru--get-next-string
       "foo"
       (lambda (arg &optional rev)
         (cons
@@ -342,9 +342,9 @@
              ("foo" "bar")
              ("bar" "baz")
              ("baz" "foo")))))
-      1))))
+      1 t))))
   (should-not
-   (grugru--get-previous-string
+   (grugru--get-next-string
     "foo"
     (lambda (arg &optional rev)
       (let ((cons (cons
@@ -359,7 +359,7 @@
                        ("bar" "baz")
                        ("baz" "foo"))))))
         (when (cdr cons) cons)))
-    2)))
+    2 t)))
 
 (ert-deftest grugru--get-getter-function ()
   (let ((grugru-getter-alist
@@ -373,11 +373,11 @@
 
 (ert-deftest grugru--get-plist-normal ()
   (let ((grugru--global
-         '(((lambda () (grugru--get-word)) . ("foo" "bar" "baz"))
-           ((grugru--get-word) . ("aaa" "bbb" "ccc"))))
+         '(((lambda () (grugru--getter-word)) . ("foo" "bar" "baz"))
+           ((grugru--getter-word) . ("aaa" "bbb" "ccc"))))
         (grugru--local
-         '(((lambda () (grugru--get-word)) . ("fool" "bar" "bazl"))
-           ((grugru--get-word) . ("aaal" "bbb" "cccl")))))
+         '(((lambda () (grugru--getter-word)) . ("fool" "bar" "bazl"))
+           ((grugru--getter-word) . ("aaal" "bbb" "cccl")))))
     (with-temp-buffer
       (insert "bar hoge")
       (goto-char 2)
@@ -390,14 +390,14 @@
         (should (equal (plist-get plist1 :symbol) 'global))
         (should (equal (plist-get plist1 :bound) '(1 . 4)))
         (should (equal (plist-get plist1 :next) "baz"))
-        (should (equal (plist-get plist1 :getter) '(lambda () (grugru--get-word))))
-        (should (equal (plist-get plist1 :strs-or-func) '("foo" "bar" "baz")))
+        (should (equal (plist-get plist1 :getter) '(lambda () (grugru--getter-word))))
+        (should (equal (plist-get plist1 :strings-or-generator) '("foo" "bar" "baz")))
 
         (should (equal (plist-get plist2 :symbol) 'local))
         (should (equal (plist-get plist2 :bound) '(1 . 4)))
         (should (equal (plist-get plist2 :next) "bazl"))
-        (should (equal (plist-get plist2 :getter) '(lambda () (grugru--get-word))))
-        (should (equal (plist-get plist2 :strs-or-func) '("fool" "bar" "bazl")))))
+        (should (equal (plist-get plist2 :getter) '(lambda () (grugru--getter-word))))
+        (should (equal (plist-get plist2 :strings-or-generator) '("fool" "bar" "bazl")))))
     (with-temp-buffer
       (insert "bbb hoge")
       (goto-char 2)
@@ -410,22 +410,22 @@
         (should (equal (plist-get plist1 :symbol) 'global))
         (should (equal (plist-get plist1 :bound) '(1 . 4)))
         (should (equal (plist-get plist1 :next) "ccc"))
-        (should (equal (plist-get plist1 :getter) '(grugru--get-word)))
-        (should (equal (plist-get plist1 :strs-or-func) '("aaa" "bbb" "ccc")))
+        (should (equal (plist-get plist1 :getter) '(grugru--getter-word)))
+        (should (equal (plist-get plist1 :strings-or-generator) '("aaa" "bbb" "ccc")))
 
         (should (equal (plist-get plist2 :symbol) 'local))
         (should (equal (plist-get plist2 :bound) '(1 . 4)))
         (should (equal (plist-get plist2 :next) "cccl"))
-        (should (equal (plist-get plist2 :getter) '(grugru--get-word)))
-        (should (equal (plist-get plist2 :strs-or-func) '("aaal" "bbb" "cccl")))))))
+        (should (equal (plist-get plist2 :getter) '(grugru--getter-word)))
+        (should (equal (plist-get plist2 :strings-or-generator) '("aaal" "bbb" "cccl")))))))
 
 (ert-deftest grugru--get-plist-only-one ()
   (let ((grugru--global
-         '(((lambda () (grugru--get-word)) . ("foo" "bar" "baz"))
-           ((grugru--get-word) . ("aaa" "bbb" "ccc"))))
+         '(((lambda () (grugru--getter-word)) . ("foo" "bar" "baz"))
+           ((grugru--getter-word) . ("aaa" "bbb" "ccc"))))
         (grugru--local
-         '(((lambda () (grugru--get-word)) . ("fool" "bar" "bazl"))
-           ((grugru--get-word) . ("aaal" "bbb" "cccl")))))
+         '(((lambda () (grugru--getter-word)) . ("fool" "bar" "bazl"))
+           ((grugru--getter-word) . ("aaal" "bbb" "cccl")))))
     (with-temp-buffer
       (insert "bar hoge")
       (goto-char 2)
@@ -437,8 +437,8 @@
         (should (equal (plist-get plist :symbol) 'global))
         (should (equal (plist-get plist :bound) '(1 . 4)))
         (should (equal (plist-get plist :next) "baz"))
-        (should (equal (plist-get plist :getter) '(lambda () (grugru--get-word))))
-        (should (equal (plist-get plist :strs-or-func) '("foo" "bar" "baz")))))
+        (should (equal (plist-get plist :getter) '(lambda () (grugru--getter-word))))
+        (should (equal (plist-get plist :strings-or-generator) '("foo" "bar" "baz")))))
     (with-temp-buffer
       (insert "bbb hoge")
       (goto-char 2)
@@ -450,18 +450,18 @@
         (should (equal (plist-get plist :symbol) 'global))
         (should (equal (plist-get plist :bound) '(1 . 4)))
         (should (equal (plist-get plist :next) "ccc"))
-        (should (equal (plist-get plist :getter) '(grugru--get-word)))
-        (should (equal (plist-get plist :strs-or-func) '("aaa" "bbb" "ccc")))))))
+        (should (equal (plist-get plist :getter) '(grugru--getter-word)))
+        (should (equal (plist-get plist :strings-or-generator) '("aaa" "bbb" "ccc")))))))
 
-(ert-deftest grugru--insert-sexp-append-to-file ()
+(ert-deftest grugru--edit-insert-sexp-append-to-file ()
   (let ((file "test1"))
     (unwind-protect
         (progn
           (when (file-exists-p file)
             (delete-file file))
           (let((buffer-file-coding-system))
-            (grugru--insert-sexp-append-to-file '(aaa bbb) file)
-            (grugru--insert-sexp-append-to-file '((ccc) ddd) file)
+            (grugru--edit-insert-sexp-append-to-file '(aaa bbb) file)
+            (grugru--edit-insert-sexp-append-to-file '((ccc) ddd) file)
             (should
              (string=
               (with-temp-buffer
@@ -472,39 +472,12 @@
       (when (file-exists-p file)
         (delete-file file)))))
 
-(ert-deftest grugru--make-expression-global-new ()
-  (should
-   (equal
-    (grugru--make-expression
-     'global 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff"))
-    '(grugru-redefine-global 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
-
-(ert-deftest grugru--make-expression-global-remove ()
-  (should
-   (equal
-    (grugru--make-expression 'global 'word '("aaa" "bbb" "ccc") nil)
-    '(grugru-remove-global 'word '("aaa" "bbb" "ccc")))))
-
-(ert-deftest grugru--make-expression-major-mode-new ()
-  (should
-   (equal
-    (grugru--make-expression
-     'fundamental-mode 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff"))
-    '(grugru-redefine-on-major-mode
-      'fundamental-mode 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
-
-(ert-deftest grugru--make-expression-major-mode-remove ()
-  (should
-   (equal
-    (grugru--make-expression 'fundamental-mode 'word '("aaa" "bbb" "ccc") nil)
-    '(grugru-remove-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc")))))
-
-(ert-deftest grugru--strings-or-function-p ()
-  (should (grugru--strings-or-function-p '("aaa" "bbb")))
-  (should (grugru--strings-or-function-p #'grugru--strings-or-function-p))
-  (should-not (grugru--strings-or-function-p '(xyz)))
-  (should-not (grugru--strings-or-function-p "aaa"))
-  (should-not (grugru--strings-or-function-p nil)))
+(ert-deftest grugru--strings-or-generator-p ()
+  (should (grugru--strings-or-generator-p '("aaa" "bbb")))
+  (should (grugru--strings-or-generator-p #'grugru--strings-or-generator-p))
+  (should-not (grugru--strings-or-generator-p '(xyz)))
+  (should-not (grugru--strings-or-generator-p "aaa"))
+  (should-not (grugru--strings-or-generator-p nil)))
 
 (ert-deftest gruru--replace ()
   (cursor-test/equal*
@@ -555,6 +528,33 @@
        (grugru--load-and-cache-position 2 5 3)))
    :expect
    "1234|56789"))
+
+(ert-deftest grugru--edit-make-expression-global-new ()
+  (should
+   (equal
+    (grugru--edit-make-expression
+     'global 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff"))
+    '(grugru-redefine-global 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+
+(ert-deftest grugru--edit-make-expression-global-remove ()
+  (should
+   (equal
+    (grugru--edit-make-expression 'global 'word '("aaa" "bbb" "ccc") nil)
+    '(grugru-remove-global 'word '("aaa" "bbb" "ccc")))))
+
+(ert-deftest grugru--edit-make-expression-major-mode-new ()
+  (should
+   (equal
+    (grugru--edit-make-expression
+     'fundamental-mode 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff"))
+    '(grugru-redefine-on-major-mode
+      'fundamental-mode 'word '("aaa" "bbb" "ccc") '("ddd" "eee" "fff")))))
+
+(ert-deftest grugru--edit-make-expression-major-mode-remove ()
+  (should
+   (equal
+    (grugru--edit-make-expression 'fundamental-mode 'word '("aaa" "bbb" "ccc") nil)
+    '(grugru-remove-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc")))))
 
 (ert-deftest grugru--select-generate-strings ()
   (should

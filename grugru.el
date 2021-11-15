@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.20.2
+;; Version: 1.20.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -153,8 +153,8 @@
 ;;    The change is saved to file ~grugru-edit-save-file~.
 ;;    You can assign completing function to ~grugru-completing-function~.
 ;;; Functions Defining grugru
-;;;; ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
-;;    Define global grugru with GETTER and STRINGS-OR-FUNCTION.
+;;;; ~(grugru-define-global GETTER STRINGS-OR-GENERATOR)~
+;;    Define global grugru with GETTER and STRINGS-OR-GENERATOR.
 ;;
 ;;    GETTER is a function, or a symbol which is alias defined in ~grugru-getter-alist~.
 ;;    GETTER also can be positive or negative number, which means the number of characters.
@@ -162,7 +162,7 @@
 ;;    If it is a function, it should return cons cell ~(begin . end)~
 ;;    which express things at point, and with no argument.
 ;;
-;;    STRINGS-OR-FUNCTION is list of string or function.
+;;    STRINGS-OR-GENERATOR is list of string or function.
 ;;
 ;;    List of string: If it includes string gotten by GETTER,
 ;;    the things gotten by GETTER is replaced to next string.
@@ -176,8 +176,8 @@
 ;;      ;; Or replace "no" at point, to "yes".
 ;;      (grugru-define-global 'symbol '("yes" "no"))
 ;;
-;;;; ~(grugru-define-on-major-mode MAJOR GETTER STRINGS-OR-FUNCTION)~
-;;    Define major-mode local grugru with GETTER and STRINGS-OR-FUNCTION.
+;;;; ~(grugru-define-on-major-mode MAJOR GETTER STRINGS-OR-GENERATOR)~
+;;    Define major-mode local grugru with GETTER and STRINGS-OR-GENERATOR.
 ;;
 ;;    Same as ~grugru-define-global~, but grugru defined with this is applied
 ;;    only in buffer on MAJOR major-mode.  MAJOR can be list of major-modes.
@@ -186,8 +186,8 @@
 ;;      ;; only in lisp-interaction-mode.
 ;;      (grugru-define-on-major-mode lisp-interaction-mode 'symbol '("yes" "no"))
 ;;
-;;;; ~(grugru-define-local GETTER STRINGS-OR-FUNCTION)~
-;;    Define buffer-local grugru with GETTER and STRINGS-OR-FUNCTION.
+;;;; ~(grugru-define-local GETTER STRINGS-OR-GENERATOR)~
+;;    Define buffer-local grugru with GETTER and STRINGS-OR-GENERATOR.
 ;;
 ;;    Same as ~grugru-define-global~, but grugru defined with this is applied
 ;;    only in buffer where eval this expression.
@@ -200,18 +200,18 @@
 ;;                  (grugru-define-local 'word '("I" "my" "me" "mine"))))
 ;;
 ;;
-;;    Also, you can run it interactively (though cannot set STRINGS-OR-FUNCTION to a function).
-;;    On interactive usage, by default, GETTER is the length of car of STRINGS-OR-FUNCTION,
-;;    and STRINGS-OR-FUNCTION is a list which has 2 elements, constructed interactively.
-;;    With prefix argument, you can select GETTER and length of STRINGS-OR-FUNCTION.
+;;    Also, you can run it interactively (though cannot set STRINGS-OR-GENERATOR to a function).
+;;    On interactive usage, by default, GETTER is the length of car of STRINGS-OR-GENERATOR,
+;;    and STRINGS-OR-GENERATOR is a list which has 2 elements, constructed interactively.
+;;    With prefix argument, you can select GETTER and length of STRINGS-OR-GENERATOR.
 ;;    Default GETTER is set by ~grugru-local-interactively-default-getter~.
 ;;
 ;;;; ~(grugru-define-multiple &rest CLAUSES)~
 ;;    This function define multiple grugru.
 ;;
 ;;    Each ~CLAUSE~ is:
-;;    - ~(GETTER . STRINGS-OR-FUNCTION)~: means ~(grugru-define-global GETTER  STRINGS-OR-FUNCTION)~.
-;;    - ~(MAJOR (GETTER . STRINGS-OR-FUNCTION)...)~: means ~(grugru-define-on-major-mode MAJOR GETTER  STRINGS-OR-FUNCTION)...~.
+;;    - ~(GETTER . STRINGS-OR-GENERATOR)~: means ~(grugru-define-global GETTER  STRINGS-OR-GENERATOR)~.
+;;    - ~(MAJOR (GETTER . STRINGS-OR-GENERATOR)...)~: means ~(grugru-define-on-major-mode MAJOR GETTER  STRINGS-OR-GENERATOR)...~.
 ;;    - List of above.
 ;;
 ;;
@@ -247,7 +247,7 @@
 ;;
 ;;;; ~(grugru-define-function NAME () &optional DOCSTRING &rest BODY)~
 ;;    Define function which can roate only grugru defined by BODY.
-;;    Each element of BODY is ~(GETTER . STRINGS-OR-FUNCTION)~,
+;;    Each element of BODY is ~(GETTER . STRINGS-OR-GENERATOR)~,
 ;;    which meaning is same as ~grugru-define-*~ functions.
 ;;
 ;;      ;; The function `three-state' rotate like "water"=>"ice"=>"vapor"=>"water",
@@ -303,7 +303,7 @@
 ;;
 ;;;; ~grugru-select-function-generate-number~
 ;;    This variable have how many strings are generated from function
-;;    in ~STRINGS-OR-FUNCTION~, on ~grugru-select~.
+;;    in ~STRINGS-OR-GENERATOR~, on ~grugru-select~.
 ;;
 ;;;; ~grugru-local-interactively-default-getter~
 ;;    Indicate default getter on interactive usage of ~grugru-define-local~.
@@ -328,15 +328,15 @@
 (defcustom grugru-getter-alist
   '((defun  . (bounds-of-thing-at-point 'defun))
     (symbol . (bounds-of-thing-at-point 'symbol))
-    (word   . grugru--get-word)
+    (word   . grugru--getter-word)
     (char   . (unless (= (point) (point-max)) (cons (point) (1+ (point)))))
     (list   . (bounds-of-thing-at-point 'list))
     (line   . (bounds-of-thing-at-point 'line))
-    (non-alphabet . grugru--get-non-alphabet)
-    (tex-command . grugru--get-tex-command))
+    (non-alphabet . grugru--getter-non-alphabet)
+    (tex-command . grugru--getter-tex-command))
   "An alist of getter of current thing.
-Each element should be (SYMBOL . FUNC-OR-SEXP).  SYMBOL is used to access to
-SEXP by `grugru'.  FUNC-OR-SEXP should be sexp or function
+Each element should be (SYMBOL . FUNCTION-OR-SEXP).  SYMBOL is used to access to
+SEXP by `grugru'.  FUNCTION-OR-SEXP should be sexp or getter function,
 which return cons cell whose car/cdr is beginning/end point of current thing."
   :group 'grugru
   :risky t
@@ -360,13 +360,13 @@ You can also use `ivy-completing-read' or `ido-completing-read'."
   :type 'function)
 
 (defcustom grugru-select-function-generate-number 30
-  "Max strings which are generated by function in STRS-OR-FUNCTION, on `grugru-select'."
+  "Max number of strings which are generated by generator on `grugru-select'."
   :group 'grugru
   :type 'number)
 
 (defcustom grugru-local-interactively-default-getter 0
   "Default getter of `grugru-define-local' on interactive usage.
-If 0, gets number from first string."
+If 0, use the length of the first string."
   :group 'grugru
   :risky t
   :type '(choice (const 0) function symbol))
@@ -388,45 +388,73 @@ Indent happens only if text after rotation has a newline."
   :group 'grugru
   :type 'boolean)
 
+(defcustom grugru-before-hook nil
+  "Hooks run before rotation by `grugru'."
+  :group 'grugru
+  :type 'hook)
+
+(defcustom grugru-after-hook nil
+  "Hooks run after rotation by `grugru'."
+  :group 'grugru
+  :type 'hook)
+
+(defcustom grugru-after-no-rotate-hook nil
+  "Hooks run after `grugru' tries to rotate text but cannot rotate."
+  :group 'grugru
+  :type 'hook)
+
+
+
 (defvar grugru--major-modes-grugru-alist '()
   "An alist of rotated text on each `major-mode'.
 Each element should be (MAJOR-MODE . ALIST).
 
-ALIST is compounded from (GETTER . STRINGS-OR-FUNCTION).
-GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char' is available as GETTER.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.")
+ALIST is compounded from (GETTER . STRINGS-OR-GENERATOR).
+
+GETTER is symbol in `grugru-getter-alist', sexp or getter function.
+See also `grugru-getter-alist'.
+
+STRINGS-OR-GENERATOR can be a list of strings or generator,
+function which recieves current thing as an argument and returns next text.
+
+You can add element to this with `grugru-define-on-major-mode',
+ or `grugru-define-on-major-mode'.")
 
 (defvar grugru--global-grugru-alist '()
-  "This variable keeps global list of (GETTER . STRINGS-OR-FUNCTION).
-GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char' is available as GETTER.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
+  "This variable keeps global list of (GETTER . STRINGS-OR-GENERATOR).
+
+GETTER is symbol in `grugru-getter-alist', sexp or getter function.
+See also `grugru-getter-alist'.
+
+STRINGS-OR-GENERATOR can be a list of strings or generator,
+function which recieves current thing as an argument and returns next text.
 
 You can add element to this with `grugru-define-global'.")
 
 (defvar grugru--local-interactively-history nil)
 
 (defvar-local grugru--buffer-local-grugru-alist '()
-  "This variable keeps buffer-local list of (GETTER . STRINGS-OR-FUNCTION).
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
-`char' is available as GETTER.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
+  "This variable keeps buffer-local list of (GETTER . STRINGS-OR-GENERATOR).
+
+GETTER is symbol in `grugru-getter-alist', sexp or getter function.
+See also `grugru-getter-alist'.
+
+STRINGS-OR-GENERATOR can be a list of strings or generator,
+function which recieves current thing as an argument and returns next text.
 
 You can add element to this with `grugru-define-local'.")
 
 (defvar-local grugru--buffer-local-major-mode-grugru-alist '()
-  "This variable keeps major-mode-specific list of (GETTER . STRINGS-OR-FUNCTION).
-GETTER is symbol in `grugru-getter-alist'. By default, `symbol', `word',
-`char' is available as GETTER.
- STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
+  "This variable keeps major-mode-specific list of (GETTER . STRINGS-OR-GENERATOR).
 
-You can add element to this with `grugru-define-on-major-mode',
- or `grugru-define-on-major-mode'.")
+GETTER is symbol in `grugru-getter-alist', sexp or getter function.
+See also `grugru-getter-alist'.
+
+STRINGS-OR-GENERATOR can be a list of strings or generator,
+function which recieves current thing as an argument and returns next text.
+
+This variable is automatically loaded from `grugru--major-mode-grugru-alist'
+by `grugru--major-mode-load'.")
 
 (defvar-local grugru--loaded-local nil
   "Whether the buffer load grugru list or not, on the buffer.
@@ -435,14 +463,8 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
 (defvar grugru--point-cache nil
   "Cache for keep position on sequentially executed `grugru'.")
 
-(defvar grugru-before-hook nil
-  "Hooks run before rotation by `grugru'.")
-
-(defvar grugru-after-hook nil
-  "Hooks run after rotation by `grugru'.")
-
-(defvar grugru-after-no-rotate-hook nil
-  "Hooks run after `grugru' tries to rotate text but cannot rotate.")
+
+;;; Metagetter
 
 (defconst grugru--non-alphabet-regexp
   (mapconcat
@@ -451,23 +473,10 @@ Global grugru is not observed, because `grugru' is remake rotated sets of list."
    "-^\\@;:,\\./=~|`+*<>?_!\"#$%&'"
    "\\|")
   "Regexp which match non alphabet character.
-Used in `grugru--get-non-alphabet'.")
+Used in `grugru--getter-non-alphabet'.")
 
-
-;; inner
-(defun grugru--get-word ()
-  "Get beginning/end of current point."
-  (if (or (eq (point) (point-at-eol))
-          (string-match "[-\\[\\]_:;&+^~|#$!?%'()<>=*{}.,/\\\\\n\t]\\| "
-                        (buffer-substring (point) (1+ (point)))))
-      (save-excursion (cons (subword-left) (subword-right)))
-    (save-excursion
-      (let ((x (subword-right))
-            (y (subword-left)))
-        (cons y x)))))
-
-(defun grugru--get-from-regexp (regexp)
-  "Get things at point matched to REGEXP repeatedly, at least once."
+(defun grugru--metagetter-from-regexp (regexp)
+  "Get beginning/end of string at point matched to REGEXP repeatedly."
   (let ((beg
          (save-excursion
            (let ((bef (point)))
@@ -487,28 +496,8 @@ Used in `grugru--get-non-alphabet'.")
     (unless (= beg end)
       (cons beg end))))
 
-(defun grugru--get-non-alphabet ()
-  "Get non-alphabet sequence at point."
-  (grugru--get-from-regexp grugru--non-alphabet-regexp))
-
-(defun grugru--get-tex-command ()
-  "Get TeX command sequence at point.
-For example, \"\\alpha\", \"\\mathrm\" is valid sequence."
-  (save-excursion
-    (when (and
-           (not (eq (point) (point-max)))
-           (string= (buffer-substring-no-properties (point) (1+ (point))) "\\"))
-      (goto-char (1+ (point))))
-    (let ((cons (grugru--get-from-regexp "[a-zA-Z]")))
-      (when (and cons
-                 (not (eq (point-min) (car cons)))
-                 (string=
-                  (buffer-substring-no-properties (1- (car cons)) (car cons))
-                  "\\"))
-        (cons (1- (car cons)) (cdr cons))))))
-
-(defun grugru--get-with-integer (number)
-  "Get string of buffer from point by NUMBER characters.
+(defun grugru--metagetter-with-integer (number)
+  "Get beginning/end of string at point by NUMBER characters.
 NUMBER can be negative."
   (let ((p (+ (point)))
         (q (+ (point) number)))
@@ -516,8 +505,45 @@ NUMBER can be negative."
                (<= p (point-max)) (<= q (point-max)))
       (cons (min p q) (max p q)))))
 
+
+;;; Getter
+
+(defun grugru--getter-word ()
+  "Get beginning/end of word at point."
+  (if (or (eq (point) (point-at-eol))
+          (string-match "[-\\[\\]_:;&+^~|#$!?%'()<>=*{}.,/\\\\\n\t]\\| "
+                        (buffer-substring (point) (1+ (point)))))
+      (save-excursion (cons (subword-left) (subword-right)))
+    (save-excursion
+      (let ((x (subword-right))
+            (y (subword-left)))
+        (cons y x)))))
+
+(defun grugru--getter-non-alphabet ()
+  "Get beginning/end non-alphabet string sequence at point."
+  (grugru--metagetter-from-regexp grugru--non-alphabet-regexp))
+
+(defun grugru--getter-tex-command ()
+  "Get beginning/end of TeX command string sequence at point.
+For example, \"\\alpha\", \"\\mathrm\" is valid sequence."
+  (save-excursion
+    (when (and
+           (not (eq (point) (point-max)))
+           (string= (buffer-substring-no-properties (point) (1+ (point))) "\\"))
+      (goto-char (1+ (point))))
+    (let ((cons (grugru--metagetter-from-regexp "[a-zA-Z]")))
+      (when (and cons
+                 (not (eq (point-min) (car cons)))
+                 (string=
+                  (buffer-substring-no-properties (1- (car cons)) (car cons))
+                  "\\"))
+        (cons (1- (car cons)) (cdr cons))))))
+
+
+;;; Load major-mode-local `grugru'
+
 (defun grugru--major-mode-load ()
-  "Load grugru in current buffer."
+  "Load major mode local grugru in current buffer."
   (setq grugru--buffer-local-major-mode-grugru-alist
         (cdr (assq major-mode grugru--major-modes-grugru-alist)))
   (setq grugru--loaded-local t))
@@ -533,6 +559,28 @@ NUMBER can be negative."
                 (setq grugru--loaded-local nil))))
           (buffer-list)))
 
+
+;;; Metagenerator
+
+(defun grugru--simple-metagenerator (strings string &optional reverse)
+  "Return string next to STRING in STRINGS.
+If REVERSE is non-nil, return previous STRING."
+  (when reverse
+    (setq strings (reverse strings)))
+  (let ((match-list (member string strings)))
+    (when match-list
+      (or (cadr match-list)
+          (car strings)))))
+
+
+;;; Miscs
+
+(defmacro grugru--set-cons (car cdr value)
+  "Set CAR and CDR to car and cdr of VALUE."
+  (let ((temp (cl-gensym)))
+    `(let ((,temp ,value))
+         (setf (cons ,car ,cdr) ,temp))))
+
 (defun grugru--get-valid-bound (point valid-bounds)
   "Return bound if POINT is among VALID-BOUNDS.
 VALID-BOUNDS is list of cons cell (BEG . END), which is pair of numbers
@@ -545,142 +593,111 @@ indicating range valid to rotate."
          bound)))
    valid-bounds))
 
-(defun grugru--simple-metagenerator (strings string &optional reverse)
-  "Return string next to STRING from STRINGS.
-If REVERSE is non-nil, return previous STRING."
-  (when reverse
-    (setq strings (reverse strings)))
-  (let ((match-list (member string strings)))
-    (when match-list
-      (or (cadr match-list)
-          (car strings)))))
-
-(defun grugru--call-generator (func string reverse)
-  "Call FUNC with STRING and REVERSE.
+(defun grugru--call-generator (generator string reverse)
+  "Call GENERATOR with STRING and REVERSE.
 When REVERSE is non-nil, ignore the `wrong-number-of-arguments' error."
   (if reverse
       (condition-case nil
-          (funcall func string t)
+          (funcall generator string t)
         ('wrong-number-of-arguments nil))
-    (funcall func string)))
+    (funcall generator string)))
 
-(defun grugru--get-next-string (string strs-or-function &optional point reverse)
-  "Get next string of STRING with STRS-OR-FUNCTION.
-POINT is relative from beggining of STRING,
-and used when valid-bounds are detected.  This function returns
-cons cell (valid-bounds . next-string), or only next-string.
+(defun grugru--get-next-string (string strings-or-generator &optional point reverse)
+  "Get next string of STRING with STRINGS-OR-GENERATOR.
+
+POINT is relative from beggining of STRING.  POINT is used when valid-bounds are
+detected.
+
+This function returns cons cell (valid-bounds . next-string).
 
 If REVERSE is non-nil, get previous string instead."
-  (let* ((func (if (functionp strs-or-function) strs-or-function
-                 (apply-partially #'grugru--simple-metagenerator strs-or-function)))
+  (let* ((func (if (functionp strings-or-generator) strings-or-generator
+                 (apply-partially #'grugru--simple-metagenerator strings-or-generator)))
          (result (grugru--call-generator func string reverse))
          (valid-bounds (car-safe result))
-         (string (or (cdr-safe result) result))
+         (next-string (or (cdr-safe result) result))
          valid-bound)
     (when (and (not (null valid-bounds))
                (listp valid-bounds)
                (not (consp (car valid-bounds))))
       (setq valid-bounds (list valid-bounds)))
-    (when valid-bounds
-      (setq valid-bound (grugru--get-valid-bound point valid-bounds)))
-    (cond
-     ((or (not point)
-          (null valid-bounds))
-      string)
-     (valid-bound
-      (cons valid-bound string))
-     (t nil))))
 
-(defun grugru--get-previous-string (string strs-or-function &optional point)
-  "Get previous string of STRING with STRS-OR-FUNCTION.
-If STRS-OR-FUNCTION is a function which recieves 2 arguments, return nil.
-POINT is relative from beggining of STRING, and used when
-valid-bounds are detected.
-
-This function returns cons cell (valid-bounds . prev-string), or only prev-string."
-  (grugru--get-next-string string strs-or-function point t))
+    (setq valid-bound
+          (if valid-bounds
+              (grugru--get-valid-bound point valid-bounds)
+            (cons 0 (length string))))
+    (when (and next-string valid-bound)
+      (cons valid-bound next-string))))
 
 (defun grugru--get-getter-function (getter)
   "Get getter function from GETTER."
   (setq getter (or (cdr (assq getter grugru-getter-alist)) getter))
-  (or (if (functionp getter)
-          getter
-        `(lambda () ,getter))))
+  (pcase getter
+   ((pred functionp)
+    getter)
+   ((pred integerp)
+    (apply-partially #'grugru--metagetter-with-integer getter))
+    (_ `(lambda () ,getter))))
 
 (defun grugru--get-plist (alist &optional only-one reverse)
   "Return plist list constructed with ALIST.
 If ONLY-ONE is non-nil, returned value is 1 plist, which matches first.
 Each element of ALIST is (SYMBOL . GRUGRU-ALIST).
-Each element of GRUGRU-ALIST is (GETTER . STRS-OR-FUNCTION), which is same as
-`grugru-define-global'.
+Each element of GRUGRU-ALIST is (GETTER . STRINGS-OR-GENERATOR), which is same
+as `grugru-define-global'.
 If optional argument REVERSE is non-nil, get string reversely."
-  (eval
-   `(let (cache cached? begin end cons next valid-bound element)
-      (cl-loop
-       for (symbol . grugrus) in ',alist
-       do
-       (setq
-        element
-        (cl-loop
-         for (getter . strs-or-func) in (symbol-value grugrus)
-         do
-         (setq cons
-               (or (setq cached? (cdr (assoc getter cache)))
-                   (if (integerp getter)
-                       (grugru--get-with-integer getter)
-                    (funcall (grugru--get-getter-function getter)))))
-         (unless cached? (push (cons getter cons) cache))
+  (let (result
+        cache
+        symbol
+        grugru-alist)
+    (while (and alist
+                (if only-one (null result) t))
+      (grugru--set-cons symbol grugru-alist (pop alist))
+      (when (symbolp grugru-alist)
+        (setq grugru-alist (symbol-value grugru-alist)))
+      (setq result
+            (append
+             result
+             (let (inner-result)
+               (while (and grugru-alist
+                           (if only-one (null inner-result) t))
+                 (let (getter
+                       strings-or-generator
+                       begin
+                       end
+                       cached?
+                       bound
+                       valid-bound
+                       next-string)
+                   (grugru--set-cons getter strings-or-generator (pop grugru-alist))
+                   (setq cached? (assoc getter cache))
+                   (setq bound
+                         (if cached?
+                             (cdr cached?)
+                           (funcall (grugru--get-getter-function getter))))
+                   (setf (cons begin end) bound)
+                   (unless cached? (push (cons getter bound) cache))
+                   (when bound
+                     (grugru--set-cons valid-bound next-string
+                                       (grugru--get-next-string
+                                        (buffer-substring begin end)
+                                        strings-or-generator
+                                        (- (point) begin) reverse)))
+                   (when next-string
+                     (push (list :symbol symbol
+                                 :bound (cons begin end)
+                                 :next next-string
+                                 :getter getter
+                                 :strings-or-generator strings-or-generator
+                                 :valid-bound valid-bound)
+                           inner-result))))
+               (nreverse inner-result)))))
+    (if only-one
+        (car result)
+      result)))
 
-         (setq begin (car cons) end (cdr cons))
-         if (and
-             cons
-             (setq next
-                   (if ,reverse
-                       (grugru--get-previous-string
-                        (buffer-substring begin end) strs-or-func
-                        (- (point) begin))
-                     (grugru--get-next-string
-                      (buffer-substring begin end) strs-or-func
-                      (- (point) begin)))))
-         do (when (consp next)
-              (cl-psetq next         (cdr next)
-                        valid-bound (car next)))
-         and
-         ,(if only-one 'return 'collect)
-         (list :symbol symbol
-               :bound (cons begin end)
-               :next next
-               :getter getter
-               :strs-or-func strs-or-func
-               :valid-bound valid-bound)))
-       when element
-       ,@(if only-one
-             '(return element)
-           '(append element))))))
-
-(defun grugru--insert-sexp-append-to-file (sexp file)
-  "Insert SEXP to the end of FILE."
-  (with-temp-buffer
-    (let (print-level print-length)
-      (encode-coding-string
-       (format "%S
-" sexp)
-       'utf-8 nil (current-buffer))
-      (write-region nil nil file t))))
-
-(defun grugru--make-expression (symbol getter strs-or-func &optional new)
-  "Make sexp to change old grugru to NEW grugru.
-Old one is specified by SYMBOL, GETTER and STRS-OR-FUNC."
-  (if (eq symbol 'global)
-      (if new
-          `(grugru-redefine-global ',getter ',strs-or-func ',new)
-        `(grugru-remove-global ',getter ',strs-or-func))
-    (if new
-        `(grugru-redefine-on-major-mode ',symbol ',getter ',strs-or-func ',new)
-      `(grugru-remove-on-major-mode ',symbol ',getter ',strs-or-func))))
-
-(defun grugru--strings-or-function-p (object)
-  "Return non-nil if OBJECT is acceptable as `strs-or-func'."
+(defun grugru--strings-or-generator-p (object)
+  "Return non-nil if OBJECT is acceptable as `strings-or-generator'."
   (when object
     (or
      (functionp object)
@@ -704,23 +721,8 @@ Otherwise, goto the end of the thing (begin + len)."
     (setq grugru--point-cache bef))
   (goto-char (+ begin (min grugru--point-cache len))))
 
-(defun grugru--select-generate-strings (init func num)
-  "Generate string list.
-INIT is initial term, and FUNC generates string recursively.
-NUM is a maximum length of the generated list."
-  (let (all
-        (now init))
-    (cl-loop
-     for i below num
-     if (or (null now) (member now all))
-     return 0
-     end
-     do (push now all)
-     do (setq now (funcall func now)))
-    (nreverse all)))
-
 
-;; For user interaction
+;;; Main functions
 
 (defvar grugru-highlight-mode)
 
@@ -748,8 +750,8 @@ If PREFIX is negative number, rotate text previously - PREFIX times."
     (dotimes (_ (abs prefix))
       (let ((plist
              (grugru--get-plist
-              `((local       . grugru--global-grugru-alist)
-                (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+              '((local       . grugru--global-grugru-alist)
+                (major-mode . grugru--buffer-local-major-mode-grugru-alist)
                 (global      . grugru--buffer-local-grugru-alist))
               'only-one (< prefix 0))))
         (if plist
@@ -781,13 +783,46 @@ If PREFIX is negative, same as calling `grugru-forward' with - PREFIX."
   (interactive "p")
   (grugru (and prefix (- prefix))))
 
+
+;; `grugru-edit'
+
+(defun grugru--edit-insert-sexp-append-to-file (sexp file)
+  "Insert SEXP to the end of FILE."
+  (with-temp-buffer
+    (let (print-level print-length)
+      (encode-coding-string
+       (format "%S
+" sexp)
+       'utf-8 nil (current-buffer))
+      (write-region nil nil file t))))
+
+(defun grugru--edit-make-expression (symbol getter old-strings-or-generator &optional new-strings-or-generator)
+  "Make sexp to change old grugru to NEW-STRINGS-OR-GENERATOR grugru.
+Old one is specified by SYMBOL, GETTER and OLD-STRINGS-OR-GENERATOR."
+  (pcase symbol
+    (`global
+     (if new-strings-or-generator
+         `(grugru-redefine-global ',getter ',old-strings-or-generator ',new-strings-or-generator)
+       `(grugru-remove-global ',getter ',old-strings-or-generator)))
+    (`local
+     (if new-strings-or-generator
+         `(grugru-redefine-local ',getter ',old-strings-or-generator ',new-strings-or-generator)
+       `(grugru-remove-local ',getter ',old-strings-or-generator)))
+    (_
+     (if new-strings-or-generator
+         `(grugru-redefine-on-major-mode ',symbol ',getter ',old-strings-or-generator ',new-strings-or-generator)
+       `(grugru-remove-on-major-mode ',symbol ',getter ',old-strings-or-generator)))))
+
 ;;;###autoload
-(defun grugru-edit (symbol getter strs-or-func new)
+(defun grugru-edit (symbol getter old-strings-or-generator new-strings-or-generator)
   "Edit grugru which can be rotated at point.
 SYMBOL indicates what type (global, local or major mode) of grugru is edited.
-GETTER and STRS-OR-FUNC are used by `grugru-define-global' edited.
-NEW indicates to which grugru is changed, which is new STRS-OR-FUNC.
-The change made by this function is saved in file `grugru-edit-save-file'."
+GETTER and OLD-STRINGS-OR-GENERATOR are used by `grugru-define-global' edited.
+NEW-STRINGS-OR-GENERATOR indicates to which grugru is changed, which is new
+STRINGS-OR-GENERATOR.
+
+The change made by this function is saved in file `grugru-edit-save-file' if
+SYMBOL is not `local'."
   (interactive
    (progn
      (unless grugru--loaded-local
@@ -800,10 +835,11 @@ The change made by this function is saved in file `grugru-edit-save-file'."
                 (cons (format "%S(%S): %S"
                               (plist-get arg :symbol)
                               (plist-get arg :getter)
-                              (plist-get arg :strs-or-func))
+                              (plist-get arg :strings-or-generator))
                       arg))
               (grugru--get-plist
-               `((,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+               `((local . grugru--buffer-local-grugru-alist)
+                 (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
                  (global . grugru--global-grugru-alist)))))
             (cons
              (assoc (funcall grugru-completing-function "Edit grugru: "
@@ -812,24 +848,43 @@ The change made by this function is saved in file `grugru-edit-save-file'."
             (prompt (car cons))
             (plist (cdr cons))
             (getter (plist-get plist :getter))
-            (strs-or-func (plist-get plist :strs-or-func))
+            (old-strings-or-generator (plist-get plist :strings-or-generator))
             (symbol (plist-get plist :symbol))
-            (new (read (read-from-minibuffer
+            (new-strings-or-generator (read (read-from-minibuffer
                         (format "Edit '%s' to: " prompt)
-                        (format "%S" strs-or-func)))))
-       (list symbol getter strs-or-func new))))
+                        (format "%S" old-strings-or-generator)))))
+       (list symbol getter old-strings-or-generator new-strings-or-generator))))
   (unless grugru--loaded-local
     (grugru--major-mode-load)
     (setq grugru--loaded-local t))
-  (let* ((expression (grugru--make-expression symbol getter strs-or-func new)))
+  (let* ((expression (grugru--edit-make-expression symbol getter old-strings-or-generator new-strings-or-generator)))
     (eval expression)
-    (grugru--insert-sexp-append-to-file expression grugru-edit-save-file)))
+    (unless (eq symbol 'local)
+      (grugru--edit-insert-sexp-append-to-file expression grugru-edit-save-file))))
 
 ;;;###autoload
 (defun grugru-edit-load ()
   "Load edited grugru saved on `grugru-edit-save-file'."
   (interactive)
   (load grugru-edit-save-file t nil t))
+
+
+;; `grugru-select'
+
+(defun grugru--select-generate-strings (init generator num)
+  "Generate string list.
+INIT is initial term, and GENERATOR generates string recursively.
+NUM is a maximum length of the generated list."
+  (let (all
+        (now init))
+    (cl-loop
+     for i below num
+     if (or (null now) (member now all))
+     return 0
+     end
+     do (push now all)
+     do (setq now (funcall generator now)))
+    (nreverse all)))
 
 ;;;###autoload
 (defun grugru-select (begin end str)
@@ -851,18 +906,18 @@ by `grugru-completing-function'."
               (lambda (plist)
                 (let* ((symbol (plist-get plist :symbol))
                        (getter (plist-get plist :getter))
-                       (strs-or-func (plist-get plist :strs-or-func))
+                       (strings-or-generator (plist-get plist :strings-or-generator))
                        (bound (plist-get plist :bound))
                        (begin (car bound))
                        (end (cdr bound)))
                   (cons (format "%S(%S): %S" symbol getter
-                                (if (functionp strs-or-func)
-                                    ;; Replace function to strings on strs-or-func.
+                                (if (functionp strings-or-generator)
+                                    ;; Replace function to strings on strings-or-generator.
                                     (grugru--select-generate-strings
                                      (buffer-substring-no-properties begin end)
-                                     strs-or-func
+                                     strings-or-generator
                                      grugru-select-function-generate-number)
-                                  strs-or-func))
+                                  strings-or-generator))
                         plist)))
               plists))
             (cons
@@ -875,15 +930,15 @@ by `grugru-completing-function'."
             (bound (plist-get plist :bound))
             (begin (car bound))
             (end   (cdr bound))
-            (strs-or-func (plist-get plist :strs-or-func))
+            (strings-or-generator (plist-get plist :strings-or-generator))
             (strings
              (remove
               (buffer-substring-no-properties begin end)
-              (if (functionp strs-or-func)
+              (if (functionp strings-or-generator)
                   (grugru--select-generate-strings
                    (buffer-substring-no-properties begin end)
-                   strs-or-func grugru-select-function-generate-number)
-                strs-or-func)))
+                   strings-or-generator grugru-select-function-generate-number)
+                strings-or-generator)))
             (str
              (funcall grugru-completing-function
                       (format "Replace \"%s\" with: "
@@ -894,55 +949,43 @@ by `grugru-completing-function'."
   (grugru--replace begin end str))
 
 
-;; For lisp user
+;;; Functions defining `grugru'
+
 ;;;###autoload
-(defun grugru-define-on-major-mode (major getter strings-or-function)
-  "Add new grugru STRINGS-OR-FUNCTION in MAJOR major mode, with GETTER.
+(defun grugru-define-on-major-mode (major getter strings-or-generator)
+  "Add new grugru STRINGS-OR-GENERATOR in MAJOR major mode, with GETTER.
 
 MAJOR is `major-mode' or list of that where the grugru is set.
-GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char', `line', `defun', `non-alphabet', `list', integer or function are
-available as GETTER.
-Integer means getting string from point by NUMBER characters.
-If function, it should return cons cell (BEG . END),
-which indicates buffer substring.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text."
+Others are same as `grugru-define-global'."
   (if (listp major)
       (mapc (lambda (arg)
-              (grugru-define-on-major-mode arg getter strings-or-function))
+              (grugru-define-on-major-mode arg getter strings-or-generator))
             major)
     (let ((x (assoc major grugru--major-modes-grugru-alist)))
       (if x
-          (unless (member (cons getter strings-or-function) (cdr x))
-            (setf (cdr (last (cdr x))) (list (cons getter strings-or-function))))
-        (push (cons major (list (cons getter strings-or-function)))
+          (unless (member (cons getter strings-or-generator) (cdr x))
+            (setf (cdr (last (cdr x))) (list (cons getter strings-or-generator))))
+        (push (cons major (list (cons getter strings-or-generator)))
               grugru--major-modes-grugru-alist))
       (grugru--major-mode-set-as-unloaded major))))
 
 ;;;###autoload
-(defmacro grugru-define-on-local-major-mode (getter strings-or-function)
-  "Same as (grugru-define-on-major-mode major-mode GETTER STRINGS-OR-FUNCTION)."
-  `(grugru-define-on-major-mode (eval 'major-mode) ,getter ,strings-or-function))
+(defmacro grugru-define-on-local-major-mode (getter strings-or-generator)
+  "Same as (grugru-define-on-major-mode major-mode GETTER STRINGS-OR-GENERATOR)."
+  `(grugru-define-on-major-mode (eval 'major-mode) ,getter ,strings-or-generator))
 
 ;;;###autoload
-(defun grugru-define-local (getter strings-or-function)
-  "Add new grugru STRINGS-OR-FUNCTION with GETTER on buffer-local.
+(defun grugru-define-local (getter strings-or-generator)
+  "Add new grugru STRINGS-OR-GENERATOR with GETTER on buffer-local.
 
-GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char', `line', `defun', `non-alphabet', `list', integer or function are
-available as GETTER.
-Integer means getting string from point by NUMBER characters.
-If function, it should return cons cell (BEG . END),
-which indicates buffer substring.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
-current thing as an argument and returns next text.
+All arguments are same as `grugru-define-global'.
 
-On interactive usage, by default, GETTER is the length of car of
-STRINGS-OR-FUNCTION, and STRINGS-OR-FUNCTION is a list which has 2 elements,
-constructed interactively.
-With prefix argument, you can select GETTER and length of STRINGS-OR-FUNCTION.
-Default GETTER is set by `grugru-local-interactively-default-getter'."
+On interactive usage, by default, STRINGS-OR-GENERATOR is a list which has
+two elements, and GETTER is the length of the first string.
+Default GETTER is set by `grugru-local-interactively-default-getter'.
+
+With prefix argument, you can select GETTER and length of strings  as
+STRINGS-OR-GENERATOR, and then input each string."
   (interactive
    (if current-prefix-arg
        (let* ((getter
@@ -981,23 +1024,125 @@ Default GETTER is set by `grugru-local-interactively-default-getter'."
                   'grugru--local-interactively-history)
                  (error "Void string"))))
        (list getter (list string1 string2)))))
-  (unless (member (cons getter strings-or-function) grugru--buffer-local-grugru-alist)
-    (push (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
+  (unless (member (cons getter strings-or-generator) grugru--buffer-local-grugru-alist)
+    (push (cons getter strings-or-generator) grugru--buffer-local-grugru-alist)))
 
 ;;;###autoload
-(defun grugru-define-global (getter strings-or-function)
-  "Add new grugru STRINGS-OR-FUNCTION with GETTER globally.
+(defun grugru-define-global (getter strings-or-generator)
+  "Add new grugru STRINGS-OR-GENERATOR with GETTER globally.
 
-GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
-`char', `line', `defun', `non-alphabet', `list', integer or function are
-available as GETTER.
-Integer means getting string from point by NUMBER characters.
-If function, it should return cons cell (BEG . END),
-which indicates buffer substring.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+GETTER is symbol in `grugru-getter-alist', sexp or getter function,
+which return cons cell whose car/cdr is beginning/end point of current thing.
+GETTER also can be integer NUMBER.  It means getting string from point by NUMBER
+characters backward.
+
+STRINGS-OR-GENERATOR can be a list of strings or generator, which recieves
 current thing as an argument and returns next text."
-  (unless (member (cons getter strings-or-function) grugru--global-grugru-alist)
-    (push (cons getter strings-or-function) grugru--global-grugru-alist)))
+  (unless (member (cons getter strings-or-generator) grugru--global-grugru-alist)
+    (push (cons getter strings-or-generator) grugru--global-grugru-alist)))
+
+;;;###autoload
+(defun grugru-remove-on-major-mode (major getter strings-or-generator)
+  "Remove `major-mode' local grugru defined with MAJOR, GETTER and STRINGS-OR-GENERATOR."
+  (if (listp major)
+      (mapcar (lambda (arg)
+                (grugru-remove-on-major-mode arg getter strings-or-generator))
+              major)
+    (grugru--major-mode-set-as-unloaded major)
+    (let ((major-grugru (assq major grugru--major-modes-grugru-alist)))
+      (setf (cdr major-grugru) (delete (cons getter strings-or-generator)
+                                       (cdr major-grugru))))))
+
+;;;###autoload
+(defmacro grugru-remove-on-local-major-mode (getter strings-or-generator)
+  "Same as (grugru-remove-on-major-mode major-mode GETTER STRINGS-OR-GENERATOR)."
+  `(grugru-remove-on-major-mode (eval 'major-mode) ,getter ,strings-or-generator))
+
+;;;###autoload
+(defun grugru-remove-local (getter strings-or-generator)
+  "Remove local grugru defined with GETTER and  STRINGS-OR-GENERATOR."
+  (setq grugru--buffer-local-grugru-alist
+        (delete (cons getter strings-or-generator) grugru--buffer-local-grugru-alist)))
+
+;;;###autoload
+(defun grugru-remove-global (getter strings-or-generator)
+  "Remove global grugru defined with GETTER and  STRINGS-OR-GENERATOR."
+  (setq grugru--global-grugru-alist
+        (delete (cons getter strings-or-generator) grugru--global-grugru-alist)))
+
+;;;###autoload
+(defun grugru-redefine-on-major-mode (major getter old-strings-or-generator new-strings-or-generator)
+  "Redefine grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR on MAJOR to NEW-STRINGS-OR-GENERATOR."
+  (if (listp major)
+      (mapcar
+       (lambda (arg)
+         (grugru-redefine-on-major-mode arg getter old-strings-or-generator new-strings-or-generator))
+       major)
+    (let* ((major-lst (cdr (assq major grugru--major-modes-grugru-alist)))
+           (lst (car (member (cons getter old-strings-or-generator) major-lst))))
+      (if lst
+          (setf (cdr lst) new-strings-or-generator)
+        (error "No grugru defined on %s with %s, %s" major getter old-strings-or-generator)))))
+
+;;;###autoload
+(defun grugru-redefine-global (getter old-strings-or-generator new-strings-or-generator)
+  "Redefine grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR on to NEW-STRINGS-OR-GENERATOR."
+  (let* ((lst (car (member (cons getter old-strings-or-generator) grugru--global-grugru-alist))))
+    (if lst
+        (setf (cdr lst) new-strings-or-generator)
+      (error "No grugru defined with %s, %s" getter old-strings-or-generator))))
+
+;;;###autoload
+(defun grugru-redefine-local (getter old-strings-or-generator new-strings-or-generator)
+  "Redefine grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR on to NEW-STRINGS-OR-GENERATOR."
+  (let* ((lst (car (member (cons getter old-strings-or-generator) grugru--buffer-local-grugru-alist))))
+    (if lst
+        (setf (cdr lst) new-strings-or-generator)
+      (error "No grugru defined with %s, %s" getter old-strings-or-generator))))
+
+;;;###autoload
+(defmacro grugru-define-multiple (&rest clauses)
+  "Define multiple grugru with CLAUSES.
+Each element of CLAUSES can be:
+ - (GETTER . STRINGS-OR-GENERATOR)
+   This is regarded as (`grugru-define-global' GETTER STRINGS-OR-GENERATOR).
+ - (MAJOR-MODE . ((GETTER . STRINGS-OR-GENERATOR)...))
+   This is regarded as multiple sexps, each one is like
+   (`grugru-define-on-major-mode' MAJOR-MODE GETTER STRINGS-OR-GENERATOR).
+ - (CLAUSE...)
+   List of cons cells like above is also acceptable."
+  `(progn
+     ,@(mapcar
+        (lambda (arg)
+          (cond
+           ;; (MAJOR-MODE . ((GETTER . STRINGS-OR-GENERATOR)...))
+           ((and
+             (listp arg)
+             (listp (cdr arg))
+             (listp (cadr arg))
+             (grugru--strings-or-generator-p (cdr (cadr arg)))
+             ;; car is not (getter . strings-or-generator)
+             (not
+              (and (listp (car arg))
+                   (grugru--strings-or-generator-p (cdar arg)))))
+            `(progn
+               ,@(cl-loop
+                  for (getter . strings-or-generator) in (cdr arg)
+                  collect
+                  `(grugru-define-on-major-mode
+                    ',(car arg) ',getter ',strings-or-generator))))
+           ;;(CLAUSE...)
+           ((and (listp (car arg)) (not (functionp (car arg)))
+                 `(grugru-define-multiple ,@arg)))
+           ;; (GETTER . STRINGS-OR-GENERATOR)
+           ((or (functionp (car arg)) (assq (car arg) grugru-getter-alist))
+            `(grugru-define-global ',(car arg) ',(cdr arg)))
+           ;; Not acceptable
+           (t (error "Wrong clauses on `grugru-define-multiple'"))))
+        clauses)))
+
+
+;;;  Functions Defining independent `grugru'
 
 ;;;###autoload
 (defmacro grugru-define-function (name _ &optional docstring &rest body)
@@ -1006,7 +1151,7 @@ The function defined with this rotates text at point only if it is matched to
 one element of BODY.
 
 DOCSTRING is optional argument, which is passed to defun as DOCSTRING,
-and BODY is sequence of (GETTER . STRING-OR-FUNCTION).
+and BODY is sequence of (GETTER . STRINGS-OR-GENERATOR).
 
 GETTER is symbol in `grugru-getter-alist'.  By default, `symbol', `word',
 `char', `line', `defun', `non-alphabet', `list', integer or function are
@@ -1014,7 +1159,7 @@ available as GETTER.
 Integer means getting string from point by NUMBER characters.
 If function, it should return cons cell (BEG . END),
 which indicates buffer substring.
-STRINGS-OR-FUNCTION can be a list of strings, or function which recieves
+STRINGS-OR-GENERATOR can be a list of strings, or function which recieves
 current thing as an argument and returns next text.
 
 \(fn NAME () &optional DOCSTRING &rest BODY)"
@@ -1031,106 +1176,6 @@ current thing as an argument and returns next text.
              (grugru--buffer-local-major-mode-grugru-alist nil)
              (grugru--loaded-local t))
          (call-interactively #'grugru)))))
-
-;;;###autoload
-(defun grugru-remove-on-major-mode (major getter strings-or-function)
-  "Remove `major-mode' local grugru defined with MAJOR, GETTER and STRINGS-OR-FUNCTION."
-  (if (listp major)
-      (mapcar (lambda (arg)
-                (grugru-remove-on-major-mode arg getter strings-or-function))
-              major)
-    (grugru--major-mode-set-as-unloaded major)
-    (let ((major-grugru (assq major grugru--major-modes-grugru-alist)))
-      (setf (cdr major-grugru) (delete (cons getter strings-or-function)
-                                       (cdr major-grugru))))))
-
-;;;###autoload
-(defmacro grugru-remove-on-local-major-mode (getter strings-or-function)
-  "Same as (grugru-remove-on-major-mode major-mode GETTER STRINGS-OR-FUNCTION)."
-  `(grugru-remove-on-major-mode (eval 'major-mode) ,getter ,strings-or-function))
-
-;;;###autoload
-(defun grugru-remove-local (getter strings-or-function)
-  "Remove local grugru defined with GETTER and  STRINGS-OR-FUNCTION."
-  (setq grugru--buffer-local-grugru-alist
-        (delete (cons getter strings-or-function) grugru--buffer-local-grugru-alist)))
-
-;;;###autoload
-(defun grugru-remove-global (getter strings-or-function)
-  "Remove global grugru defined with GETTER and  STRINGS-OR-FUNCTION."
-  (setq grugru--global-grugru-alist
-        (delete (cons getter strings-or-function) grugru--global-grugru-alist)))
-
-;;;###autoload
-(defun grugru-redefine-on-major-mode (major getter old-str-or-func new-str-or-func)
-  "Redefine grugru defined with GETTER and OLD-STR-OR-FUNC on MAJOR to NEW-STR-OR-FUNC."
-  (if (listp major)
-      (mapcar
-       (lambda (arg)
-         (grugru-redefine-on-major-mode arg getter old-str-or-func new-str-or-func))
-       major)
-    (let* ((major-lst (cdr (assq major grugru--major-modes-grugru-alist)))
-           (lst (car (member (cons getter old-str-or-func) major-lst))))
-      (if lst
-          (setf (cdr lst) new-str-or-func)
-        (error "No grugru defined on %s with %s, %s" major getter old-str-or-func)))))
-
-;;;###autoload
-(defun grugru-redefine-global (getter old-str-or-func new-str-or-func)
-  "Redefine grugru defined with GETTER and OLD-STR-OR-FUNC on to NEW-STR-OR-FUNC."
-  (let* ((lst (car (member (cons getter old-str-or-func) grugru--global-grugru-alist))))
-    (if lst
-        (setf (cdr lst) new-str-or-func)
-      (error "No grugru defined with %s, %s" getter old-str-or-func))))
-
-;;;###autoload
-(defun grugru-redefine-local (getter old-str-or-func new-str-or-func)
-  "Redefine grugru defined with GETTER and OLD-STR-OR-FUNC on to NEW-STR-OR-FUNC."
-  (let* ((lst (car (member (cons getter old-str-or-func) grugru--buffer-local-grugru-alist))))
-    (if lst
-        (setf (cdr lst) new-str-or-func)
-      (error "No grugru defined with %s, %s" getter old-str-or-func))))
-
-;;;###autoload
-(defmacro grugru-define-multiple (&rest clauses)
-  "Define multiple grugru with CLAUSES.
-Each element of CLAUSES can be:
- - (GETTER . STRINGS-OR-FUNCTION)
-   This is regarded as (`grugru-define-global' GETTER STRINGS-OR-FUNCTION).
- - (MAJOR-MODE . ((GETTER . STRINGS-OR-FUNCTION)...))
-   This is regarded as multiple sexps, each one is like
-   (`grugru-define-on-major-mode' MAJOR-MODE GETTER STRINGS-OR-FUNCTION).
- - (CLAUSE...)
-   List of cons cells like above is also acceptable."
-  `(progn
-     ,@(mapcar
-        (lambda (arg)
-          (cond
-           ;; (MAJOR-MODE . ((GETTER . STRINGS-OR-FUNCTION)...))
-           ((and
-             (listp arg)
-             (listp (cdr arg))
-             (listp (cadr arg))
-             (grugru--strings-or-function-p (cdr (cadr arg)))
-             ;; car is not (getter . strs-or-func)
-             (not
-              (and (listp (car arg))
-                   (grugru--strings-or-function-p (cdar arg)))))
-            `(progn
-               ,@(cl-loop
-                  for (getter . strings-or-function) in (cdr arg)
-                  collect
-                  `(grugru-define-on-major-mode
-                    ',(car arg) ',getter ',strings-or-function))))
-           ;;(CLAUSE...)
-           ((and (listp (car arg)) (not (functionp (car arg)))
-                 `(grugru-define-multiple ,@arg)))
-           ;; (GETTER . STRINGS-OR-FUNCTION)
-           ((or (functionp (car arg)) (assq (car arg) grugru-getter-alist))
-            `(grugru-define-global ',(car arg) ',(cdr arg)))
-           ;; Not acceptable
-           (t (error "Wrong clauses on `grugru-define-multiple'"))))
-        clauses)))
 
 (defun grugru--function-advice (original symbol type library)
   "Advice for `find-function-search-for-symbol' from grugru.
@@ -1156,6 +1201,7 @@ ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
 
 
 ;;; Highlight
+
 (defcustom grugru-highlight-idle-delay 1
   "Idle delay to add highlight added by command `grugru-highlight-mode'."
   :type 'number
@@ -1186,19 +1232,22 @@ This is used by command `grugru-highlight-mode'."
   (grugru--highlight-remove)
   (let* ((plist (grugru--get-plist
                  `((local . grugru--buffer-local-grugru-alist)
-                   (,major-mode . grugru--buffer-local-major-mode-grugru-alist)
+                   (major-mode . grugru--buffer-local-major-mode-grugru-alist)
                    (global . grugru--global-grugru-alist))
                  t))
          (bound (plist-get plist :bound))
          (begin (car bound))
          (end (cdr bound))
-         (valid-bound (plist-get plist :valid-bound)))
+         (valid-bound (plist-get plist :valid-bound))
+         (valid-begin (car valid-bound))
+         (valid-end (cdr valid-bound)))
     (when bound
-      (if valid-bound
+      (if (not (eq (- end begin)
+                   (- valid-end valid-begin)))
           (progn
             (setq grugru--highlight-overlay-sub
-                  (make-overlay (+ begin (car valid-bound))
-                                (+ begin (cdr valid-bound))))
+                  (make-overlay (+ begin valid-begin)
+                                (+ begin valid-end)))
             (overlay-put grugru--highlight-overlay-sub 'face 'grugru-highlight-face)
             (setq grugru--highlight-overlay (make-overlay begin end))
             (overlay-put grugru--highlight-overlay 'face 'grugru-highlight-sub-face))

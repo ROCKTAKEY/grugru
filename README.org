@@ -191,7 +191,7 @@
    First, select grugru from grugrus available at point.
    Then, edit the list in minibuffer.
 
-   The change is saved to file ~grugru-edit-save-file~.
+   The change is saved to file ~grugru-edit-save-file~ if it is not ~local~ one.
    You can assign completing function to ~grugru-completing-function~.
 * Functions Defining grugru
 ** ~(grugru-define-global GETTER STRINGS-OR-FUNCTION)~
