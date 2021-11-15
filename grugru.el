@@ -545,7 +545,7 @@ indicating range valid to rotate."
          bound)))
    valid-bounds))
 
-(defun grugru--simple-generator (strings string &optional reverse)
+(defun grugru--simple-metagenerator (strings string &optional reverse)
   "Return string next to STRING from STRINGS.
 If REVERSE is non-nil, return previous STRING."
   (when reverse
@@ -572,7 +572,7 @@ cons cell (valid-bounds . next-string), or only next-string.
 
 If REVERSE is non-nil, get previous string instead."
   (let* ((func (if (functionp strs-or-function) strs-or-function
-                 (apply-partially #'grugru--simple-generator strs-or-function)))
+                 (apply-partially #'grugru--simple-metagenerator strs-or-function)))
          (result (grugru--call-generator func string reverse))
          (valid-bounds (car-safe result))
          (string (or (cdr-safe result) result))
