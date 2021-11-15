@@ -575,6 +575,12 @@ If REVERSE is non-nil, return previous STRING."
 
 ;;; Miscs
 
+(defmacro grugru--set-cons (car cdr value)
+  "Set CAR and CDR to car and cdr of VALUE."
+  (let ((temp (cl-gensym)))
+    `(let ((,temp ,value))
+         (setf (cons ,car ,cdr) ,temp))))
+
 (defun grugru--get-valid-bound (point valid-bounds)
   "Return bound if POINT is among VALID-BOUNDS.
 VALID-BOUNDS is list of cons cell (BEG . END), which is pair of numbers
@@ -642,20 +648,28 @@ as `grugru-define-global'.
 If optional argument REVERSE is non-nil, get string reversely."
   (let (result
         cache
-
-        symbol grugrus getter strings-or-generator begin end)
+        symbol
+        grugru-alist)
     (while (and alist
                 (if only-one (null result) t))
-      (setf (cons symbol grugrus) (pop alist))
-      (setq grugrus (symbol-value grugrus))
+      (grugru--set-cons symbol grugru-alist (pop alist))
+      (when (symbolp grugru-alist)
+        (setq grugru-alist (symbol-value grugru-alist)))
       (setq result
             (append
              result
              (let (inner-result)
-               (while (and grugrus
+               (while (and grugru-alist
                            (if only-one (null inner-result) t))
-                 (let (cached? bound valid-bound next-string)
-                   (setf (cons getter strings-or-generator) (pop grugrus))
+                 (let (getter
+                       strings-or-generator
+                       begin
+                       end
+                       cached?
+                       bound
+                       valid-bound
+                       next-string)
+                   (grugru--set-cons getter strings-or-generator (pop grugru-alist))
                    (setq cached? (assoc getter cache))
                    (setq bound
                          (if cached?
@@ -664,11 +678,11 @@ If optional argument REVERSE is non-nil, get string reversely."
                    (setf (cons begin end) bound)
                    (unless cached? (push (cons getter bound) cache))
                    (when bound
-                     (setf (cons valid-bound next-string)
-                           (grugru--get-next-string
-                            (buffer-substring begin end)
-                            strings-or-generator
-                            (- (point) begin) reverse)))
+                     (grugru--set-cons valid-bound next-string
+                                       (grugru--get-next-string
+                                        (buffer-substring begin end)
+                                        strings-or-generator
+                                        (- (point) begin) reverse)))
                    (when next-string
                      (push (list :symbol symbol
                                  :bound (cons begin end)
