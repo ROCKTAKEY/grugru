@@ -391,10 +391,10 @@ Indent happens only if text after rotation has a newline."
 (defcustom grugru-strings-metagenerator #'grugru-metagenerator-simple
   "Function which generates default generator from strings on `grugru-define-*'.
 The function should recieve STRINGS, list of string, as one argument,
-and return function. Returned function should recieve one or two argument(s),
+and return function.  Returned function should recieve one or two argument(s),
 string STRING as first one, boolean REVERSE as second one.
 
-STRING means current string. Returned function returns string next to STRING.
+STRING means current string.  Returned function returns string next to STRING.
 If REVERSE is non-nil, it returns previous one instead."
   :group 'grugru
   :type '(choice (const grugru-metagenerator-simple)
@@ -587,6 +587,7 @@ If REVERSE is non-nil, return previous STRING."
           (car strings)))))
 
 (defun grugru-metagenerator-simple (strings)
+  "Generate generator from STRINGS."
   (apply-partially #'grugru--metagenerator-simple strings))
 
 (defun grugru--metagenerator-keep-case (strings string &optional reverse)
@@ -611,6 +612,8 @@ This function is not case-sensitive and keeps case."
           (downcase case-insensitive-result)))))))
 
 (defun grugru-metagenerator-keep-case (strings)
+  "Generate generator from STRINGS.
+Generated generator is not case-sensitive and keeps case."
   (apply-partially #'grugru--metagenerator-keep-case strings))
 
 
