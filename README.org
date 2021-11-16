@@ -386,6 +386,14 @@
      (ghi
       jkl)
    #+end_src
+** ~grugru-strings-metagenerator~
+   Function which generates default generator from strings on ~grugru-define-*~.
+   The function should recieve ~STRINGS~, list of string, as one argument,
+   and return function.  Returned function should recieve one or two argument(s),
+   string ~STRING~ as first one, boolean ~REVERSE~ as second one.
+
+   STRING means current string.  Returned function (generator) returns string next to STRING.
+   If REVERSE is non-nil, it returns previous one instead.
 * leaf-keyword ~:grugru~
   You can use ~:grugru~ keyword on [[https://github.com/conao3/leaf.el][leaf.el]], if you use [[https://github.com/conao3/leaf-keywords.el][leaf-keywords.el]].
 
