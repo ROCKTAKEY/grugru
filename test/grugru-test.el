@@ -2910,6 +2910,45 @@
        (grugru-define-global 'symbol '("xxxx" "yyyyy" "zzzzz"))
        (grugru-define-global 'word '("abcd" "defd" "ghid"))))))
 
+(ert-deftest grugru-define-multiple-major-mode-and-lambda-getter ()
+  (should
+   (equal
+    (macroexpand-all
+     '(grugru-define-multiple
+        ((major-mode1 major-mode2)
+         ((lambda () 123) . ("aaa" "bbb" "ccc"))
+         (symbol . ("xxx" "yyy" "zzz"))
+         (word . ("abc" "def" "ghi")))))
+    '(progn
+       (grugru-define-on-major-mode '(major-mode1 major-mode2) #'(lambda () 123) '("aaa" "bbb" "ccc"))
+       (grugru-define-on-major-mode '(major-mode1 major-mode2) 'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode '(major-mode1 major-mode2) 'word '("abc" "def" "ghi")))))
+  (should
+   (equal
+    (macroexpand-all
+     '(grugru-define-multiple
+        ((major-mode1 major-mode2)
+         ((lambda () 123) . some-function)
+         (symbol . ("xxx" "yyy" "zzz"))
+         (word . ("abc" "def" "ghi")))))
+    '(progn
+       (grugru-define-on-major-mode '(major-mode1 major-mode2) #'(lambda () 123) #'some-function)
+       (grugru-define-on-major-mode '(major-mode1 major-mode2) 'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode '(major-mode1 major-mode2) 'word '("abc" "def" "ghi")))))
+
+  (should
+   (equal
+    (macroexpand-all
+     '(grugru-define-multiple
+        ((1-major-mode 2-major-mode)
+         ((lambda () 123) . (apply #'xy))
+         (symbol . ("xxx" "yyy" "zzz"))
+         (word . ("abc" "def" "ghi")))))
+    '(progn
+       (grugru-define-on-major-mode '(1-major-mode 2-major-mode) #'(lambda () 123) (apply #'xy))
+       (grugru-define-on-major-mode '(1-major-mode 2-major-mode) 'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode '(1-major-mode 2-major-mode) 'word '("abc" "def" "ghi"))))))
+
 
 (ert-deftest grugru-define-function ()
   (grugru-define-function grugru-test-1 ()
