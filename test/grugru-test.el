@@ -615,9 +615,9 @@
   (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Efg"))
   (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Hijk"))
 
-  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Abcd"))
-  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Efg"))
-  (should (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Hijk")))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "ABCD"))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "EFG"))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "HIJK")))
 
 (ert-deftest grugru--metagenerator-simple-backward ()
   (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "abcd" t) "hijk"))
@@ -625,12 +625,12 @@
   (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "hijk" t) "efg"))
 
   (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Abcd" t))
-  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Efg" t) )
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Efg" t))
   (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Hijk" t))
 
-  (should-not (grugru--metagenerator-simple '("ABCD" "EFG" "HIJK") "ABCD" t))
-  (should-not (grugru--metagenerator-simple '("ABCD" "EFG" "HIJK") "EFG" t))
-  (should-not (grugru--metagenerator-simple '("ABCD" "EFG" "HIJK") "HIJK" t)))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "ABCD" t))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "EFG" t))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "HIJK" t)))
 
 (ert-deftest grugru--metagenerator-keep-case-forward ()
   (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "abcd") "efg"))
