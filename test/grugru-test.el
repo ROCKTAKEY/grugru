@@ -605,6 +605,60 @@
     '("add" "remove"))))
 
 
+;; Metagenerator
+(ert-deftest grugru--metagenerator-simple-forward ()
+  (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "abcd") "efg"))
+  (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "efg") "hijk"))
+  (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "hijk") "abcd"))
+
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Abcd"))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Efg"))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Hijk"))
+
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "ABCD"))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "EFG"))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "HIJK")))
+
+(ert-deftest grugru--metagenerator-simple-backward ()
+  (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "abcd" t) "hijk"))
+  (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "efg" t) "abcd"))
+  (should (string= (grugru--metagenerator-simple '("abcd" "efg" "hijk") "hijk" t) "efg"))
+
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Abcd" t))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Efg" t))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "Hijk" t))
+
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "ABCD" t))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "EFG" t))
+  (should-not (grugru--metagenerator-simple '("abcd" "efg" "hijk") "HIJK" t)))
+
+(ert-deftest grugru--metagenerator-keep-case-forward ()
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "abcd") "efg"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "efg") "hijk"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "hijk") "abcd"))
+
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "Abcd") "Efg"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "Efg") "Hijk"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "Hijk") "Abcd"))
+
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "ABCD") "EFG"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "EFG") "HIJK"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "HIJK") "ABCD")))
+
+(ert-deftest grugru--metagenerator-keep-case-backward ()
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "abcd" t) "hijk"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "efg" t) "abcd"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "hijk" t) "efg"))
+
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "Abcd" t) "Hijk"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "Efg" t) "Abcd"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "Hijk" t) "Efg"))
+
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "ABCD" t) "HIJK"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "EFG" t) "ABCD"))
+  (should (string= (grugru--metagenerator-keep-case '("abcd" "efg" "hijk") "HIJK" t) "EFG")))
+
+
 (ert-deftest grugru-edit ()
   (let ((grugru-edit-save-file
          (expand-file-name ".grugru" "."))
