@@ -472,13 +472,6 @@
       (when (file-exists-p file)
         (delete-file file)))))
 
-(ert-deftest grugru--strings-or-generator-p ()
-  (should (grugru--strings-or-generator-p '("aaa" "bbb")))
-  (should (grugru--strings-or-generator-p #'grugru--strings-or-generator-p))
-  (should-not (grugru--strings-or-generator-p '(xyz)))
-  (should-not (grugru--strings-or-generator-p "aaa"))
-  (should-not (grugru--strings-or-generator-p nil)))
-
 (ert-deftest gruru--replace ()
   (cursor-test/equal*
    :init "12345678|9"
@@ -2797,7 +2790,7 @@
 (ert-deftest grugru-define-multiple-global ()
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        (word . ("aaa" "bbb" "ccc"))
        (symbol . ("xxx" "yyy" "zzz"))
@@ -2808,7 +2801,7 @@
        (grugru-define-global 'word '("abc" "def" "ghi")))))
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        (word "aaa" "bbb" "ccc")
        (symbol "xxx" "yyy" "zzz")
@@ -2821,95 +2814,91 @@
 (ert-deftest grugru-define-multiple-major-mode ()
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        (fundamental-mode
         . ((word . ("aaa" "bbb" "ccc"))
            (symbol . ("xxx" "yyy" "zzz"))
            (word . ("abc" "def" "ghi"))))))
     '(progn
-       (progn
-         (grugru-define-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc"))
-         (grugru-define-on-major-mode 'fundamental-mode 'symbol '("xxx" "yyy" "zzz"))
-         (grugru-define-on-major-mode 'fundamental-mode 'word '("abc" "def" "ghi"))))))
+       (grugru-define-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc"))
+       (grugru-define-on-major-mode 'fundamental-mode 'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode 'fundamental-mode 'word '("abc" "def" "ghi")))))
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        (fundamental-mode
         . ((word "aaa" "bbb" "ccc")
            (symbol "xxx" "yyy" "zzz")
            (word "abc" "def" "ghi")))))
     '(progn
-       (progn
-         (grugru-define-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc"))
-         (grugru-define-on-major-mode 'fundamental-mode 'symbol '("xxx" "yyy" "zzz"))
-         (grugru-define-on-major-mode 'fundamental-mode 'word '("abc" "def" "ghi")))))))
+       (grugru-define-on-major-mode 'fundamental-mode 'word '("aaa" "bbb" "ccc"))
+       (grugru-define-on-major-mode 'fundamental-mode 'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode 'fundamental-mode 'word '("abc" "def" "ghi"))))))
 
 (ert-deftest grugru-define-multiple-major-mode-multi ()
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        ((fundamental-mode lisp-interaction-mode)
         . ((word . ("aaa" "bbb" "ccc"))
            (symbol . ("xxx" "yyy" "zzz"))
            (word . ("abc" "def" "ghi"))))))
     '(progn
-       (progn
-         (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
-                                      'word '("aaa" "bbb" "ccc"))
-         (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
-                                      'symbol '("xxx" "yyy" "zzz"))
-         (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
-                                      'word '("abc" "def" "ghi"))))))
+       (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
+                                    'word '("aaa" "bbb" "ccc"))
+       (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
+                                    'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
+                                    'word '("abc" "def" "ghi")))))
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        ((fundamental-mode lisp-interaction-mode)
         (word "aaa" "bbb" "ccc")
         (symbol "xxx" "yyy" "zzz")
         (word "abc" "def" "ghi"))))
     '(progn
-       (progn
-         (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
-                                      'word '("aaa" "bbb" "ccc"))
-         (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
-                                      'symbol '("xxx" "yyy" "zzz"))
-         (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
-                                      'word '("abc" "def" "ghi")))))))
+       (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
+                                    'word '("aaa" "bbb" "ccc"))
+       (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
+                                    'symbol '("xxx" "yyy" "zzz"))
+       (grugru-define-on-major-mode '(fundamental-mode lisp-interaction-mode)
+                                    'word '("abc" "def" "ghi"))))))
 
 (ert-deftest grugru-define-multiple-nest ()
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        ((word . ("aaa" "bbb" "ccc"))
         (symbol . ("xxx" "yyy" "zzz")))
        (word . ("abc" "def" "ghi"))))
     '(progn
-       (grugru-define-multiple
-        (word . ("aaa" "bbb" "ccc"))
-        (symbol . ("xxx" "yyy" "zzz")))
+       (progn
+         (grugru-define-global 'word '("aaa" "bbb" "ccc"))
+         (grugru-define-global 'symbol '("xxx" "yyy" "zzz")))
        (grugru-define-global 'word '("abc" "def" "ghi")))))
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        ((word "aaa" "bbb" "ccc")
         (symbol "xxx" "yyy" "zzz"))
        (word "abc" "def" "ghi")))
     '(progn
-       (grugru-define-multiple
-        (word . ("aaa" "bbb" "ccc"))
-        (symbol . ("xxx" "yyy" "zzz")))
+       (progn
+         (grugru-define-global 'word '("aaa" "bbb" "ccc"))
+         (grugru-define-global 'symbol '("xxx" "yyy" "zzz")))
        (grugru-define-global 'word '("abc" "def" "ghi"))))))
 
 (ert-deftest grugru-define-multiple-complex ()
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        (fundamental-mode
         . ((word . ("aaa" "bbb" "ccc"))
@@ -2928,7 +2917,7 @@
        (grugru-define-global 'word '("abcd" "defd" "ghid")))))
   (should
    (equal
-    (macroexpand-1
+    (macroexpand-all
      '(grugru-define-multiple
        (fundamental-mode
         (word "aaa" "bbb" "ccc")
