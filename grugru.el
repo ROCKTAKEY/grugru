@@ -609,7 +609,9 @@ This function is not case-sensitive and keeps case."
          ((string= string (upcase string))
           (upcase case-insensitive-result))
          ((string= string (downcase string))
-          (downcase case-insensitive-result)))))))
+          (downcase case-insensitive-result))
+         (t
+          (grugru--metagenerator-simple strings string reverse)))))))
 
 (defun grugru-metagenerator-keep-case (strings)
   "Generate generator from STRINGS.
