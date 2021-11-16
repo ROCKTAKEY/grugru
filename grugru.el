@@ -388,6 +388,20 @@ Indent happens only if text after rotation has a newline."
   :group 'grugru
   :type 'boolean)
 
+(defcustom grugru-strings-metagenerator #'grugru-metagenerator-simple
+  "Function which generates default generator from strings on `grugru-define-*'.
+The function should recieve STRINGS, list of string, as one argument,
+and return function. Returned function should recieve one or two argument(s),
+string STRING as first one, boolean REVERSE as second one.
+
+STRING means current string. Returned function returns string next to STRING.
+If REVERSE is non-nil, it returns previous one instead."
+  :group 'grugru
+  :type '(choice (const grugru-metagenerator-simple)
+                 (const grugru-metagenerator-keep-case)
+                 function)
+  :risky t)
+
 (defcustom grugru-before-hook nil
   "Hooks run before rotation by `grugru'."
   :group 'grugru
@@ -572,6 +586,9 @@ If REVERSE is non-nil, return previous STRING."
       (or (cadr match-list)
           (car strings)))))
 
+(defun grugru-metagenerator-simple (strings)
+  (apply-partially #'grugru--metagenerator-simple strings))
+
 (defun grugru--metagenerator-keep-case (strings string &optional reverse)
   "Return string next to STRING in STRINGS.
 If REVERSE is non-nil, return previous STRING.
@@ -592,6 +609,10 @@ This function is not case-sensitive and keeps case."
           (upcase case-insensitive-result))
          ((string= string (downcase string))
           (downcase case-insensitive-result)))))))
+
+(defun grugru-metagenerator-keep-case (strings)
+  (apply-partially #'grugru--metagenerator-keep-case strings))
+
 
 
 ;;; Miscs
@@ -633,7 +654,7 @@ This function returns cons cell (valid-bounds . next-string).
 
 If REVERSE is non-nil, get previous string instead."
   (let* ((func (if (functionp strings-or-generator) strings-or-generator
-                 (apply-partially #'grugru--metagenerator-simple strings-or-generator)))
+                 (funcall grugru-strings-metagenerator strings-or-generator)))
          (result (grugru--call-generator func string reverse))
          (valid-bounds (car-safe result))
          (next-string (or (cdr-safe result) result))
