@@ -37,31 +37,6 @@
 (require 'ert)
 (require 'cursor-test)
 
-(unless (functionp 'macroexpand-1)
- (defun macroexpand-1 (form &optional environment)
-  "Perform (at most) one step of macroexpansion."
-  (cond
-   ((consp form)
-    (let* ((head (car form))
-           (env-expander (assq head environment)))
-      (if env-expander
-          (if (cdr env-expander)
-              (apply (cdr env-expander) (cdr form))
-            form)
-        (if (not (and (symbolp head) (fboundp head)))
-            form
-          (let ((def (autoload-do-load (symbol-function head) head 'macro)))
-            (cond
-             ;; Follow alias, but only for macros, otherwise we may end up
-             ;; skipping an important compiler-macro (e.g. cl--block-wrapper).
-             ((and (symbolp def) (macrop def)) (cons def (cdr form)))
-             ((not (consp def)) form)
-             (t
-              (if (eq 'macro (car def))
-                  (apply (cdr def) (cdr form))
-                form))))))))
-   (t form))))
-
 (ert-deftest grugru--getter-non-alphabet ()
   (with-temp-buffer
     (insert "abc || efg")
