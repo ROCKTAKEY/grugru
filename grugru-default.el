@@ -89,7 +89,7 @@ with `grugru-remove-on-major-mode' or `grugru-remove-global'."
     (symbol "plist-get" "plist-put")
     (symbol "lax-plist-get" "lax-plist-put")
     (symbol "car-safe" "cdr-safe")
-    (list grugru-default@emacs-lisp+nth!aref))
+    (list . grugru-default@emacs-lisp+nth!aref))
    ((emacs-lisp-mode lisp-mode)
     (symbol "nil" "t")
     (symbol "eq" "equal")

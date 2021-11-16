@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.21.0
+;; Version: 1.21.1
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -743,14 +743,6 @@ If optional argument REVERSE is non-nil, get string reversely."
         (car result)
       result)))
 
-(defun grugru--strings-or-generator-p (object)
-  "Return non-nil if OBJECT is acceptable as `strings-or-generator'."
-  (when object
-    (or
-     (functionp object)
-     (and (listp object)
-          (cl-every #'stringp object)))))
-
 (defun grugru--replace (begin end str)
   "Replace string between points, BEGIN and END, to STR."
   (delete-region begin end)
@@ -1147,6 +1139,67 @@ current thing as an argument and returns next text."
         (setf (cdr lst) new-strings-or-generator)
       (error "No grugru defined with %s, %s" getter old-strings-or-generator))))
 
+(defmacro grugru--progn (&rest args)
+  "Add `progn' if ARGS is list of sexp."
+  (if (cdr args)
+      `(progn
+         ,@args)
+    (car args)))
+
+(defun grugru--major-mode-p (arg)
+  "Return non-nil when ARG is symbol with suffix \"-mode\"."
+  (and (symbolp arg)
+       (string-match-p "-mode" (symbol-name arg))))
+
+;;;###autoload
+(defmacro grugru-define-multiple-with-defualt (default &rest clauses)
+  "Define multiple grugru.
+CLAUSES is same as `grugru-define-multiple'.
+DEFAULT can be `global', `local', symbol or list of symbol which indicate
+major mode."
+  (declare (indent defun))
+  `(grugru--progn
+    ,@(mapcar
+       (lambda (arg)
+         (cond
+          ;; (MAJOR-MODE . ((GETTER . STRINGS-OR-GENERATOR)...))
+          ((and
+            (listp arg)
+            (or (grugru--major-mode-p (car arg))
+                (and (listp (car arg))
+                     (cl-every #'grugru--major-mode-p (car arg)))))
+           `(grugru-define-multiple-with-defualt ,(car arg)
+              ,@(cdr arg)))
+          ;;(CLAUSE...)
+          ((and (listp (car arg)) (not (functionp (car arg)))
+                `(grugru-define-multiple ,@arg)))
+          ;; (GETTER . STRINGS-OR-GENERATOR)
+          ((or (functionp (car arg))
+               (symbolp (car arg))
+               (listp (car arg)))
+           `(,@(pcase default
+                 (`global '(grugru-define-global))
+                 (`local '(grugru-define-local))
+                 (_ `(grugru-define-on-major-mode ',default)))
+             ,(cond
+               ((symbolp (car arg))
+                `',(car arg))
+               ((functionp (car arg))
+                `#',(car arg))
+               ((listp (car arg))
+                `',(car arg)))
+             ,(cond
+               ((and (listp (cdr arg))
+                     (cl-every #'stringp (cdr arg)))
+                `',(cdr arg))
+               ((symbolp (cdr arg))
+                `#',(cdr arg))
+               ((listp (cdr arg))
+                (cdr arg)))))
+          ;; Not acceptable
+          (t (error "Wrong clauses on `grugru-define-multiple'"))))
+       clauses)))
+
 ;;;###autoload
 (defmacro grugru-define-multiple (&rest clauses)
   "Define multiple grugru with CLAUSES.
@@ -1158,35 +1211,9 @@ Each element of CLAUSES can be:
    (`grugru-define-on-major-mode' MAJOR-MODE GETTER STRINGS-OR-GENERATOR).
  - (CLAUSE...)
    List of cons cells like above is also acceptable."
-  `(progn
-     ,@(mapcar
-        (lambda (arg)
-          (cond
-           ;; (MAJOR-MODE . ((GETTER . STRINGS-OR-GENERATOR)...))
-           ((and
-             (listp arg)
-             (listp (cdr arg))
-             (listp (cadr arg))
-             (grugru--strings-or-generator-p (cdr (cadr arg)))
-             ;; car is not (getter . strings-or-generator)
-             (not
-              (and (listp (car arg))
-                   (grugru--strings-or-generator-p (cdar arg)))))
-            `(progn
-               ,@(cl-loop
-                  for (getter . strings-or-generator) in (cdr arg)
-                  collect
-                  `(grugru-define-on-major-mode
-                    ',(car arg) ',getter ',strings-or-generator))))
-           ;;(CLAUSE...)
-           ((and (listp (car arg)) (not (functionp (car arg)))
-                 `(grugru-define-multiple ,@arg)))
-           ;; (GETTER . STRINGS-OR-GENERATOR)
-           ((or (functionp (car arg)) (assq (car arg) grugru-getter-alist))
-            `(grugru-define-global ',(car arg) ',(cdr arg)))
-           ;; Not acceptable
-           (t (error "Wrong clauses on `grugru-define-multiple'"))))
-        clauses)))
+  (declare (indent defun))
+  `(grugru-define-multiple-with-defualt global
+     ,@clauses))
 
 
 ;;;  Functions Defining independent `grugru'
