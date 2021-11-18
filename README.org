@@ -78,6 +78,12 @@
     ;; Define grugru globally. This is applied in all buffers.
     (grugru-define-global 'symbol '("yes" "no"))
 
+    ;; Define grugru keeping case:
+    (grugru-define-global 'symbol (grugru-metagenerator-keep-case '("yes" "no")))
+
+    ;; If you want grugru to define grugru defaultly keeping case:
+    (customize-set-variable 'grugru-strings-metagenerator #'grugru-metagenerator-simple)
+
     ;; You can use function instead of list of strings.
     (grugru-define-on-major-mode
      'c-mode 'symbol
