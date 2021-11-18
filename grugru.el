@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.21.1
+;; Version: 1.22.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -344,9 +344,11 @@ which return cons cell whose car/cdr is beginning/end point of current thing."
 
 (defcustom grugru-edit-save-file
   (expand-file-name ".grugru" user-emacs-directory)
-  "File which has saved data, provided by `grugru-edit'."
+  "File which has saved data, provided by `grugru-edit'.
+If it is nil, `grugru-edit' never saves data."
   :group 'grugru
-  :type 'string)
+  :type '(choice string
+                 (const nil)))
 
 (define-obsolete-variable-alias 'grugru-edit-completing-function
   'grugru-completing-function
@@ -898,14 +900,24 @@ SYMBOL is not `local'."
     (setq grugru--loaded-local t))
   (let* ((expression (grugru--edit-make-expression symbol getter old-strings-or-generator new-strings-or-generator)))
     (eval expression)
-    (unless (eq symbol 'local)
+    (when (and grugru-edit-save-file
+               (not (eq symbol 'local)))
       (grugru--edit-insert-sexp-append-to-file expression grugru-edit-save-file))))
+
+;;;###autoload
+(defun grugru-edit-no-save ()
+  "Same as `grugru-edit' except it never saves data."
+  (interactive)
+  (let ((grugru-edit-save-file nil))
+    (call-interactively #'grugru-edit)))
 
 ;;;###autoload
 (defun grugru-edit-load ()
   "Load edited grugru saved on `grugru-edit-save-file'."
   (interactive)
-  (load grugru-edit-save-file t nil t))
+  (if grugru-edit-save-file
+      (load grugru-edit-save-file t nil t)
+    (error "The value of `grugru-edit-save-file' is nil")))
 
 
 ;; `grugru-select'
