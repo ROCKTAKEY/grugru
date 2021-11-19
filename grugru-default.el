@@ -29,7 +29,7 @@
 (require 'grugru)
 (require 'grugru-utils)
 
-(defun grugru-default@emacs-lisp+nth!aref (str)
+(defun grugru-default@emacs-lisp+nth!aref (str &optional _)
   "Return STR exchanged `nth' and `aref' with argument permutation."
   (cond
    ((string-match "^(\\_<\\(nth\\)\\_>" str)
