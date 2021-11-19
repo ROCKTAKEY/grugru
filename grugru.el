@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.22.1
+;; Version: 1.22.2
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -642,6 +642,11 @@ indicating range valid to rotate."
          bound)))
    valid-bounds))
 
+(defun grugru--get-generator (strings-or-generator)
+  "Return generator from STRINGS-OR-GENERATOR."
+  (if (functionp strings-or-generator) strings-or-generator
+    (funcall grugru-strings-metagenerator strings-or-generator)))
+
 (defun grugru--call-generator (generator string reverse)
   "Call GENERATOR with STRING and REVERSE.
 When REVERSE is non-nil, ignore the `wrong-number-of-arguments' error."
@@ -660,9 +665,8 @@ detected.
 This function returns cons cell (valid-bounds . next-string).
 
 If REVERSE is non-nil, get previous string instead."
-  (let* ((func (if (functionp strings-or-generator) strings-or-generator
-                 (funcall grugru-strings-metagenerator strings-or-generator)))
-         (result (grugru--call-generator func string reverse))
+  (let* ((generator (grugru--get-generator strings-or-generator))
+         (result (grugru--call-generator generator string reverse))
          (valid-bounds (car-safe result))
          (next-string (or (cdr-safe result) result))
          valid-bound)
