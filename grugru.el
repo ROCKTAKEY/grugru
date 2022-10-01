@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.22.2
+;; Version: 1.22.3
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -1098,7 +1098,9 @@ current thing as an argument and returns next text."
 
 ;;;###autoload
 (defun grugru-remove-on-major-mode (major getter strings-or-generator)
-  "Remove `major-mode' local grugru defined with MAJOR, GETTER and STRINGS-OR-GENERATOR."
+  "Remove `major-mode' local grugru.
+It removes grugru defined with GETTER and STRINGS-OR-GENERATOR
+on `major-mode' MAJOR."
   (if (listp major)
       (mapcar (lambda (arg)
                 (grugru-remove-on-major-mode arg getter strings-or-generator))
@@ -1127,7 +1129,9 @@ current thing as an argument and returns next text."
 
 ;;;###autoload
 (defun grugru-redefine-on-major-mode (major getter old-strings-or-generator new-strings-or-generator)
-  "Redefine grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR on MAJOR to NEW-STRINGS-OR-GENERATOR."
+  "Redefine major-mode-local grugru.
+It redefines grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR
+on `major-mode' MAJOR to NEW-STRINGS-OR-GENERATOR."
   (if (listp major)
       (mapcar
        (lambda (arg)
@@ -1141,7 +1145,9 @@ current thing as an argument and returns next text."
 
 ;;;###autoload
 (defun grugru-redefine-global (getter old-strings-or-generator new-strings-or-generator)
-  "Redefine grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR on to NEW-STRINGS-OR-GENERATOR."
+  "Redefine global grugru.
+It redefines grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR to
+NEW-STRINGS-OR-GENERATOR."
   (let* ((lst (car (member (cons getter old-strings-or-generator) grugru--global-grugru-alist))))
     (if lst
         (setf (cdr lst) new-strings-or-generator)
@@ -1149,7 +1155,9 @@ current thing as an argument and returns next text."
 
 ;;;###autoload
 (defun grugru-redefine-local (getter old-strings-or-generator new-strings-or-generator)
-  "Redefine grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR on to NEW-STRINGS-OR-GENERATOR."
+  "Redefine buffer-local grugru.
+It redefines grugru defined with GETTER and OLD-STRINGS-OR-GENERATOR to
+NEW-STRINGS-OR-GENERATOR."
   (let* ((lst (car (member (cons getter old-strings-or-generator) grugru--buffer-local-grugru-alist))))
     (if lst
         (setf (cdr lst) new-strings-or-generator)
