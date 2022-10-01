@@ -31,6 +31,7 @@ jobs:
           version: ${{ matrix.emacs_version }}
       - uses: conao3/setup-keg@master
       - run: keg install
+      - run: env
       - run: keg run test-all
       - uses: codecov/codecov-action@v2
 
