@@ -125,7 +125,7 @@
        ((string-match "^(\\_<\\(nth\\)\\_>" str)
         (cons
          (cons (match-beginning 1) (match-end 1))
-         ;; This function permutate arguments on lisp.
+         ;; This function permutate arguments on Lisp.
          (grugru-utils-lisp-exchange-args
          (replace-match "aref" nil nil str 1)
          '(2 1))))
