@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.22.3
+;; Version: 1.22.4
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -1607,7 +1607,7 @@ ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
   :group 'grugru)
 
 (defface grugru-highlight-face
-  '((t (:box (:line-width 1 :color "#ff0000" :style nil))))
+  '((t (:box (:line-width 1 :color "#ff0000"))))
   "Face used `grugru-highlight-mode'."
   :group 'grugru)
 
