@@ -1607,7 +1607,7 @@ ORIGINAL is original function.  SYMBOL, TYPE and LIBRARY is original arguments."
   :group 'grugru)
 
 (defface grugru-highlight-face
-  '((t (:box (:line-width 1 :color "#ff0000" :style nil))))
+  '((t (:box (:line-width 1 :color "#ff0000"))))
   "Face used `grugru-highlight-mode'."
   :group 'grugru)
 
