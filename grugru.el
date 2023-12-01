@@ -5,7 +5,7 @@
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
 
-;; Version: 1.22.4
+;; Version: 1.22.5
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/ROCKTAKEY/grugru
 
@@ -929,7 +929,7 @@ Generated generator is not case-sensitive and keeps case."
   "Set CAR and CDR to car and cdr of VALUE."
   (let ((temp (cl-gensym)))
     `(let ((,temp ,value))
-         (setf (cons ,car ,cdr) ,temp))))
+       (setf (cons ,car ,cdr) ,temp))))
 
 (defun grugru--get-valid-bound (point valid-bounds)
   "Return bound if POINT is among VALID-BOUNDS.
@@ -987,10 +987,10 @@ If REVERSE is non-nil, get previous string instead."
   "Get getter function from GETTER."
   (setq getter (or (cdr (assq getter grugru-getter-alist)) getter))
   (pcase getter
-   ((pred functionp)
-    getter)
-   ((pred integerp)
-    (apply-partially #'grugru--metagetter-with-integer getter))
+    ((pred functionp)
+     getter)
+    ((pred integerp)
+     (apply-partially #'grugru--metagetter-with-integer getter))
     (_ `(lambda () ,getter))))
 
 (defun grugru--get-plist (alist &optional only-one reverse)
@@ -1197,8 +1197,8 @@ SYMBOL is not `local'."
             (old-strings-or-generator (plist-get plist :strings-or-generator))
             (symbol (plist-get plist :symbol))
             (new-strings-or-generator (read (read-from-minibuffer
-                        (format "Edit '%s' to: " prompt)
-                        (format "%S" old-strings-or-generator)))))
+                                             (format "Edit '%s' to: " prompt)
+                                             (format "%S" old-strings-or-generator)))))
        (list symbol getter old-strings-or-generator new-strings-or-generator))))
   (unless grugru--loaded-local
     (grugru--major-mode-load)
@@ -1658,8 +1658,8 @@ This is used by command `grugru-highlight-mode'."
   (mapc
    (lambda (ov)
      (when (symbol-value ov)
-    (delete-overlay (symbol-value ov))
-    (set ov nil)))
+       (delete-overlay (symbol-value ov))
+       (set ov nil)))
    '(grugru--highlight-overlay grugru--highlight-overlay-sub)))
 
 ;;;###autoload
