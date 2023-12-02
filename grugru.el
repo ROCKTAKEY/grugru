@@ -1,6 +1,6 @@
 ;;; grugru.el --- Rotate text at point             -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2019-2021  ROCKTAKEY
+;; Copyright (C) 2019-2023  ROCKTAKEY
 
 ;; Author: ROCKTAKEY <rocktakey@gmail.com>
 ;; Keywords: convenience, abbrev, tools
